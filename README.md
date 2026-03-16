@@ -328,6 +328,9 @@ Tier 3 → Dashboard:
 | **Gemini Flash** | Tier 1 cross-referencing (fast + cheap) |
 | **GPT-4o** | Tier 2 deep analysis |
 | **Proprietary Simulation Engine** | Tier 3 predictive risk scoring |
+| **MiroFish Simulation Engine** | Tier 3 predictive risk scoring (self-hosted, used with permission) |
+
+
 
 ### Reports & Import
 | Technology | Purpose |
@@ -489,6 +492,9 @@ VITE_OPENAI_API_KEY=
 # Proprietary Simulation Engine
 VITE_SIMULATION_ENGINE_URL=
 VITE_SIMULATION_ENGINE_KEY=
+
+VITE_SIMULATION_ENGINE_URL=  # MiroFish wrapper URL
+VITE_SIMULATION_ENGINE_KEY=  # Optional API key
 ```
 
 ---
@@ -520,6 +526,10 @@ Runs at `http://localhost:8080`
 - [ ] PDF report generation
 - [ ] Alert system
 - [ ] Demo video + X post
+- [ ] MiroFish wrapper API built
+- [ ] MiroFish deployed on server
+- [ ] Scope3Scout connected to wrapper
+
 
 ### v2 Post-Hackathon
 - [ ] Email + Slack integrations
