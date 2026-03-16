@@ -55,6 +55,8 @@ export interface Violation {
   severity: 'low' | 'medium' | 'high' | 'critical';
   description: string;
   source_url: string | null;
+  source_name: string | null;
+  source_excerpt: string | null;
   fine_amount_eur: number;
   found_at: string;
 }
