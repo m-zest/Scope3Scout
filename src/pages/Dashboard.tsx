@@ -55,9 +55,11 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { data: dbSuppliers } = useSuppliers();
 
-  // Build supplier list from demo data or database
+  // Use demo data if DEMO_MODE is on, or if DB returned empty/no suppliers
+  const useDemo = DEMO_MODE || (!dbSuppliers || dbSuppliers.length === 0);
+
   const suppliers: DashboardSupplier[] = useMemo(() => {
-    if (DEMO_MODE) {
+    if (useDemo) {
       return getDemoSuppliers().map((s: DemoScanResult & { id: string }) => ({
         id: s.id,
         name: s.supplier_name,
@@ -84,7 +86,7 @@ export default function Dashboard() {
       csrd_compliant: false,
       financial_exposure_eur: 0,
     }));
-  }, [dbSuppliers]);
+  }, [useDemo, dbSuppliers]);
 
   // Stats
   const totalSuppliers = suppliers.length;
@@ -104,7 +106,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       {/* Demo mode banner */}
-      {DEMO_MODE && (
+      {useDemo && (
         <div className="bg-amber-50 border border-amber-300 rounded-lg px-4 py-3 flex items-center gap-2 text-amber-800 text-sm">
           <span className="text-base">🎬</span>
           <span className="font-medium">Demo Mode</span>
