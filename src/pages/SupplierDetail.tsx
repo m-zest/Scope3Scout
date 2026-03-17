@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Building2,
@@ -10,7 +11,9 @@ import {
 import { useSupplier } from '@/hooks/useSuppliers';
 import { useViolations } from '@/hooks/useViolations';
 import { useLatestSimulation } from '@/hooks/useSimulations';
+import { getDemoSuppliers } from '@/data/demoSuppliers';
 import { cn } from '@/lib/utils';
+import type { Supplier, Violation, SimulationOutput } from '@/types';
 
 const riskLevelConfig = {
   low: { label: 'LOW', color: 'text-green-600 bg-green-50 border-green-200' },
@@ -37,11 +40,57 @@ function formatDate(dateStr: string | null) {
 
 export default function SupplierDetail() {
   const { id } = useParams<{ id: string }>();
-  const { data: supplier, isLoading: supplierLoading } = useSupplier(id || '');
-  const { data: violations } = useViolations(id);
-  const { data: simulation } = useLatestSimulation(id || '');
+  const isDemo = id?.startsWith('demo-supplier-');
 
-  if (supplierLoading) {
+  // DB hooks (only run when not demo)
+  const { data: dbSupplier, isLoading: supplierLoading } = useSupplier(isDemo ? '' : (id || ''));
+  const { data: dbViolations } = useViolations(isDemo ? undefined : id);
+  const { data: dbSimulation } = useLatestSimulation(isDemo ? '' : (id || ''));
+
+  // Resolve demo data
+  const { supplier, violations, simulation } = useMemo(() => {
+    if (isDemo) {
+      const demoList = getDemoSuppliers();
+      const demoIndex = parseInt(id?.replace('demo-supplier-', '') || '1') - 1;
+      const demo = demoList[demoIndex] || demoList[0];
+
+      const sup: Supplier = {
+        id: demo.id,
+        org_id: 'demo',
+        name: demo.supplier_name,
+        website: demo.website,
+        country: demo.country,
+        industry: demo.industry,
+        status: demo.status,
+        risk_score: demo.risk_score,
+        risk_level: demo.risk_level,
+        last_scanned_at: '2026-03-15T00:00:00Z',
+        created_at: '2026-03-15T00:00:00Z',
+      };
+
+      const viol: Violation[] = demo.violations.map((v) => ({
+        ...v,
+        supplier_id: demo.id,
+      }));
+
+      const sim: SimulationOutput = {
+        ...demo.simulation_output,
+        id: 'demo-sim',
+        supplier_id: demo.id,
+        simulated_at: '2026-03-15T00:00:00Z',
+      };
+
+      return { supplier: sup, violations: viol, simulation: sim };
+    }
+
+    return {
+      supplier: dbSupplier as Supplier | null,
+      violations: (dbViolations as Violation[]) || [],
+      simulation: dbSimulation as SimulationOutput | null,
+    };
+  }, [isDemo, id, dbSupplier, dbViolations, dbSimulation]);
+
+  if (!isDemo && supplierLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <p className="text-muted-foreground">Loading supplier data...</p>
@@ -61,6 +110,15 @@ export default function SupplierDetail() {
 
   return (
     <div className="space-y-6 max-w-4xl">
+      {/* Demo banner */}
+      {isDemo && (
+        <div className="bg-amber-50 border border-amber-300 rounded-lg px-4 py-3 flex items-center gap-2 text-amber-800 text-sm">
+          <span className="text-base">🎬</span>
+          <span className="font-medium">Demo Mode</span>
+          <span className="text-amber-700">— viewing sample supplier data</span>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center gap-3">
         <Building2 className="h-8 w-8 text-primary" />
@@ -89,7 +147,7 @@ export default function SupplierDetail() {
             <p className="text-muted-foreground">Website</p>
             {supplier.website ? (
               <a href={supplier.website} target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline flex items-center gap-1">
-                {new URL(supplier.website).hostname} <ExternalLink className="h-3 w-3" />
+                {(() => { try { return new URL(supplier.website).hostname; } catch { return supplier.website; } })()} <ExternalLink className="h-3 w-3" />
               </a>
             ) : (
               <p className="font-medium text-foreground">N/A</p>

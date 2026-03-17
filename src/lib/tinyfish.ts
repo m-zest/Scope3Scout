@@ -4,7 +4,8 @@
 import { getDemoScanResult, getDemoSuppliers, type DemoScanResult } from '@/data/demoSuppliers';
 
 const TINYFISH_API_KEY = import.meta.env.VITE_TINYFISH_API_KEY || '';
-export const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true';
+// Default to demo mode unless explicitly set to 'false'
+export const DEMO_MODE = import.meta.env.VITE_DEMO_MODE !== 'false';
 
 export interface TinyFishTask {
   url: string;
