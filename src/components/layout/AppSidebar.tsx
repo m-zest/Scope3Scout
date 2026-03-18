@@ -6,13 +6,10 @@ import {
   Bell,
   Settings,
   LogOut,
-  Sun,
-  Moon,
   Shield,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
-import { useTheme } from 'next-themes';
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
@@ -32,7 +29,6 @@ interface AppSidebarProps {
 export function AppSidebar({ userEmail }: AppSidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { theme, setTheme } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
 
   const handleLogout = async () => {
@@ -43,24 +39,24 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
   return (
     <aside
       className={cn(
-        'flex flex-col min-h-screen bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 transition-all duration-300',
-        collapsed ? 'w-[68px]' : 'w-64'
+        'flex flex-col min-h-screen m-3 rounded-2xl bg-white/[0.02] border border-white/[0.06] backdrop-blur-xl transition-all duration-300',
+        collapsed ? 'w-[68px]' : 'w-60'
       )}
     >
       {/* Logo */}
-      <div className="h-16 flex items-center px-5 border-b border-slate-200 dark:border-slate-800 shrink-0">
+      <div className="h-16 flex items-center px-5 border-b border-white/[0.04] shrink-0">
         <div className="flex items-center gap-2.5 min-w-0">
-          <Shield className="h-6 w-6 text-emerald-500 shrink-0" />
+          <Shield className="h-5 w-5 text-cyan-400 shrink-0" />
           {!collapsed && (
-            <div className="min-w-0">
-              <span className="font-heading font-bold text-sm text-foreground block truncate">Scope3Scout</span>
-            </div>
+            <span className="font-heading font-bold text-sm text-white block truncate tracking-tight">
+              Scope3Scout
+            </span>
           )}
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-3 space-y-0.5">
+      <nav className="flex-1 p-2.5 space-y-0.5 mt-1">
         {navItems.map((item) => {
           const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + '/');
           return (
@@ -68,14 +64,18 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
               key={item.to}
               to={item.to}
               className={cn(
-                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
+                'flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium transition-all duration-200 relative',
                 isActive
-                  ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
-                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-200'
+                  ? 'bg-white/[0.05] text-white'
+                  : 'text-neutral-500 hover:bg-white/[0.03] hover:text-neutral-300'
               )}
               title={collapsed ? item.label : undefined}
             >
-              <item.icon className={cn('h-[18px] w-[18px] shrink-0', isActive && 'text-emerald-600 dark:text-emerald-400')} />
+              {/* Glowing left border for active */}
+              {isActive && (
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-4 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]" />
+              )}
+              <item.icon className={cn('h-[17px] w-[17px] shrink-0', isActive && 'text-cyan-400')} />
               {!collapsed && <span className="truncate">{item.label}</span>}
             </NavLink>
           );
@@ -83,41 +83,25 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
       </nav>
 
       {/* Bottom section */}
-      <div className="p-3 border-t border-slate-200 dark:border-slate-800 space-y-1">
-        {/* Collapse toggle */}
+      <div className="p-2.5 border-t border-white/[0.04] space-y-0.5">
+        {/* Collapse */}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-600 dark:hover:text-slate-300 transition-colors w-full"
+          className="flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] text-neutral-600 hover:bg-white/[0.03] hover:text-neutral-400 transition-colors w-full"
         >
           {collapsed ? <ChevronRight className="h-4 w-4 shrink-0" /> : <ChevronLeft className="h-4 w-4 shrink-0" />}
           {!collapsed && <span>Collapse</span>}
         </button>
 
-        {/* Theme toggle */}
-        <button
-          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-600 dark:hover:text-slate-300 transition-colors w-full"
-          title={collapsed ? (theme === 'dark' ? 'Light Mode' : 'Dark Mode') : undefined}
-        >
-          {theme === 'dark' ? (
-            <Sun className="h-4 w-4 shrink-0" />
-          ) : (
-            <Moon className="h-4 w-4 shrink-0" />
-          )}
-          {!collapsed && (theme === 'dark' ? 'Light Mode' : 'Dark Mode')}
-        </button>
-
         {/* User email */}
         {userEmail && !collapsed && (
-          <p className="px-3 py-1 text-xs text-slate-400 dark:text-slate-500 truncate">
-            {userEmail}
-          </p>
+          <p className="px-3 py-1 text-[11px] text-neutral-600 truncate">{userEmail}</p>
         )}
 
         {/* Logout */}
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 transition-colors w-full"
+          className="flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] text-neutral-600 hover:bg-red-500/[0.08] hover:text-red-400 transition-colors w-full"
           title={collapsed ? 'Logout' : undefined}
         >
           <LogOut className="h-4 w-4 shrink-0" />

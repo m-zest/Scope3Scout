@@ -170,7 +170,7 @@ export default function Upload() {
     if (fileInputRef.current) fileInputRef.current.value = '';
   }, []);
 
-  const inputCls = 'w-full px-3.5 py-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-foreground placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-colors';
+  const inputCls = 'w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08] text-white placeholder-neutral-600 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500/50 transition-colors';
 
   return (
     <motion.div
@@ -181,25 +181,25 @@ export default function Upload() {
     >
       {/* Demo banner */}
       {DEMO_MODE && (
-        <motion.div variants={fadeUp} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-sm">
-          <Info className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
-          <span className="text-amber-800 dark:text-amber-300">
-            <span className="font-semibold">Demo Mode</span> — uploads are simulated, no data is saved
+        <motion.div variants={fadeUp} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-500/[0.06] border border-amber-500/[0.12] text-sm">
+          <Info className="h-4 w-4 text-amber-400 shrink-0" />
+          <span className="text-amber-300/80">
+            <span className="font-semibold text-amber-300">Demo Mode</span> — uploads are simulated, no data is saved
           </span>
         </motion.div>
       )}
 
       <motion.div variants={fadeUp} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* CSV Upload */}
-        <div className="surface-elevated rounded-xl p-6">
+        <div className="bg-white/[0.02] border border-white/[0.06] backdrop-blur-xl rounded-2xl p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center">
-              <FileSpreadsheet className="h-5 w-5 text-emerald-500" />
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+              <FileSpreadsheet className="h-5 w-5 text-emerald-400" />
             </div>
             <div>
-              <h2 className="font-heading text-base font-semibold text-foreground">CSV Upload</h2>
-              <p className="text-xs text-muted-foreground">
-                Columns: <code className="text-[10px] bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">name</code>, <code className="text-[10px] bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">website</code>, <code className="text-[10px] bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">country</code>, <code className="text-[10px] bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">industry</code>
+              <h2 className="font-heading text-base font-semibold text-white">CSV Upload</h2>
+              <p className="text-xs text-neutral-500">
+                Columns: <code className="text-[10px] bg-white/[0.04] px-1 py-0.5 rounded text-neutral-400">name</code>, <code className="text-[10px] bg-white/[0.04] px-1 py-0.5 rounded text-neutral-400">website</code>, <code className="text-[10px] bg-white/[0.04] px-1 py-0.5 rounded text-neutral-400">country</code>, <code className="text-[10px] bg-white/[0.04] px-1 py-0.5 rounded text-neutral-400">industry</code>
               </p>
             </div>
           </div>
@@ -212,20 +212,20 @@ export default function Upload() {
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
                 className={cn(
-                  'border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all',
+                  'border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all',
                   dragActive
-                    ? 'border-emerald-500 bg-emerald-500/5'
-                    : 'border-slate-200 dark:border-slate-700 hover:border-emerald-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/30'
+                    ? 'border-cyan-500/50 bg-cyan-500/[0.04]'
+                    : 'border-white/[0.08] hover:border-cyan-500/30 hover:bg-white/[0.02]'
                 )}
               >
-                <UploadIcon className={cn('h-10 w-10 mx-auto mb-3 transition-colors', dragActive ? 'text-emerald-500' : 'text-slate-300 dark:text-slate-600')} />
-                <p className="text-sm font-medium text-foreground mb-1">Drag & drop your CSV file</p>
-                <p className="text-xs text-muted-foreground">or click to browse</p>
+                <UploadIcon className={cn('h-10 w-10 mx-auto mb-3 transition-colors', dragActive ? 'text-cyan-400' : 'text-neutral-700')} />
+                <p className="text-sm font-medium text-neutral-300 mb-1">Drag & drop your CSV file</p>
+                <p className="text-xs text-neutral-600">or click to browse</p>
                 <input ref={fileInputRef} type="file" accept=".csv" onChange={handleFileInput} className="hidden" />
               </div>
-              <div className="mt-4 p-3 rounded-lg surface-inset">
-                <p className="text-[10px] text-muted-foreground font-medium mb-1 uppercase tracking-wider">Example CSV</p>
-                <code className="text-xs text-foreground font-mono block whitespace-pre leading-relaxed">
+              <div className="mt-4 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                <p className="text-[10px] text-neutral-600 font-medium mb-1 uppercase tracking-wider">Example CSV</p>
+                <code className="text-xs text-neutral-400 font-mono block whitespace-pre leading-relaxed">
 {`name,website,country,industry
 SteelCorp GmbH,steelcorp.de,Germany,Steel
 TextilePro,textilepro.bd,Bangladesh,Textile`}
@@ -235,61 +235,61 @@ TextilePro,textilepro.bd,Bangladesh,Textile`}
           )}
 
           {csvStatus === 'parsing' && (
-            <div className="border border-slate-200 dark:border-slate-700 rounded-xl p-8 text-center">
-              <Loader2 className="h-8 w-8 text-emerald-500 mx-auto mb-3 animate-spin" />
-              <p className="text-sm text-foreground">Parsing {fileName}...</p>
+            <div className="border border-white/[0.06] rounded-2xl p-8 text-center">
+              <Loader2 className="h-8 w-8 text-cyan-400 mx-auto mb-3 animate-spin" />
+              <p className="text-sm text-neutral-300">Parsing {fileName}...</p>
             </div>
           )}
 
           {csvStatus === 'preview' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400 font-medium">
+                <span className="flex items-center gap-2 text-sm text-emerald-400 font-medium">
                   <CheckCircle2 className="h-4 w-4" />
                   {parsedRows.length} supplier{parsedRows.length !== 1 ? 's' : ''} found
                 </span>
-                <button onClick={resetCsv} className="text-xs text-muted-foreground hover:text-foreground transition-colors">Different file</button>
+                <button onClick={resetCsv} className="text-xs text-neutral-600 hover:text-neutral-400 transition-colors">Different file</button>
               </div>
 
               {parseErrors.length > 0 && (
-                <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-lg p-3 space-y-1">
+                <div className="bg-amber-500/[0.06] border border-amber-500/[0.12] rounded-xl p-3 space-y-1">
                   {parseErrors.map((err, i) => (
-                    <p key={i} className="text-xs text-amber-700 dark:text-amber-400 flex items-start gap-1">
+                    <p key={i} className="text-xs text-amber-400 flex items-start gap-1">
                       <AlertTriangle className="h-3 w-3 mt-0.5 shrink-0" />{err}
                     </p>
                   ))}
                 </div>
               )}
 
-              <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden max-h-56 overflow-y-auto">
+              <div className="border border-white/[0.06] rounded-xl overflow-hidden max-h-56 overflow-y-auto">
                 <table className="w-full text-xs">
-                  <thead className="bg-slate-50 dark:bg-slate-900/50 sticky top-0">
+                  <thead className="bg-white/[0.02] sticky top-0">
                     <tr>
-                      <th className="text-left px-3 py-2 font-medium text-muted-foreground">#</th>
-                      <th className="text-left px-3 py-2 font-medium text-muted-foreground">Name</th>
-                      <th className="text-left px-3 py-2 font-medium text-muted-foreground">Country</th>
-                      <th className="text-left px-3 py-2 font-medium text-muted-foreground">Industry</th>
+                      <th className="text-left px-3 py-2 font-medium text-neutral-600">#</th>
+                      <th className="text-left px-3 py-2 font-medium text-neutral-600">Name</th>
+                      <th className="text-left px-3 py-2 font-medium text-neutral-600">Country</th>
+                      <th className="text-left px-3 py-2 font-medium text-neutral-600">Industry</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  <tbody className="divide-y divide-white/[0.03]">
                     {parsedRows.slice(0, 20).map((row, i) => (
                       <tr key={i}>
-                        <td className="px-3 py-2 text-muted-foreground">{i + 1}</td>
-                        <td className="px-3 py-2 font-medium text-foreground">{row.name}</td>
-                        <td className="px-3 py-2 text-muted-foreground">{row.country || '—'}</td>
-                        <td className="px-3 py-2 text-muted-foreground">{row.industry || '—'}</td>
+                        <td className="px-3 py-2 text-neutral-600">{i + 1}</td>
+                        <td className="px-3 py-2 font-medium text-neutral-200">{row.name}</td>
+                        <td className="px-3 py-2 text-neutral-500">{row.country || '—'}</td>
+                        <td className="px-3 py-2 text-neutral-500">{row.industry || '—'}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
                 {parsedRows.length > 20 && (
-                  <p className="text-xs text-muted-foreground text-center py-2 bg-slate-50 dark:bg-slate-900/30">...and {parsedRows.length - 20} more</p>
+                  <p className="text-xs text-neutral-600 text-center py-2 bg-white/[0.02]">...and {parsedRows.length - 20} more</p>
                 )}
               </div>
 
               <button
                 onClick={handleConfirmUpload}
-                className="w-full flex items-center justify-center gap-2 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-lg text-sm font-medium transition-colors"
+                className="w-full flex items-center justify-center gap-2 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-white rounded-xl text-sm font-medium transition-colors shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]"
               >
                 Upload {parsedRows.length} Supplier{parsedRows.length !== 1 ? 's' : ''}
                 <ArrowRight className="h-4 w-4" />
@@ -298,86 +298,86 @@ TextilePro,textilepro.bd,Bangladesh,Textile`}
           )}
 
           {csvStatus === 'uploading' && (
-            <div className="border border-slate-200 dark:border-slate-700 rounded-xl p-8 text-center">
-              <Loader2 className="h-8 w-8 text-emerald-500 mx-auto mb-3 animate-spin" />
-              <p className="text-sm text-foreground">Saving {parsedRows.length} suppliers...</p>
+            <div className="border border-white/[0.06] rounded-2xl p-8 text-center">
+              <Loader2 className="h-8 w-8 text-cyan-400 mx-auto mb-3 animate-spin" />
+              <p className="text-sm text-neutral-300">Saving {parsedRows.length} suppliers...</p>
             </div>
           )}
 
           {csvStatus === 'done' && (
-            <div className="border border-emerald-200 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-500/10 rounded-xl p-6 text-center space-y-3">
-              <CheckCircle2 className="h-10 w-10 text-emerald-500 mx-auto" />
-              <p className="text-sm font-medium text-emerald-800 dark:text-emerald-300">
+            <div className="border border-emerald-500/20 bg-emerald-500/[0.06] rounded-2xl p-6 text-center space-y-3">
+              <CheckCircle2 className="h-10 w-10 text-emerald-400 mx-auto" />
+              <p className="text-sm font-medium text-emerald-300">
                 {parsedRows.length} supplier{parsedRows.length !== 1 ? 's' : ''} uploaded!
               </p>
               <div className="flex gap-3 justify-center">
-                <button onClick={() => navigate('/dashboard')} className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-lg text-sm font-medium transition-colors">Go to Dashboard</button>
-                <button onClick={resetCsv} className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-foreground rounded-lg text-sm font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Upload More</button>
+                <button onClick={() => navigate('/dashboard')} className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-white rounded-xl text-sm font-medium transition-colors">Go to Dashboard</button>
+                <button onClick={resetCsv} className="px-4 py-2 bg-white/[0.04] border border-white/[0.08] text-neutral-300 rounded-xl text-sm font-medium hover:bg-white/[0.06] transition-colors">Upload More</button>
               </div>
             </div>
           )}
 
           {csvStatus === 'error' && (
             <div className="space-y-3">
-              <div className="border border-red-200 dark:border-red-500/20 bg-red-50 dark:bg-red-500/10 rounded-xl p-4">
+              <div className="border border-red-500/20 bg-red-500/[0.06] rounded-2xl p-4">
                 <div className="flex items-start gap-2">
-                  <XCircle className="h-5 w-5 text-red-500 mt-0.5 shrink-0" />
+                  <XCircle className="h-5 w-5 text-red-400 mt-0.5 shrink-0" />
                   <div>
                     {parseErrors.map((err, i) => (
-                      <p key={i} className="text-sm text-red-700 dark:text-red-400">{err}</p>
+                      <p key={i} className="text-sm text-red-400">{err}</p>
                     ))}
                   </div>
                 </div>
               </div>
-              <button onClick={resetCsv} className="text-sm text-emerald-600 dark:text-emerald-400 hover:underline">Try again</button>
+              <button onClick={resetCsv} className="text-sm text-cyan-400 hover:underline">Try again</button>
             </div>
           )}
         </div>
 
         {/* Manual Add */}
-        <div className="surface-elevated rounded-xl p-6">
+        <div className="bg-white/[0.02] border border-white/[0.06] backdrop-blur-xl rounded-2xl p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center">
-              <Plus className="h-5 w-5 text-blue-500" />
+            <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+              <Plus className="h-5 w-5 text-blue-400" />
             </div>
             <div>
-              <h2 className="font-heading text-base font-semibold text-foreground">Manual Add</h2>
-              <p className="text-xs text-muted-foreground">Add suppliers one at a time</p>
+              <h2 className="font-heading text-base font-semibold text-white">Manual Add</h2>
+              <p className="text-xs text-neutral-500">Add suppliers one at a time</p>
             </div>
           </div>
 
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-medium text-foreground mb-1">
-                Supplier Name <span className="text-red-500">*</span>
+              <label className="block text-xs font-medium text-neutral-400 mb-1">
+                Supplier Name <span className="text-red-400">*</span>
               </label>
               <input type="text" value={manualName} onChange={(e) => setManualName(e.target.value)} placeholder="e.g. SteelCorp GmbH" className={inputCls} />
             </div>
             <div>
-              <label className="block text-xs font-medium text-foreground mb-1">Website</label>
+              <label className="block text-xs font-medium text-neutral-400 mb-1">Website</label>
               <input type="url" value={manualWebsite} onChange={(e) => setManualWebsite(e.target.value)} placeholder="e.g. https://steelcorp.de" className={inputCls} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-foreground mb-1">Country</label>
+                <label className="block text-xs font-medium text-neutral-400 mb-1">Country</label>
                 <input type="text" value={manualCountry} onChange={(e) => setManualCountry(e.target.value)} placeholder="e.g. Germany" className={inputCls} />
               </div>
               <div>
-                <label className="block text-xs font-medium text-foreground mb-1">Industry</label>
+                <label className="block text-xs font-medium text-neutral-400 mb-1">Industry</label>
                 <input type="text" value={manualIndustry} onChange={(e) => setManualIndustry(e.target.value)} placeholder="e.g. Steel" className={inputCls} />
               </div>
             </div>
             <button
               onClick={handleManualAdd}
               disabled={!manualName.trim()}
-              className="w-full flex items-center justify-center gap-2 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]"
             >
               <Plus className="h-4 w-4" />
               Add Supplier
             </button>
 
             {manualAdded && (
-              <p className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+              <p className="text-xs text-emerald-400 flex items-center gap-1">
                 <CheckCircle2 className="h-3 w-3" />
                 Supplier added
               </p>
@@ -386,17 +386,17 @@ TextilePro,textilepro.bd,Bangladesh,Textile`}
 
           {manualSuppliers.length > 0 && (
             <div className="mt-5 space-y-2">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <p className="text-xs font-medium text-neutral-600 uppercase tracking-wider">
                 Added ({manualSuppliers.length})
               </p>
               <div className="space-y-1.5 max-h-48 overflow-y-auto">
                 {manualSuppliers.map((s, i) => (
-                  <div key={i} className="flex items-center justify-between surface-inset rounded-lg px-3 py-2">
+                  <div key={i} className="flex items-center justify-between bg-white/[0.02] border border-white/[0.04] rounded-xl px-3 py-2">
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{s.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">{[s.country, s.industry].filter(Boolean).join(' / ') || 'No details'}</p>
+                      <p className="text-sm font-medium text-neutral-200 truncate">{s.name}</p>
+                      <p className="text-xs text-neutral-600 truncate">{[s.country, s.industry].filter(Boolean).join(' / ') || 'No details'}</p>
                     </div>
-                    <button onClick={() => removeManualSupplier(i)} className="text-slate-400 hover:text-red-500 shrink-0 ml-2 transition-colors">
+                    <button onClick={() => removeManualSupplier(i)} className="text-neutral-600 hover:text-red-400 shrink-0 ml-2 transition-colors">
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
@@ -404,7 +404,7 @@ TextilePro,textilepro.bd,Bangladesh,Textile`}
               </div>
               <button
                 onClick={() => navigate('/dashboard')}
-                className="w-full flex items-center justify-center gap-2 py-2.5 mt-2 bg-slate-100 dark:bg-slate-800 text-foreground rounded-lg text-sm font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                className="w-full flex items-center justify-center gap-2 py-2.5 mt-2 bg-white/[0.04] border border-white/[0.08] text-neutral-300 rounded-xl text-sm font-medium hover:bg-white/[0.06] transition-colors"
               >
                 Done — Go to Dashboard
                 <ArrowRight className="h-4 w-4" />
