@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
   Upload,
@@ -8,8 +8,12 @@ import {
   LogOut,
   Sun,
   Moon,
+  Shield,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
@@ -27,7 +31,9 @@ interface AppSidebarProps {
 
 export function AppSidebar({ userEmail }: AppSidebarProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { theme, setTheme } = useTheme();
+  const [collapsed, setCollapsed] = useState(false);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -35,56 +41,75 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
   };
 
   return (
-    <aside className="flex flex-col w-64 min-h-screen bg-card border-r border-border">
+    <aside
+      className={cn(
+        'flex flex-col min-h-screen bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 transition-all duration-300',
+        collapsed ? 'w-[68px]' : 'w-64'
+      )}
+    >
       {/* Logo */}
-      <div className="p-6 border-b border-border">
-        <h1 className="text-xl font-bold text-foreground">
-          Scope3Scout 🌍
-        </h1>
-        <p className="text-xs text-muted-foreground mt-1">
-          ESG Supply Chain Intelligence
-        </p>
+      <div className="h-16 flex items-center px-5 border-b border-slate-200 dark:border-slate-800 shrink-0">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <Shield className="h-6 w-6 text-emerald-500 shrink-0" />
+          {!collapsed && (
+            <div className="min-w-0">
+              <span className="font-heading font-bold text-sm text-foreground block truncate">Scope3Scout</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-1">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            className={({ isActive }) =>
-              cn(
-                'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors',
+      <nav className="flex-1 p-3 space-y-0.5">
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + '/');
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={cn(
+                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
                 isActive
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-              )
-            }
-          >
-            <item.icon className="h-4 w-4" />
-            {item.label}
-          </NavLink>
-        ))}
+                  ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-200'
+              )}
+              title={collapsed ? item.label : undefined}
+            >
+              <item.icon className={cn('h-[18px] w-[18px] shrink-0', isActive && 'text-emerald-600 dark:text-emerald-400')} />
+              {!collapsed && <span className="truncate">{item.label}</span>}
+            </NavLink>
+          );
+        })}
       </nav>
 
       {/* Bottom section */}
-      <div className="p-4 border-t border-border space-y-3">
+      <div className="p-3 border-t border-slate-200 dark:border-slate-800 space-y-1">
+        {/* Collapse toggle */}
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-600 dark:hover:text-slate-300 transition-colors w-full"
+        >
+          {collapsed ? <ChevronRight className="h-4 w-4 shrink-0" /> : <ChevronLeft className="h-4 w-4 shrink-0" />}
+          {!collapsed && <span>Collapse</span>}
+        </button>
+
         {/* Theme toggle */}
         <button
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors w-full"
+          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-600 dark:hover:text-slate-300 transition-colors w-full"
+          title={collapsed ? (theme === 'dark' ? 'Light Mode' : 'Dark Mode') : undefined}
         >
           {theme === 'dark' ? (
-            <Sun className="h-4 w-4" />
+            <Sun className="h-4 w-4 shrink-0" />
           ) : (
-            <Moon className="h-4 w-4" />
+            <Moon className="h-4 w-4 shrink-0" />
           )}
-          {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+          {!collapsed && (theme === 'dark' ? 'Light Mode' : 'Dark Mode')}
         </button>
 
         {/* User email */}
-        {userEmail && (
-          <p className="px-3 text-xs text-muted-foreground truncate">
+        {userEmail && !collapsed && (
+          <p className="px-3 py-1 text-xs text-slate-400 dark:text-slate-500 truncate">
             {userEmail}
           </p>
         )}
@@ -92,10 +117,11 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
         {/* Logout */}
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-destructive hover:bg-destructive/10 transition-colors w-full"
+          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 transition-colors w-full"
+          title={collapsed ? 'Logout' : undefined}
         >
-          <LogOut className="h-4 w-4" />
-          Logout
+          <LogOut className="h-4 w-4 shrink-0" />
+          {!collapsed && <span>Logout</span>}
         </button>
       </div>
     </aside>

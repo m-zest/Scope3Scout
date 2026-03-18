@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { AppLayout } from '@/components/layout/AppLayout';
 import type { Session } from '@supabase/supabase-js';
 
+import Home from '@/pages/Home';
 import Auth from '@/pages/Auth';
 import Dashboard from '@/pages/Dashboard';
 import Upload from '@/pages/Upload';
@@ -50,18 +51,29 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center bg-slate-950">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-slate-400">Loading...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <Routes>
-            {/* Public */}
+            {/* Public landing page */}
+            <Route
+              path="/"
+              element={
+                session ? <Navigate to="/dashboard" replace /> : <Home />
+              }
+            />
+
+            {/* Auth */}
             <Route
               path="/auth"
               element={
@@ -89,7 +101,7 @@ function App() {
               path="*"
               element={
                 <Navigate
-                  to={session ? '/dashboard' : '/auth'}
+                  to={session ? '/dashboard' : '/'}
                   replace
                 />
               }
