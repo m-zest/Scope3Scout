@@ -14,7 +14,6 @@ import {
   BarChart3,
   TrendingUp,
   FileText,
-  Zap,
   MapPin,
 } from 'lucide-react';
 
@@ -181,7 +180,6 @@ export default function Home() {
     offset: ['start end', 'end start'],
   });
 
-  const heroTextY = useTransform(heroProgress, [0, 1], [0, -120]);
   const heroOpacity = useTransform(heroProgress, [0, 0.6], [1, 0]);
   const macY = useTransform(macProgress, [0, 1], [100, -60]);
   const macScale = useTransform(macProgress, [0, 0.4, 1], [0.9, 1, 1]);
@@ -218,82 +216,41 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* ═══ HERO SECTION — Spline lives only here ═══ */}
-      <section ref={heroRef} className="relative min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden">
-        {/* Spline 3D wave — clipped to hero only */}
-        <div className="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden">
+      {/* ═══ HERO SECTION — Spline 3D scene IS the hero ═══ */}
+      <section ref={heroRef} className="relative h-screen overflow-hidden bg-black">
+        {/* Spline 3D scene — full hero, its own text is the hero content */}
+        <div className="absolute inset-0 w-full h-full z-0">
           <Suspense fallback={<div className="w-full h-full bg-black" />}>
             <Spline scene="https://prod.spline.design/YPaOvWpo21wNAioe/scene.splinecode" />
           </Suspense>
-          {/* Bottom fade to pure black — hides Spline text content */}
-          <div className="absolute bottom-0 left-0 right-0 h-[40%] bg-gradient-to-t from-black via-black/80 to-transparent" />
-          {/* Top fade for nav area */}
-          <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/50 to-transparent" />
         </div>
 
+        {/* CTA buttons — floating at bottom center, above the Spline */}
         <motion.div
-          className="relative z-10 max-w-5xl mx-auto text-center pt-16"
-          style={{ y: heroTextY, opacity: heroOpacity }}
+          className="absolute bottom-24 left-0 right-0 z-10 flex flex-col items-center gap-5 px-6"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: customEase, delay: 0.6 }}
+          style={{ opacity: heroOpacity }}
         >
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: customEase }}
-            className="mb-8"
-          >
-            <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-300/80 bg-cyan-400/[0.06] border border-cyan-400/[0.12] rounded-full px-5 py-2 backdrop-blur-md">
-              <Zap className="h-3 w-3" />
-              EU CSRD &amp; CSDDD Compliant
-            </span>
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: customEase, delay: 0.1 }}
-            className="font-heading text-5xl md:text-7xl font-light tracking-tight leading-[1.08] mb-8"
-          >
-            Find what your
-            <br />
-            suppliers are{' '}
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-indigo-400 [-webkit-background-clip:text]">
-              hiding.
-            </span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: customEase, delay: 0.2 }}
-            className="text-lg md:text-xl text-neutral-400 max-w-2xl mx-auto mb-14 leading-relaxed font-light"
-          >
-            AI-powered supply chain risk intelligence. Scan, detect violations,
-            and simulate regulatory outcomes across your entire network{' '}
-            <span className="text-neutral-200">before regulators do.</span>
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: customEase, delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
-          >
+          <div className="flex flex-col sm:flex-row items-center gap-4">
             <button
               onClick={() => navigate('/auth')}
-              className="flex items-center gap-2 bg-purple-600 hover:bg-purple-500 text-white font-semibold px-8 py-3.5 rounded-full text-[15px] transition-all duration-300 shadow-[0_0_24px_rgba(147,51,234,0.5),inset_0_1px_0_rgba(255,255,255,0.15)] hover:shadow-[0_0_40px_rgba(147,51,234,0.6),inset_0_1px_0_rgba(255,255,255,0.2)]"
+              className="px-8 py-4 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium hover:scale-105 transition-transform duration-300 shadow-[0_0_40px_-10px_rgba(147,51,234,0.5)] text-[15px]"
             >
-              Start Free Trial
-              <ArrowRight className="h-4 w-4" />
+              Start Free Trial &rarr;
             </button>
             <button
               onClick={() => navigate('/auth')}
-              className="flex items-center gap-2 text-neutral-400 hover:text-white font-medium px-7 py-3.5 rounded-full text-[15px] bg-white/[0.03] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.15] transition-all duration-300 backdrop-blur-md"
+              className="px-8 py-4 rounded-full bg-white/[0.05] border border-white/10 text-white font-medium backdrop-blur-md hover:bg-white/[0.1] transition-colors duration-300 text-[15px]"
             >
               View Live Demo
-              <ChevronRight className="h-4 w-4" />
             </button>
-          </motion.div>
+          </div>
         </motion.div>
+
+        {/* Bottom fade to black for smooth transition to dashboard */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent z-[5] pointer-events-none" />
       </section>
 
       {/* ═══ MAC WINDOW DASHBOARD — LARGE, SCROLL-DRIVEN ═══ */}
