@@ -218,12 +218,18 @@ export default function Home() {
 
       {/* ═══ HERO SECTION — Spline 3D scene IS the hero ═══ */}
       <section ref={heroRef} className="relative h-screen overflow-hidden bg-black">
-        {/* Spline 3D scene — full hero, its own text is the hero content */}
-        <div className="absolute inset-0 w-full h-full z-0">
+        {/* Spline 3D scene — pointer-events-none so page scroll works through it */}
+        <div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
           <Suspense fallback={<div className="w-full h-full bg-black" />}>
             <Spline scene="https://prod.spline.design/YPaOvWpo21wNAioe/scene.splinecode" />
           </Suspense>
         </div>
+        {/* Hide Spline watermark */}
+        <style>{`
+          a[href*="spline.design"],
+          a[href*="spline.design"] img,
+          div:has(> a[href*="spline.design"]) { display: none !important; opacity: 0 !important; pointer-events: none !important; }
+        `}</style>
 
         {/* CTA buttons — floating at bottom center, above the Spline */}
         <motion.div

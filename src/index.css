@@ -8,6 +8,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Prevent Spline canvas from capturing scroll/touch events */
+canvas[data-engine],
+div:has(> canvas[data-engine]) {
+  pointer-events: none !important;
+  touch-action: none !important;
+}
+
+/* Hide Spline "Built with Spline" watermark */
+a[href*="spline.design"] {
+  display: none !important;
+  opacity: 0 !important;
+}
+
 @layer base {
   :root {
     --background: 0 0% 99%;
