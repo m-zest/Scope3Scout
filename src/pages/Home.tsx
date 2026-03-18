@@ -167,20 +167,14 @@ const chartData = {
 
 export default function Home() {
   const navigate = useNavigate();
-  const heroRef = useRef<HTMLElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
   const macRef = useRef<HTMLDivElement>(null);
-
-  const { scrollYProgress: heroProgress } = useScroll({
-    target: heroRef,
-    offset: ['start start', 'end start'],
-  });
 
   const { scrollYProgress: macProgress } = useScroll({
     target: macRef,
     offset: ['start end', 'end start'],
   });
 
-  const heroOpacity = useTransform(heroProgress, [0, 0.6], [1, 0]);
   const macY = useTransform(macProgress, [0, 1], [100, -60]);
   const macScale = useTransform(macProgress, [0, 0.4, 1], [0.9, 1, 1]);
   const macRotateX = useTransform(macProgress, [0, 0.4], [6, 0]);
@@ -217,41 +211,54 @@ export default function Home() {
       </nav>
 
       {/* ═══ HERO SECTION — Spline 3D scene IS the hero ═══ */}
-      <section ref={heroRef} className="relative h-[calc(100vh-40px)] overflow-hidden bg-black">
-        {/* Spline 3D scene — shifted up so the bottom watermark is cropped out */}
-        <div className="absolute inset-0 w-full h-[calc(100%+40px)] z-0 pointer-events-none">
+      <div ref={heroRef} className="relative w-full h-screen flex flex-col items-center justify-center overflow-hidden pt-10 px-4">
+        {/* 3D Background with Watermark Hide Hack */}
+        <div className="absolute inset-0 w-full h-full z-0 pointer-events-none scale-[1.05] translate-y-4 [&_a]:!hidden">
           <Suspense fallback={<div className="w-full h-full bg-black" />}>
             <Spline scene="https://prod.spline.design/YPaOvWpo21wNAioe/scene.splinecode" />
           </Suspense>
         </div>
 
-        {/* CTA buttons — floating at bottom center, above the Spline */}
-        <motion.div
-          className="absolute bottom-24 left-0 right-0 z-10 flex flex-col items-center gap-5 px-6"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: customEase, delay: 0.6 }}
-          style={{ opacity: heroOpacity }}
-        >
+        {/* Foreground Content */}
+        <div className="relative z-10 flex flex-col items-center text-center">
+          {/* Kicker */}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 font-semibold tracking-[0.2em] uppercase text-xs md:text-sm mb-4">
+            Detect. Simulate. Comply.
+          </span>
+
+          {/* Main Headline */}
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-light tracking-tighter text-white mb-6 max-w-5xl leading-[1.1]">
+            Find what your suppliers are <br className="hidden md:block" />
+            <span className="font-normal text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500">
+              hiding.
+            </span>
+          </h1>
+
+          {/* Subheadline */}
+          <p className="text-lg text-neutral-400 font-light max-w-2xl mb-10 leading-relaxed">
+            AI-powered supply chain risk intelligence. Automatically audit your entire network, detect ESG violations, and prevent CSRD fines before regulators step in.
+          </p>
+
+          {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center gap-4">
             <button
               onClick={() => navigate('/auth')}
-              className="px-8 py-4 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium hover:scale-105 transition-transform duration-300 shadow-[0_0_40px_-10px_rgba(147,51,234,0.5)] text-[15px]"
+              className="px-8 py-4 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium hover:scale-105 transition-transform duration-300 shadow-[0_0_40px_-10px_rgba(147,51,234,0.5)]"
             >
               Start Free Trial &rarr;
             </button>
             <button
               onClick={() => navigate('/auth')}
-              className="px-8 py-4 rounded-full bg-white/[0.05] border border-white/10 text-white font-medium backdrop-blur-md hover:bg-white/[0.1] transition-colors duration-300 text-[15px]"
+              className="px-8 py-4 rounded-full bg-white/[0.05] border border-white/10 text-white font-medium backdrop-blur-md hover:bg-white/[0.1] transition-colors duration-300"
             >
               View Live Demo
             </button>
           </div>
-        </motion.div>
+        </div>
 
         {/* Bottom fade to black for smooth transition to dashboard */}
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent z-[5] pointer-events-none" />
-      </section>
+      </div>
 
       {/* ═══ MAC WINDOW DASHBOARD — LARGE, SCROLL-DRIVEN ═══ */}
       <section className="relative px-6 -mt-20 pb-32">
