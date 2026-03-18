@@ -1,5 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { lazy, Suspense } from 'react';
+const Spline = lazy(() => import('@splinetool/react-spline'));
 import {
   Shield,
   Search,
@@ -101,11 +103,12 @@ export default function Home() {
 
       {/* ═══ HERO SECTION ═══ */}
       <section className="relative pt-44 pb-32 px-6">
-        {/* Multi-layer aurora — radial gradients for depth */}
-        <div className="absolute top-[-10%] left-[10%] w-[800px] h-[600px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-600/30 via-cyan-900/10 to-transparent blur-3xl opacity-70 pointer-events-none" />
-        <div className="absolute top-[5%] right-[5%] w-[700px] h-[500px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-700/25 via-indigo-900/10 to-transparent blur-3xl opacity-60 pointer-events-none" />
-        <div className="absolute top-[20%] left-[40%] w-[500px] h-[400px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-600/15 via-blue-900/5 to-transparent blur-[100px] opacity-50 pointer-events-none" />
-        <div className="absolute top-[30%] left-[60%] w-[300px] h-[300px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-fuchsia-600/15 via-transparent to-transparent blur-[80px] opacity-40 pointer-events-none" />
+        {/* Spline 3D animated wave background */}
+        <div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
+          <Suspense fallback={<div className="w-full h-full bg-black" />}>
+            <Spline scene="https://prod.spline.design/YPaOvWpo21wNAioe/scene.splinecode" />
+          </Suspense>
+        </div>
 
         <motion.div
           className="relative z-10 max-w-5xl mx-auto text-center"
@@ -114,7 +117,7 @@ export default function Home() {
           variants={stagger}
         >
           <motion.div variants={fadeUp} className="mb-8">
-            <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-300/80 bg-cyan-400/[0.06] border border-cyan-400/[0.12] rounded-full px-5 py-2">
+            <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-300/80 bg-cyan-400/[0.06] border border-cyan-400/[0.12] rounded-full px-5 py-2 backdrop-blur-md">
               <Zap className="h-3 w-3" />
               EU CSRD &amp; CSDDD Compliant
             </span>
@@ -122,36 +125,36 @@ export default function Home() {
 
           <motion.h1
             variants={fadeUp}
-            className="font-heading text-[3.5rem] md:text-[5.5rem] font-bold tracking-tighter leading-[1.02] mb-8"
+            className="font-heading text-5xl md:text-7xl font-light tracking-tight leading-[1.08] mb-8"
           >
             Find what your
             <br />
             suppliers are{' '}
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 [-webkit-background-clip:text]">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-indigo-400 [-webkit-background-clip:text]">
               hiding.
             </span>
           </motion.h1>
 
           <motion.p
             variants={fadeUp}
-            className="text-lg md:text-xl text-neutral-500 max-w-2xl mx-auto mb-14 leading-relaxed font-light"
+            className="text-lg md:text-xl text-neutral-400 max-w-2xl mx-auto mb-14 leading-relaxed font-light"
           >
             AI-powered supply chain risk intelligence. Scan, detect violations,
             and simulate regulatory outcomes across your entire network{' '}
-            <span className="text-neutral-300">before regulators do.</span>
+            <span className="text-neutral-200">before regulators do.</span>
           </motion.p>
 
           <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
               onClick={() => navigate('/auth')}
-              className="flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 text-black font-semibold px-8 py-3.5 rounded-full text-[15px] transition-all duration-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] hover:shadow-[0_0_32px_rgba(34,211,238,0.4),inset_0_1px_0_rgba(255,255,255,0.4)]"
+              className="flex items-center gap-2 bg-purple-600 hover:bg-purple-500 text-white font-semibold px-8 py-3.5 rounded-full text-[15px] transition-all duration-300 shadow-[0_0_24px_rgba(147,51,234,0.5),inset_0_1px_0_rgba(255,255,255,0.15)] hover:shadow-[0_0_40px_rgba(147,51,234,0.6),inset_0_1px_0_rgba(255,255,255,0.2)]"
             >
               Start Free Trial
               <ArrowRight className="h-4 w-4" />
             </button>
             <button
               onClick={() => navigate('/auth')}
-              className="flex items-center gap-2 text-neutral-400 hover:text-white font-medium px-7 py-3.5 rounded-full text-[15px] bg-white/[0.03] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.15] transition-all duration-300"
+              className="flex items-center gap-2 text-neutral-400 hover:text-white font-medium px-7 py-3.5 rounded-full text-[15px] bg-white/[0.03] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.15] transition-all duration-300 backdrop-blur-md"
             >
               View Live Demo
               <ChevronRight className="h-4 w-4" />
