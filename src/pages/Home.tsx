@@ -217,9 +217,9 @@ export default function Home() {
       </nav>
 
       {/* ═══ HERO SECTION — Spline 3D scene IS the hero ═══ */}
-      <section ref={heroRef} className="relative h-screen overflow-hidden bg-black">
-        {/* Spline 3D scene — full hero, its own text is the hero content */}
-        <div className="absolute inset-0 w-full h-full z-0">
+      <section ref={heroRef} className="relative h-[calc(100vh-40px)] overflow-hidden bg-black">
+        {/* Spline 3D scene — shifted up so the bottom watermark is cropped out */}
+        <div className="absolute inset-0 w-full h-[calc(100%+40px)] z-0 pointer-events-none">
           <Suspense fallback={<div className="w-full h-full bg-black" />}>
             <Spline scene="https://prod.spline.design/YPaOvWpo21wNAioe/scene.splinecode" />
           </Suspense>
