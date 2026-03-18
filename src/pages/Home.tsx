@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { lazy, Suspense, useRef } from 'react';
-const Spline = lazy(() => import('@splinetool/react-spline'));
+import { useRef } from 'react';
+import Spline from '@splinetool/react-spline';
 import {
   Shield,
   Search,
@@ -214,9 +214,7 @@ export default function Home() {
       <div ref={heroRef} className="relative w-full h-screen flex flex-col items-center justify-center overflow-hidden pt-10 px-4">
         {/* 3D Background with Watermark Hide Hack */}
         <div className="absolute inset-0 w-full h-full z-0 pointer-events-none scale-[1.05] translate-y-4 [&_a]:!hidden">
-          <Suspense fallback={<div className="w-full h-full bg-black" />}>
-            <Spline scene="https://prod.spline.design/YPaOvWpo21wNAioe/scene.splinecode" />
-          </Suspense>
+          <Spline scene="https://prod.spline.design/YPaOvWpo21wNAioe/scene.splinecode" />
         </div>
 
         {/* Foreground Content */}
