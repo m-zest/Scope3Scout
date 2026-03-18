@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
-import Spline from '@splinetool/react-spline';
+import Spline from '@splinetool/react-spline/next';
 import {
   Shield,
   Search,
