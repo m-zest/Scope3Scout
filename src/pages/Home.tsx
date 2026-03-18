@@ -3,76 +3,110 @@ import { motion } from 'framer-motion';
 import {
   Shield,
   Search,
-  BarChart3,
-  FileCheck,
-  AlertTriangle,
+  ArrowRight,
   ChevronRight,
   Globe,
   Cpu,
   Eye,
-  ArrowRight,
-  CheckCircle2,
-  Zap,
-  Lock,
+  Bell,
+  BarChart3,
   TrendingUp,
+  FileText,
+  Zap,
+  MapPin,
 } from 'lucide-react';
 
+/* ─── Animation Variants ─── */
+const customEase: [number, number, number, number] = [0.25, 0.4, 0.25, 1];
+
 const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' as const } },
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: customEase } },
+};
+
+const fadeUpSlow = {
+  hidden: { opacity: 0, y: 40 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.9, ease: customEase } },
 };
 
 const stagger = {
-  visible: { transition: { staggerChildren: 0.1 } },
+  visible: { transition: { staggerChildren: 0.12 } },
 };
 
-// Fake sparkline data for dashboard preview
-const sparkData = [12, 18, 15, 28, 22, 35, 30, 42, 38, 45, 40, 55];
+const staggerFast = {
+  visible: { transition: { staggerChildren: 0.08 } },
+};
 
+/* ─── Glassmorphic Card Wrapper ─── */
+function GlassCard({
+  children,
+  className = '',
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl rounded-2xl ${className}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+/* ─── Sparkline SVG ─── */
 function SparkLine({ data, color }: { data: number[]; color: string }) {
   const max = Math.max(...data);
   const min = Math.min(...data);
   const range = max - min || 1;
   const w = 80;
   const h = 24;
-  const points = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - ((v - min) / range) * h}`).join(' ');
+  const points = data
+    .map(
+      (v, i) =>
+        `${(i / (data.length - 1)) * w},${h - ((v - min) / range) * h}`
+    )
+    .join(' ');
   return (
-    <svg width={w} height={h} className="opacity-60">
+    <svg width={w} height={h} className="opacity-50">
       <polyline fill="none" stroke={color} strokeWidth="1.5" points={points} />
     </svg>
   );
 }
 
+const sparkData = [12, 18, 15, 28, 22, 35, 30, 42, 38, 45, 40, 55];
+
 export default function Home() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white overflow-hidden">
-      {/* Radial gradient background */}
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-900/20 via-slate-950 to-slate-950 pointer-events-none" />
-
-      {/* ─── Navigation ─── */}
-      <nav className="relative z-50 sticky top-0 glass border-b border-white/5 bg-slate-950/80 backdrop-blur-xl">
+    <div className="min-h-screen bg-black text-white overflow-hidden">
+      {/* ════════════════════════════════════════════════════════════
+          NAVIGATION
+         ════════════════════════════════════════════════════════════ */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-black/60 backdrop-blur-2xl border-b border-white/[0.06]">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Shield className="h-6 w-6 text-emerald-400" />
-            <span className="font-heading font-bold text-lg text-white">Scope3Scout</span>
+          <div className="flex items-center gap-2.5">
+            <Shield className="h-5 w-5 text-cyan-400" />
+            <span className="font-heading font-bold text-base tracking-tight">
+              Scope3Scout
+            </span>
           </div>
-          <div className="hidden md:flex items-center gap-8 text-sm text-slate-400">
-            <a href="#features" className="hover:text-white transition-colors">Features</a>
-            <a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a>
-            <a href="#compliance" className="hover:text-white transition-colors">Compliance</a>
+          <div className="hidden md:flex items-center gap-8 text-[13px] text-neutral-400">
+            <a href="#features" className="hover:text-white transition-colors duration-300">Features</a>
+            <a href="#simulation" className="hover:text-white transition-colors duration-300">Simulation</a>
+            <a href="#compliance" className="hover:text-white transition-colors duration-300">Compliance</a>
           </div>
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/auth')}
-              className="text-sm text-slate-300 hover:text-white transition-colors px-3 py-1.5"
+              className="text-[13px] text-neutral-300 hover:text-white transition-colors duration-300"
             >
               Sign In
             </button>
             <button
               onClick={() => navigate('/auth')}
-              className="text-sm font-medium bg-emerald-500 hover:bg-emerald-400 text-white px-4 py-2 rounded-lg transition-colors"
+              className="text-[13px] font-medium bg-cyan-400 hover:bg-cyan-300 text-black px-5 py-2 rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-cyan-400/25"
             >
               Request Demo
             </button>
@@ -80,49 +114,63 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* ─── Hero Section ─── */}
-      <section className="relative z-10 pt-24 pb-16 px-6">
+      {/* ════════════════════════════════════════════════════════════
+          HERO SECTION
+         ════════════════════════════════════════════════════════════ */}
+      <section className="relative pt-40 pb-32 px-6">
+        {/* Aurora blurs */}
+        <div className="absolute top-0 left-1/4 w-[700px] h-[700px] bg-cyan-500/20 rounded-full blur-[160px] mix-blend-screen pointer-events-none" />
+        <div className="absolute top-20 right-1/4 w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[140px] mix-blend-screen pointer-events-none" />
+        <div className="absolute top-40 left-1/2 w-[400px] h-[400px] bg-blue-500/15 rounded-full blur-[120px] mix-blend-screen pointer-events-none" />
+
         <motion.div
-          className="max-w-5xl mx-auto text-center"
+          className="relative z-10 max-w-5xl mx-auto text-center"
           initial="hidden"
           animate="visible"
           variants={stagger}
         >
-          <motion.div variants={fadeUp} className="mb-6">
-            <span className="inline-flex items-center gap-2 text-xs font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-4 py-1.5">
+          <motion.div variants={fadeUp} className="mb-8">
+            <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-300 bg-cyan-400/[0.08] border border-cyan-400/20 rounded-full px-5 py-2">
               <Zap className="h-3 w-3" />
-              EU CSRD &amp; CSDDD Compliant Intelligence
+              EU CSRD &amp; CSDDD Compliant
             </span>
           </motion.div>
 
           <motion.h1
             variants={fadeUp}
-            className="font-heading text-5xl md:text-7xl font-bold tracking-tight leading-[1.08] mb-6 text-balance"
+            className="font-heading text-[3.5rem] md:text-[5.5rem] font-bold tracking-tight leading-[1.04] mb-8"
           >
-            Find what your suppliers{' '}
-            <br className="hidden md:block" />
-            are hiding{' '}
-            <span className="gradient-text">before regulators do</span>
+            Find what your
+            <br />
+            suppliers are{' '}
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-500">
+              hiding.
+            </span>
           </motion.h1>
 
           <motion.p
             variants={fadeUp}
-            className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-10 text-balance"
+            className="text-lg md:text-xl text-neutral-400 max-w-2xl mx-auto mb-12 leading-relaxed"
           >
-            AI-powered supply chain risk intelligence. Scan, detect violations, and simulate regulatory outcomes across your entire supplier network in minutes.
+            AI-powered supply chain risk intelligence. Scan, detect violations,
+            and simulate regulatory outcomes across your entire network{' '}
+            <span className="text-neutral-200">before regulators do.</span>
           </motion.p>
 
-          <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <motion.div
+            variants={fadeUp}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          >
             <button
               onClick={() => navigate('/auth')}
-              className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-medium px-8 py-3.5 rounded-xl text-base transition-all hover:shadow-lg hover:shadow-emerald-500/25"
+              className="flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 text-black font-semibold px-8 py-3.5 rounded-full text-[15px] transition-all duration-300 hover:shadow-xl hover:shadow-cyan-400/30"
             >
               Start Free Trial
               <ArrowRight className="h-4 w-4" />
             </button>
             <button
               onClick={() => navigate('/auth')}
-              className="flex items-center gap-2 text-slate-300 hover:text-white font-medium px-6 py-3.5 rounded-xl text-base border border-slate-700 hover:border-slate-500 transition-all"
+              className="flex items-center gap-2 text-neutral-300 hover:text-white font-medium px-7 py-3.5 rounded-full text-[15px] bg-white/[0.04] border border-white/[0.12] hover:bg-white/[0.08] hover:border-white/[0.2] transition-all duration-300"
             >
               View Live Demo
               <ChevronRight className="h-4 w-4" />
@@ -132,374 +180,533 @@ export default function Home() {
 
         {/* ─── Mac Window Dashboard Preview ─── */}
         <motion.div
-          className="max-w-5xl mx-auto mt-20"
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: 'easeOut' as const, delay: 0.3 }}
+          className="relative z-10 max-w-5xl mx-auto mt-24"
+          initial={{ opacity: 0, y: 60, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 1, ease: [0.25, 0.4, 0.25, 1], delay: 0.4 }}
         >
-          <div className="relative">
-            {/* Glow effect */}
-            <div className="absolute -inset-4 bg-gradient-to-r from-emerald-500/20 via-teal-500/10 to-cyan-500/20 rounded-3xl blur-2xl opacity-50" />
+          {/* Glow behind window */}
+          <div className="absolute -inset-8 bg-gradient-to-r from-cyan-500/15 via-blue-500/10 to-purple-500/15 rounded-3xl blur-3xl opacity-60" />
 
-            {/* Mac window frame */}
-            <div className="relative bg-slate-900 border border-slate-700/60 rounded-2xl overflow-hidden shadow-2xl shadow-black/40">
-              {/* Title bar */}
-              <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-700/50 bg-slate-800/50">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-green-500/80" />
-                </div>
-                <div className="flex-1 text-center">
-                  <span className="text-xs text-slate-500 font-mono">app.scope3scout.com/dashboard</span>
-                </div>
+          <GlassCard className="relative overflow-hidden shadow-2xl shadow-black/60">
+            {/* Title bar */}
+            <div className="flex items-center gap-2 px-5 py-3.5 border-b border-white/[0.06] bg-white/[0.02]">
+              <div className="flex gap-2">
+                <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
+                <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
+                <div className="w-3 h-3 rounded-full bg-[#28c840]" />
               </div>
-
-              {/* Fake dashboard content */}
-              <div className="p-6 space-y-4">
-                {/* Top stat cards */}
-                <div className="grid grid-cols-4 gap-3">
-                  {[
-                    { label: 'Total Suppliers', value: '247', trend: '+12', color: 'text-emerald-400' },
-                    { label: 'High Risk', value: '18', trend: '+3', color: 'text-red-400' },
-                    { label: 'Violations', value: '34', trend: '+7', color: 'text-orange-400' },
-                    { label: 'CSRD Compliant', value: '89%', trend: '+4%', color: 'text-emerald-400' },
-                  ].map((stat, i) => (
-                    <div key={i} className="bg-slate-800/50 border border-slate-700/40 rounded-lg p-3">
-                      <p className="text-[10px] text-slate-500 uppercase tracking-wider">{stat.label}</p>
-                      <div className="flex items-end justify-between mt-1">
-                        <span className="text-xl font-bold text-white font-heading">{stat.value}</span>
-                        <SparkLine data={sparkData.map((d) => d + i * 5)} color={stat.color.includes('red') ? '#f87171' : stat.color.includes('orange') ? '#fb923c' : '#34d399'} />
-                      </div>
-                      <p className={`text-[10px] mt-1 ${stat.color}`}>{stat.trend} this month</p>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Fake table */}
-                <div className="bg-slate-800/30 border border-slate-700/40 rounded-lg overflow-hidden">
-                  <div className="px-4 py-2 border-b border-slate-700/40">
-                    <span className="text-xs font-medium text-slate-400">Supplier Risk Table</span>
-                  </div>
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="border-b border-slate-700/30">
-                        <th className="text-left px-4 py-2 text-slate-500 font-medium">Supplier</th>
-                        <th className="text-left px-4 py-2 text-slate-500 font-medium">Country</th>
-                        <th className="text-center px-4 py-2 text-slate-500 font-medium">Risk</th>
-                        <th className="text-center px-4 py-2 text-slate-500 font-medium">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {[
-                        { name: 'SteelCorp GmbH', country: 'Germany', risk: 'CRITICAL', status: 'Flagged', riskCls: 'bg-red-500/20 text-red-400', statusCls: 'bg-red-500/20 text-red-400' },
-                        { name: 'TextilePro Bangladesh', country: 'Bangladesh', risk: 'HIGH', status: 'Flagged', riskCls: 'bg-orange-500/20 text-orange-400', statusCls: 'bg-red-500/20 text-red-400' },
-                        { name: 'ChemBase France', country: 'France', risk: 'LOW', status: 'Cleared', riskCls: 'bg-emerald-500/20 text-emerald-400', statusCls: 'bg-emerald-500/20 text-emerald-400' },
-                      ].map((row, i) => (
-                        <tr key={i} className="border-b border-slate-700/20">
-                          <td className="px-4 py-2.5 text-slate-300 font-medium">{row.name}</td>
-                          <td className="px-4 py-2.5 text-slate-500">{row.country}</td>
-                          <td className="px-4 py-2.5 text-center">
-                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${row.riskCls}`}>{row.risk}</span>
-                          </td>
-                          <td className="px-4 py-2.5 text-center">
-                            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${row.statusCls}`}>{row.status}</span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+              <div className="flex-1 text-center">
+                <span className="text-[11px] text-neutral-500 font-mono">
+                  app.scope3scout.com/dashboard
+                </span>
               </div>
             </div>
+
+            {/* Dashboard preview */}
+            <div className="p-6 space-y-4 bg-black/40">
+              {/* Stat cards */}
+              <div className="grid grid-cols-4 gap-3">
+                {[
+                  { label: 'Total Suppliers', value: '247', trend: '+12', color: '#22d3ee' },
+                  { label: 'High Risk', value: '18', trend: '+3', color: '#f87171' },
+                  { label: 'Violations', value: '34', trend: '+7', color: '#fb923c' },
+                  { label: 'CSRD Compliant', value: '89%', trend: '+4%', color: '#34d399' },
+                ].map((stat, i) => (
+                  <div
+                    key={i}
+                    className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-3.5"
+                  >
+                    <p className="text-[10px] text-neutral-500 uppercase tracking-wider font-medium">
+                      {stat.label}
+                    </p>
+                    <div className="flex items-end justify-between mt-1.5">
+                      <span className="text-xl font-bold text-white font-heading">
+                        {stat.value}
+                      </span>
+                      <SparkLine
+                        data={sparkData.map((d) => d + i * 5)}
+                        color={stat.color}
+                      />
+                    </div>
+                    <p className="text-[10px] mt-1.5" style={{ color: stat.color }}>
+                      {stat.trend} this month
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Fake table */}
+              <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl overflow-hidden">
+                <div className="px-4 py-2.5 border-b border-white/[0.06]">
+                  <span className="text-[11px] font-medium text-neutral-500">
+                    Supplier Risk Table
+                  </span>
+                </div>
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-white/[0.04]">
+                      {['Supplier', 'Country', 'Risk', 'Status'].map((h) => (
+                        <th
+                          key={h}
+                          className={`${h === 'Risk' || h === 'Status' ? 'text-center' : 'text-left'} px-4 py-2 text-neutral-600 font-medium`}
+                        >
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { name: 'SteelCorp GmbH', country: 'Germany', risk: 'CRITICAL', riskCls: 'bg-red-500/15 text-red-400', status: 'Flagged', statusCls: 'text-red-400' },
+                      { name: 'TextilePro Bangladesh', country: 'Bangladesh', risk: 'HIGH', riskCls: 'bg-orange-500/15 text-orange-400', status: 'Flagged', statusCls: 'text-orange-400' },
+                      { name: 'ChemBase France', country: 'France', risk: 'LOW', riskCls: 'bg-emerald-500/15 text-emerald-400', status: 'Cleared', statusCls: 'text-emerald-400' },
+                    ].map((row, i) => (
+                      <tr key={i} className="border-b border-white/[0.03]">
+                        <td className="px-4 py-2.5 text-neutral-200 font-medium">{row.name}</td>
+                        <td className="px-4 py-2.5 text-neutral-500">{row.country}</td>
+                        <td className="px-4 py-2.5 text-center">
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${row.riskCls}`}>{row.risk}</span>
+                        </td>
+                        <td className={`px-4 py-2.5 text-center text-[11px] font-medium ${row.statusCls}`}>{row.status}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </GlassCard>
+        </motion.div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════
+          STATS BANNER
+         ════════════════════════════════════════════════════════════ */}
+      <section className="relative py-32 px-6">
+        {/* Subtle aurora */}
+        <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[150px] mix-blend-screen pointer-events-none -translate-y-1/2" />
+
+        <motion.div
+          className="relative z-10 max-w-6xl mx-auto"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-80px' }}
+          variants={stagger}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+            <motion.div variants={fadeUp}>
+              <h2 className="font-heading text-4xl md:text-5xl font-bold tracking-tight leading-tight">
+                Enter a new era of{' '}
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
+                  autonomous compliance.
+                </span>
+              </h2>
+              <p className="text-neutral-400 mt-6 text-lg leading-relaxed max-w-md">
+                Replace weeks of manual due diligence with AI agents that scan, verify, and simulate — continuously.
+              </p>
+            </motion.div>
+
+            <motion.div variants={fadeUp} className="space-y-8">
+              <div>
+                <p className="font-heading text-6xl md:text-7xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-neutral-400">
+                  €100K+
+                </p>
+                <p className="text-neutral-500 text-sm mt-2 uppercase tracking-wider font-medium">
+                  Saved in analyst time per year
+                </p>
+              </div>
+              <div className="border-t border-white/[0.06] pt-8">
+                <p className="font-heading text-6xl md:text-7xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-neutral-400">
+                  10%
+                </p>
+                <p className="text-neutral-500 text-sm mt-2 uppercase tracking-wider font-medium">
+                  CSRD fine avoidance through early detection
+                </p>
+              </div>
+            </motion.div>
           </div>
         </motion.div>
       </section>
 
-      {/* ─── Trusted By ─── */}
-      <section className="relative z-10 py-12 border-t border-slate-800/50">
-        <div className="max-w-5xl mx-auto px-6">
-          <p className="text-center text-xs uppercase tracking-widest text-slate-600 mb-8">
-            Built for enterprise supply chain teams
-          </p>
-          <div className="flex items-center justify-center gap-12 flex-wrap opacity-40">
-            {['CSRD Compliant', 'ISO 14001', 'CSDDD Ready', 'GRI Standards', 'CDP Verified'].map((name) => (
-              <span key={name} className="text-sm font-medium text-slate-400 whitespace-nowrap">{name}</span>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ════════════════════════════════════════════════════════════
+          FEATURES — THE FOUNDATION
+         ════════════════════════════════════════════════════════════ */}
+      <section id="features" className="relative py-32 px-6">
+        {/* Aurora */}
+        <div className="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-purple-600/15 rounded-full blur-[160px] mix-blend-screen pointer-events-none" />
+        <div className="absolute bottom-0 left-1/3 w-[400px] h-[400px] bg-cyan-500/10 rounded-full blur-[120px] mix-blend-screen pointer-events-none" />
 
-      {/* ─── Features Bento Box ─── */}
-      <section id="features" className="relative z-10 py-24 px-6">
-        <div className="max-w-6xl mx-auto">
+        <div className="relative z-10 max-w-6xl mx-auto">
           <motion.div
-            className="text-center mb-16"
+            className="text-center mb-20"
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, margin: '-100px' }}
+            viewport={{ once: true, margin: '-80px' }}
             variants={stagger}
           >
-            <motion.p variants={fadeUp} className="text-sm font-medium text-emerald-400 mb-3">
-              PLATFORM CAPABILITIES
+            <motion.p
+              variants={fadeUp}
+              className="text-[11px] font-semibold uppercase tracking-[0.25em] text-neutral-500 mb-4"
+            >
+              Platform Capabilities
             </motion.p>
-            <motion.h2 variants={fadeUp} className="font-heading text-4xl md:text-5xl font-bold tracking-tight">
-              Three-tier AI intelligence
+            <motion.h2
+              variants={fadeUp}
+              className="font-heading text-4xl md:text-[3.5rem] font-bold tracking-tight leading-tight"
+            >
+              The foundation of
+              <br />
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-500">
+                continuous monitoring.
+              </span>
             </motion.h2>
-            <motion.p variants={fadeUp} className="text-slate-400 mt-4 max-w-xl mx-auto">
-              From web scraping to predictive simulation, every layer works together to give you a complete risk picture.
+            <motion.p variants={fadeUp} className="text-neutral-400 mt-6 max-w-lg mx-auto text-lg">
+              Every layer of intelligence works together to give you a complete, real-time risk picture of your supply chain.
             </motion.p>
           </motion.div>
 
-          {/* Bento grid */}
+          {/* 2x2 Glass Grid */}
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-6 gap-4"
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, margin: '-100px' }}
-            variants={stagger}
+            viewport={{ once: true, margin: '-80px' }}
+            variants={staggerFast}
           >
-            {/* Large card: TinyFish Web Agents */}
-            <motion.div
-              variants={fadeUp}
-              className="md:col-span-4 bg-slate-900 border border-slate-800 rounded-2xl p-8 relative overflow-hidden group hover:border-slate-700 transition-colors"
-            >
-              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-emerald-500/10 to-transparent rounded-bl-full" />
-              <div className="relative">
-                <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-4">
-                  <Search className="h-5 w-5 text-emerald-400" />
+            {/* Card 1: TinyFish Web Agents */}
+            <motion.div variants={fadeUpSlow}>
+              <GlassCard className="p-8 h-full hover:bg-white/[0.05] transition-colors duration-500 group">
+                <div className="w-12 h-12 rounded-xl bg-cyan-400/10 border border-cyan-400/20 flex items-center justify-center mb-6 group-hover:bg-cyan-400/15 transition-colors duration-500">
+                  <Search className="h-6 w-6 text-cyan-400" />
                 </div>
-                <h3 className="font-heading text-xl font-bold mb-2">Tier 1: TinyFish Web Agents</h3>
-                <p className="text-slate-400 text-sm mb-6 max-w-md">
-                  5 parallel AI agents scrape supplier websites, EPA databases, news articles, and LinkedIn to find discrepancies between claims and reality.
+                <h3 className="font-heading text-xl font-bold mb-3 tracking-tight">
+                  TinyFish Web Agents
+                </h3>
+                <p className="text-neutral-400 text-sm leading-relaxed mb-6">
+                  Navigates complex government portals like a human analyst. 5 parallel agents scrape EPA databases, news archives, and certification registries simultaneously.
                 </p>
                 {/* Terminal mockup */}
-                <div className="bg-slate-950 border border-slate-800 rounded-lg p-4 font-mono text-xs">
-                  <div className="flex items-center gap-2 text-slate-600 mb-3">
-                    <span className="text-emerald-400">$</span> tinyfish scan --supplier "SteelCorp GmbH"
+                <div className="bg-black/60 border border-white/[0.06] rounded-xl p-4 font-mono text-[11px]">
+                  <div className="flex items-center gap-2 text-neutral-600 mb-3">
+                    <span className="text-cyan-400">$</span> tinyfish scan --supplier "SteelCorp GmbH"
                   </div>
-                  <div className="space-y-1 text-slate-500">
-                    <p><span className="text-emerald-400">agent[1]</span> Scanning steelcorp-gmbh.de claims...</p>
-                    <p><span className="text-cyan-400">agent[2]</span> Searching EU environmental fines database...</p>
-                    <p><span className="text-yellow-400">agent[3]</span> Querying Reuters news archive...</p>
-                    <p><span className="text-orange-400">agent[4]</span> Checking ISO certifications...</p>
-                    <p><span className="text-purple-400">agent[5]</span> Scanning LinkedIn company data...</p>
-                    <p className="text-red-400 mt-2 font-semibold">! DISCREPANCY: Claims ISO 14001 but fined EUR 40,000 for illegal discharge</p>
+                  <div className="space-y-1.5 text-neutral-500">
+                    <p><span className="text-cyan-400">agent[1]</span> Scanning website claims...</p>
+                    <p><span className="text-blue-400">agent[2]</span> Querying EU fines database...</p>
+                    <p><span className="text-purple-400">agent[3]</span> Searching Reuters archive...</p>
+                    <p className="text-red-400 font-semibold mt-2">
+                      ! DISCREPANCY: Claims ISO 14001 — fined €40,000 for illegal discharge
+                    </p>
                   </div>
                 </div>
-              </div>
+              </GlassCard>
             </motion.div>
 
-            {/* Small card: CSRD */}
-            <motion.div
-              variants={fadeUp}
-              className="md:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-slate-700 transition-colors"
-            >
-              <div className="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mb-4">
-                <FileCheck className="h-5 w-5 text-cyan-400" />
-              </div>
-              <h3 className="font-heading text-lg font-bold mb-2">CSRD Compliance</h3>
-              <p className="text-slate-400 text-sm mb-4">
-                Automatic scoring against EU sustainability reporting directives.
-              </p>
-              <div className="space-y-2">
-                {['Environmental', 'Labour', 'Governance', 'Financial'].map((item) => (
-                  <div key={item} className="flex items-center gap-2 text-xs">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
-                    <span className="text-slate-400">{item} assessment</span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Small card: Violation Detection */}
-            <motion.div
-              variants={fadeUp}
-              className="md:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-slate-700 transition-colors"
-            >
-              <div className="w-10 h-10 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center mb-4">
-                <AlertTriangle className="h-5 w-5 text-orange-400" />
-              </div>
-              <h3 className="font-heading text-lg font-bold mb-2">Tier 2: Violation Detection</h3>
-              <p className="text-slate-400 text-sm">
-                Classify and verify violations with evidence sourcing, citation URLs, and fine amount extraction.
-              </p>
-            </motion.div>
-
-            {/* Large card: Simulation Engine */}
-            <motion.div
-              variants={fadeUp}
-              className="md:col-span-4 bg-slate-900 border border-slate-800 rounded-2xl p-8 relative overflow-hidden hover:border-slate-700 transition-colors"
-            >
-              <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-purple-500/10 to-transparent rounded-tr-full" />
-              <div className="relative">
-                <div className="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-4">
-                  <Cpu className="h-5 w-5 text-purple-400" />
+            {/* Card 2: Cross-Reference LLM */}
+            <motion.div variants={fadeUpSlow}>
+              <GlassCard className="p-8 h-full hover:bg-white/[0.05] transition-colors duration-500 group">
+                <div className="w-12 h-12 rounded-xl bg-purple-400/10 border border-purple-400/20 flex items-center justify-center mb-6 group-hover:bg-purple-400/15 transition-colors duration-500">
+                  <FileText className="h-6 w-6 text-purple-400" />
                 </div>
-                <h3 className="font-heading text-xl font-bold mb-2">Tier 3: Predictive Simulation Engine</h3>
-                <p className="text-slate-400 text-sm mb-6 max-w-md">
-                  Multi-agent system simulates regulator, media, investor, and NGO responses to generate risk predictions and financial exposure estimates.
+                <h3 className="font-heading text-xl font-bold mb-3 tracking-tight">
+                  Cross-Reference LLM
+                </h3>
+                <p className="text-neutral-400 text-sm leading-relaxed">
+                  Instantly compares supplier claims against actual public records. Identifies discrepancies between sustainability reports, public procurement databases, and environmental fine registries across all 27 EU member states.
                 </p>
-                <div className="grid grid-cols-4 gap-3">
-                  {[
-                    { agent: 'Regulator', emoji: <Shield className="h-4 w-4" />, pct: '91%' },
-                    { agent: 'Media', emoji: <Eye className="h-4 w-4" />, pct: '67%' },
-                    { agent: 'Investor', emoji: <TrendingUp className="h-4 w-4" />, pct: '45%' },
-                    { agent: 'NGO', emoji: <Globe className="h-4 w-4" />, pct: '58%' },
-                  ].map((a) => (
-                    <div key={a.agent} className="bg-slate-800/50 border border-slate-700/40 rounded-lg p-3 text-center">
-                      <div className="flex justify-center mb-2 text-purple-400">{a.emoji}</div>
-                      <p className="text-xs text-slate-500">{a.agent}</p>
-                      <p className="text-lg font-bold font-heading text-white mt-1">{a.pct}</p>
+                <div className="mt-6 grid grid-cols-2 gap-3">
+                  {['Environmental', 'Labour', 'Governance', 'Financial'].map((cat) => (
+                    <div
+                      key={cat}
+                      className="flex items-center gap-2 text-xs text-neutral-400 bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2"
+                    >
+                      <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                      {cat}
                     </div>
                   ))}
                 </div>
-              </div>
+              </GlassCard>
             </motion.div>
-          </motion.div>
-        </div>
-      </section>
 
-      {/* ─── How It Works ─── */}
-      <section id="how-it-works" className="relative z-10 py-24 px-6 border-t border-slate-800/50">
-        <div className="max-w-5xl mx-auto">
-          <motion.div
-            className="text-center mb-16"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={stagger}
-          >
-            <motion.p variants={fadeUp} className="text-sm font-medium text-emerald-400 mb-3">HOW IT WORKS</motion.p>
-            <motion.h2 variants={fadeUp} className="font-heading text-4xl font-bold tracking-tight">
-              From upload to audit-ready report in minutes
-            </motion.h2>
-          </motion.div>
-
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-3 gap-8"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={stagger}
-          >
-            {[
-              {
-                step: '01',
-                title: 'Upload Suppliers',
-                desc: 'CSV bulk import or manual entry. We map names, websites, countries, and industries automatically.',
-                icon: <BarChart3 className="h-6 w-6" />,
-              },
-              {
-                step: '02',
-                title: 'AI Scans & Detects',
-                desc: 'TinyFish agents scrape the web. Tier 2 classifies violations. Evidence is sourced and cited.',
-                icon: <Search className="h-6 w-6" />,
-              },
-              {
-                step: '03',
-                title: 'Simulate & Report',
-                desc: 'Predictive models score risk, estimate financial exposure, and generate CSRD-compliant PDF reports.',
-                icon: <FileCheck className="h-6 w-6" />,
-              },
-            ].map((item) => (
-              <motion.div key={item.step} variants={fadeUp} className="relative">
-                <span className="text-6xl font-heading font-bold text-slate-800/60">{item.step}</span>
-                <div className="mt-2">
-                  <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-3">
-                    {item.icon}
-                  </div>
-                  <h3 className="font-heading text-lg font-bold mb-2">{item.title}</h3>
-                  <p className="text-sm text-slate-400">{item.desc}</p>
+            {/* Card 3: Real-time Alerts */}
+            <motion.div variants={fadeUpSlow}>
+              <GlassCard className="p-8 h-full hover:bg-white/[0.05] transition-colors duration-500 group">
+                <div className="w-12 h-12 rounded-xl bg-orange-400/10 border border-orange-400/20 flex items-center justify-center mb-6 group-hover:bg-orange-400/15 transition-colors duration-500">
+                  <Bell className="h-6 w-6 text-orange-400" />
                 </div>
-              </motion.div>
-            ))}
+                <h3 className="font-heading text-xl font-bold mb-3 tracking-tight">
+                  Real-time Alerts
+                </h3>
+                <p className="text-neutral-400 text-sm leading-relaxed">
+                  Get notified the moment a supplier is hit with an environmental fine, a labour dispute is reported, or a certification lapses. Evidence is auto-sourced with citation URLs for audit-ready documentation.
+                </p>
+              </GlassCard>
+            </motion.div>
+
+            {/* Card 4: Multi-Region Support */}
+            <motion.div variants={fadeUpSlow}>
+              <GlassCard className="p-8 h-full hover:bg-white/[0.05] transition-colors duration-500 group">
+                <div className="w-12 h-12 rounded-xl bg-emerald-400/10 border border-emerald-400/20 flex items-center justify-center mb-6 group-hover:bg-emerald-400/15 transition-colors duration-500">
+                  <MapPin className="h-6 w-6 text-emerald-400" />
+                </div>
+                <h3 className="font-heading text-xl font-bold mb-3 tracking-tight">
+                  Multi-Region Support
+                </h3>
+                <p className="text-neutral-400 text-sm leading-relaxed">
+                  Scanning 27 EU member states and their regional databases. From Germany's Umweltbundesamt to Romania's ANAP public procurement portal — every local data source is covered.
+                </p>
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {['DE', 'FR', 'RO', 'HU', 'BD', 'NL', 'IT', 'ES'].map((code) => (
+                    <span
+                      key={code}
+                      className="text-[10px] font-bold text-neutral-500 bg-white/[0.04] border border-white/[0.08] rounded-md px-2 py-1"
+                    >
+                      {code}
+                    </span>
+                  ))}
+                </div>
+              </GlassCard>
+            </motion.div>
           </motion.div>
         </div>
       </section>
 
-      {/* ─── Compliance Section ─── */}
-      <section id="compliance" className="relative z-10 py-24 px-6 border-t border-slate-800/50">
-        <div className="max-w-5xl mx-auto">
+      {/* ════════════════════════════════════════════════════════════
+          SIMULATION ENGINE — BENTO BOX
+         ════════════════════════════════════════════════════════════ */}
+      <section id="simulation" className="relative py-32 px-6">
+        {/* Aurora */}
+        <div className="absolute top-1/4 left-1/3 w-[600px] h-[600px] bg-fuchsia-600/15 rounded-full blur-[160px] mix-blend-screen pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[140px] mix-blend-screen pointer-events-none" />
+
+        <div className="relative z-10 max-w-6xl mx-auto">
           <motion.div
-            className="bg-gradient-to-br from-emerald-500/10 via-slate-900 to-slate-900 border border-emerald-500/20 rounded-3xl p-12 text-center"
+            className="text-center mb-20"
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true }}
+            viewport={{ once: true, margin: '-80px' }}
             variants={stagger}
           >
-            <motion.div variants={fadeUp}>
-              <Lock className="h-8 w-8 text-emerald-400 mx-auto mb-4" />
-            </motion.div>
-            <motion.h2 variants={fadeUp} className="font-heading text-3xl md:text-4xl font-bold mb-4">
-              Enterprise-grade compliance, out of the box
-            </motion.h2>
-            <motion.p variants={fadeUp} className="text-slate-400 max-w-xl mx-auto mb-8">
-              Scope3Scout is designed for Chief Procurement Officers who need audit-ready evidence, not just dashboards.
+            <motion.p
+              variants={fadeUp}
+              className="text-[11px] font-semibold uppercase tracking-[0.25em] text-neutral-500 mb-4"
+            >
+              Predictive Intelligence
             </motion.p>
-            <motion.div variants={fadeUp} className="flex flex-wrap justify-center gap-4">
-              {[
-                'CSRD Reporting',
-                'CSDDD Due Diligence',
-                'Audit-Ready PDFs',
-                'Evidence Citations',
-                'Role-Based Access',
-                'Supabase RLS',
-              ].map((item) => (
-                <span
-                  key={item}
-                  className="text-sm text-slate-300 bg-slate-800/50 border border-slate-700/50 rounded-full px-4 py-2"
-                >
-                  {item}
-                </span>
-              ))}
+            <motion.h2
+              variants={fadeUp}
+              className="font-heading text-4xl md:text-[3.5rem] font-bold tracking-tight leading-tight"
+            >
+              Predict the fallout
+              <br />
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-fuchsia-400 via-purple-400 to-blue-500">
+                before it happens.
+              </span>
+            </motion.h2>
+          </motion.div>
+
+          {/* Bento: 1 large top + 2 small bottom */}
+          <motion.div
+            className="space-y-4"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-80px' }}
+            variants={staggerFast}
+          >
+            {/* Large card */}
+            <motion.div variants={fadeUpSlow}>
+              <GlassCard className="p-10 relative overflow-hidden hover:bg-white/[0.05] transition-colors duration-500">
+                {/* Inner glow */}
+                <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-gradient-to-bl from-purple-500/10 to-transparent pointer-events-none" />
+
+                <div className="relative">
+                  <div className="w-12 h-12 rounded-xl bg-fuchsia-400/10 border border-fuchsia-400/20 flex items-center justify-center mb-6">
+                    <Cpu className="h-6 w-6 text-fuchsia-400" />
+                  </div>
+                  <h3 className="font-heading text-2xl font-bold mb-3 tracking-tight">
+                    MiroFish Simulation Engine
+                  </h3>
+                  <p className="text-neutral-400 text-base leading-relaxed max-w-2xl mb-10">
+                    Creates 6 AI personas — Regulator, Media, Investor, NGO, Competitor, and Legal — to predict how a critical violation will play out over the next 90 days. Each agent independently scores risk probability and timeline.
+                  </p>
+
+                  {/* Agent prediction cards */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {[
+                      { agent: 'Regulator', icon: <Shield className="h-5 w-5" />, pct: '91%', color: 'cyan' },
+                      { agent: 'Media', icon: <Eye className="h-5 w-5" />, pct: '67%', color: 'purple' },
+                      { agent: 'Investor', icon: <TrendingUp className="h-5 w-5" />, pct: '45%', color: 'blue' },
+                      { agent: 'NGO', icon: <Globe className="h-5 w-5" />, pct: '58%', color: 'emerald' },
+                    ].map((a) => (
+                      <div
+                        key={a.agent}
+                        className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-center hover:bg-white/[0.06] transition-colors duration-300"
+                      >
+                        <div className={`flex justify-center mb-3 text-${a.color}-400`}>
+                          {a.icon}
+                        </div>
+                        <p className="text-[11px] text-neutral-500 uppercase tracking-wider font-medium">
+                          {a.agent}
+                        </p>
+                        <p className="text-3xl font-heading font-bold text-white mt-2">
+                          {a.pct}
+                        </p>
+                        <p className="text-[10px] text-neutral-600 mt-1">probability</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </GlassCard>
             </motion.div>
+
+            {/* Two small cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <motion.div variants={fadeUpSlow}>
+                <GlassCard className="p-8 h-full hover:bg-white/[0.05] transition-colors duration-500">
+                  <div className="w-12 h-12 rounded-xl bg-blue-400/10 border border-blue-400/20 flex items-center justify-center mb-6">
+                    <BarChart3 className="h-6 w-6 text-blue-400" />
+                  </div>
+                  <h3 className="font-heading text-xl font-bold mb-3 tracking-tight">
+                    Risk Scoring
+                  </h3>
+                  <p className="text-neutral-400 text-sm leading-relaxed mb-6">
+                    0-100 severity index aggregating all agent predictions, violation history, and CSRD compliance gaps.
+                  </p>
+                  {/* Score visualisation */}
+                  <div className="flex items-end gap-1">
+                    {[18, 35, 58, 61, 83].map((score, i) => (
+                      <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                        <div
+                          className={`w-full rounded-t-md ${score >= 60 ? 'bg-red-500/60' : score >= 40 ? 'bg-orange-500/60' : 'bg-emerald-500/60'}`}
+                          style={{ height: `${score * 0.6}px` }}
+                        />
+                        <span className="text-[9px] text-neutral-600">{score}</span>
+                      </div>
+                    ))}
+                  </div>
+                </GlassCard>
+              </motion.div>
+
+              <motion.div variants={fadeUpSlow}>
+                <GlassCard className="p-8 h-full hover:bg-white/[0.05] transition-colors duration-500">
+                  <div className="w-12 h-12 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center mb-6">
+                    <TrendingUp className="h-6 w-6 text-amber-400" />
+                  </div>
+                  <h3 className="font-heading text-xl font-bold mb-3 tracking-tight">
+                    Financial Exposure
+                  </h3>
+                  <p className="text-neutral-400 text-sm leading-relaxed mb-6">
+                    Calculated risk in EUR. Models potential fines, contract losses, and reputational damage per supplier.
+                  </p>
+                  {/* Exposure numbers */}
+                  <div className="space-y-3">
+                    {[
+                      { supplier: 'SteelCorp', amount: '€2.3M', severity: 'critical' },
+                      { supplier: 'TextilePro', amount: '€850K', severity: 'high' },
+                      { supplier: 'PackagingPlus', amount: '€450K', severity: 'high' },
+                    ].map((item) => (
+                      <div
+                        key={item.supplier}
+                        className="flex items-center justify-between text-sm"
+                      >
+                        <span className="text-neutral-400">{item.supplier}</span>
+                        <span className={`font-heading font-bold ${item.severity === 'critical' ? 'text-red-400' : 'text-orange-400'}`}>
+                          {item.amount}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </GlassCard>
+              </motion.div>
+            </div>
           </motion.div>
         </div>
       </section>
 
-      {/* ─── CTA Section ─── */}
-      <section className="relative z-10 py-24 px-6 border-t border-slate-800/50">
+      {/* ════════════════════════════════════════════════════════════
+          CTA — DEEP GLOW
+         ════════════════════════════════════════════════════════════ */}
+      <section id="compliance" className="relative py-40 px-6">
+        {/* Massive glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-600/20 rounded-full blur-[200px] mix-blend-screen pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-purple-600/15 rounded-full blur-[160px] mix-blend-screen pointer-events-none" />
+
         <motion.div
-          className="max-w-3xl mx-auto text-center"
+          className="relative z-10 max-w-3xl mx-auto text-center"
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true }}
+          viewport={{ once: true, margin: '-80px' }}
           variants={stagger}
         >
-          <motion.h2 variants={fadeUp} className="font-heading text-4xl md:text-5xl font-bold tracking-tight mb-6">
-            Stop guessing.{' '}
-            <span className="gradient-text">Start scanning.</span>
+          <motion.h2
+            variants={fadeUp}
+            className="font-heading text-4xl md:text-[3.5rem] font-bold tracking-tight leading-tight mb-6"
+          >
+            The most trusted way to{' '}
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-500">
+              secure your supply chain.
+            </span>
           </motion.h2>
-          <motion.p variants={fadeUp} className="text-slate-400 text-lg mb-10">
-            Join procurement teams across the EU who use Scope3Scout to protect their supply chains from regulatory risk.
+          <motion.p variants={fadeUp} className="text-neutral-400 text-lg mb-6">
+            Fully CSRD compliant reporting. Deploy in minutes, not months.
           </motion.p>
-          <motion.div variants={fadeUp}>
+          <motion.div variants={fadeUp} className="flex flex-wrap justify-center gap-3 mb-12">
+            {[
+              'CSRD Reporting',
+              'CSDDD Due Diligence',
+              'Audit-Ready PDFs',
+              'Evidence Citations',
+              'Role-Based Access',
+              'ISO 14001',
+            ].map((tag) => (
+              <span
+                key={tag}
+                className="text-[12px] text-neutral-400 bg-white/[0.04] border border-white/[0.08] rounded-full px-4 py-1.5 font-medium"
+              >
+                {tag}
+              </span>
+            ))}
+          </motion.div>
+          <motion.div
+            variants={fadeUp}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          >
             <button
               onClick={() => navigate('/auth')}
-              className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-medium px-10 py-4 rounded-xl text-lg transition-all hover:shadow-lg hover:shadow-emerald-500/25"
+              className="flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 text-black font-semibold px-10 py-4 rounded-full text-base transition-all duration-300 hover:shadow-xl hover:shadow-cyan-400/30"
             >
               Get Started Free
               <ArrowRight className="h-5 w-5" />
+            </button>
+            <button
+              onClick={() => navigate('/auth')}
+              className="flex items-center gap-2 text-neutral-300 hover:text-white font-medium px-8 py-4 rounded-full text-base bg-white/[0.04] border border-white/[0.12] hover:bg-white/[0.08] transition-all duration-300"
+            >
+              Explore Documentation
+              <ChevronRight className="h-4 w-4" />
             </button>
           </motion.div>
         </motion.div>
       </section>
 
-      {/* ─── Footer ─── */}
-      <footer className="relative z-10 border-t border-slate-800/50 py-12 px-6">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-emerald-400" />
-            <span className="font-heading font-semibold text-slate-400">Scope3Scout</span>
+      {/* ════════════════════════════════════════════════════════════
+          FOOTER
+         ════════════════════════════════════════════════════════════ */}
+      <footer className="relative z-10 border-t border-white/[0.06] py-12 px-6">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-2.5">
+            <Shield className="h-5 w-5 text-cyan-400" />
+            <span className="font-heading font-semibold text-neutral-400 text-sm">
+              Scope3Scout
+            </span>
           </div>
-          <p className="text-xs text-slate-600">
-            ESG Supply Chain Intelligence Platform. Built for EU compliance.
+          <p className="text-[11px] text-neutral-600">
+            ESG Supply Chain Intelligence. Built for EU compliance.
           </p>
-          <div className="flex gap-6 text-xs text-slate-600">
-            <span>Privacy</span>
-            <span>Terms</span>
-            <span>Contact</span>
+          <div className="flex gap-8 text-[11px] text-neutral-600">
+            <span className="hover:text-neutral-400 cursor-pointer transition-colors">Privacy</span>
+            <span className="hover:text-neutral-400 cursor-pointer transition-colors">Terms</span>
+            <span className="hover:text-neutral-400 cursor-pointer transition-colors">Contact</span>
           </div>
         </div>
       </footer>
