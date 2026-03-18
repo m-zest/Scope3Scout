@@ -211,29 +211,8 @@ export default function Home() {
       </nav>
 
       {/* ═══ HERO SECTION — Spline 3D scene IS the hero ═══ */}
-      <div ref={heroRef} className="relative w-full h-screen flex flex-col items-center justify-center overflow-hidden pt-10 px-4">
-        {/* 3D Background with Watermark Hide Hack */}
-        <div className="absolute inset-0 w-full h-full z-0 pointer-events-none scale-[1.05] translate-y-4 [&_a]:!hidden">
-          <Spline scene="https://prod.spline.design/YPaOvWpo21wNAioe/scene.splinecode" />
-        </div>
-
-        {/* CTA Buttons */}
-        <div className="absolute bottom-24 left-0 right-0 z-10 flex justify-center px-6">
-          <div className="flex flex-col sm:flex-row items-center gap-4">
-            <button
-              onClick={() => navigate('/auth')}
-              className="px-8 py-4 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium hover:scale-105 transition-transform duration-300 shadow-[0_0_40px_-10px_rgba(147,51,234,0.5)] text-[15px]"
-            >
-              Start Free Trial &rarr;
-            </button>
-            <button
-              onClick={() => navigate('/auth')}
-              className="px-8 py-4 rounded-full bg-white/[0.05] border border-white/10 text-white font-medium backdrop-blur-md hover:bg-white/[0.1] transition-colors duration-300 text-[15px]"
-            >
-              View Live Demo
-            </button>
-          </div>
-        </div>
+      <div ref={heroRef} className="relative w-full h-screen overflow-hidden">
+        <Spline scene="https://prod.spline.design/YPaOvWpo21wNAioe/scene.splinecode" />
 
         {/* Bottom fade to black for smooth transition to dashboard */}
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent z-[5] pointer-events-none" />
