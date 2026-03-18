@@ -217,37 +217,18 @@ export default function Home() {
           <Spline scene="https://prod.spline.design/YPaOvWpo21wNAioe/scene.splinecode" />
         </div>
 
-        {/* Foreground Content */}
-        <div className="relative z-10 flex flex-col items-center text-center">
-          {/* Kicker */}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 font-semibold tracking-[0.2em] uppercase text-xs md:text-sm mb-4">
-            Detect. Simulate. Comply.
-          </span>
-
-          {/* Main Headline */}
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-light tracking-tighter text-white mb-6 max-w-5xl leading-[1.1]">
-            Find what your suppliers are <br className="hidden md:block" />
-            <span className="font-normal text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500">
-              hiding.
-            </span>
-          </h1>
-
-          {/* Subheadline */}
-          <p className="text-lg text-neutral-400 font-light max-w-2xl mb-10 leading-relaxed">
-            AI-powered supply chain risk intelligence. Automatically audit your entire network, detect ESG violations, and prevent CSRD fines before regulators step in.
-          </p>
-
-          {/* CTA Buttons */}
+        {/* CTA Buttons */}
+        <div className="absolute bottom-24 left-0 right-0 z-10 flex justify-center px-6">
           <div className="flex flex-col sm:flex-row items-center gap-4">
             <button
               onClick={() => navigate('/auth')}
-              className="px-8 py-4 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium hover:scale-105 transition-transform duration-300 shadow-[0_0_40px_-10px_rgba(147,51,234,0.5)]"
+              className="px-8 py-4 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium hover:scale-105 transition-transform duration-300 shadow-[0_0_40px_-10px_rgba(147,51,234,0.5)] text-[15px]"
             >
               Start Free Trial &rarr;
             </button>
             <button
               onClick={() => navigate('/auth')}
-              className="px-8 py-4 rounded-full bg-white/[0.05] border border-white/10 text-white font-medium backdrop-blur-md hover:bg-white/[0.1] transition-colors duration-300"
+              className="px-8 py-4 rounded-full bg-white/[0.05] border border-white/10 text-white font-medium backdrop-blur-md hover:bg-white/[0.1] transition-colors duration-300 text-[15px]"
             >
               View Live Demo
             </button>
