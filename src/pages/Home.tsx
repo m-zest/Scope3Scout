@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { lazy, Suspense, useRef } from 'react';
-const Spline = lazy(() => import('@splinetool/react-spline'));
+import { useRef } from 'react';
+import Spline from '@splinetool/react-spline';
 import {
   Shield,
   Search,
@@ -167,32 +167,28 @@ const chartData = {
 
 export default function Home() {
   const navigate = useNavigate();
-  const heroRef = useRef<HTMLElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
   const macRef = useRef<HTMLDivElement>(null);
-
-  const { scrollYProgress: heroProgress } = useScroll({
-    target: heroRef,
-    offset: ['start start', 'end start'],
-  });
 
   const { scrollYProgress: macProgress } = useScroll({
     target: macRef,
     offset: ['start end', 'end start'],
   });
 
-  const heroOpacity = useTransform(heroProgress, [0, 0.6], [1, 0]);
   const macY = useTransform(macProgress, [0, 1], [100, -60]);
   const macScale = useTransform(macProgress, [0, 0.4, 1], [0.9, 1, 1]);
   const macRotateX = useTransform(macProgress, [0, 0.4], [6, 0]);
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden">
+    <div className="min-h-screen bg-black text-white overflow-hidden font-sans antialiased">
       {/* ═══ NAVIGATION ═══ */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-black/60 backdrop-blur-2xl border-b border-white/[0.04]">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <Shield className="h-5 w-5 text-cyan-400" />
-            <span className="font-heading font-bold text-base tracking-tighter">Scope3Scout</span>
+          <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#818cf8] via-[#c084fc] to-[#e879f9] flex items-center justify-center shadow-[0_0_12px_rgba(129,140,248,0.4)]">
+              <Shield className="h-3.5 w-3.5 text-white" />
+            </div>
+            <span className="font-heading font-semibold text-[15px] tracking-tight bg-gradient-to-r from-white to-neutral-400 bg-clip-text text-transparent">Scope3Scout</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-[13px] text-neutral-500">
             <a href="#features" className="hover:text-white transition-colors duration-300">Features</a>
@@ -217,22 +213,35 @@ export default function Home() {
       </nav>
 
       {/* ═══ HERO SECTION — Spline 3D scene IS the hero ═══ */}
-      <section ref={heroRef} className="relative h-[calc(100vh-40px)] overflow-hidden bg-black">
-        {/* Spline 3D scene — shifted up so the bottom watermark is cropped out */}
-        <div className="absolute inset-0 w-full h-[calc(100%+40px)] z-0 pointer-events-none">
-          <Suspense fallback={<div className="w-full h-full bg-black" />}>
-            <Spline scene="https://prod.spline.design/YPaOvWpo21wNAioe/scene.splinecode" />
-          </Suspense>
+      <div ref={heroRef} className="relative w-full h-screen flex flex-col items-center justify-center overflow-hidden pt-10 px-4">
+        {/* 3D Background with Watermark Hide Hack */}
+        <div className="absolute inset-0 w-full h-full z-0 pointer-events-none scale-[1.05] translate-y-4 [&_a]:!hidden">
+          <Spline scene="https://prod.spline.design/YPaOvWpo21wNAioe/scene.splinecode" />
         </div>
 
-        {/* CTA buttons — floating at bottom center, above the Spline */}
-        <motion.div
-          className="absolute bottom-24 left-0 right-0 z-10 flex flex-col items-center gap-5 px-6"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: customEase, delay: 0.6 }}
-          style={{ opacity: heroOpacity }}
-        >
+        {/* Hero Text + CTA */}
+        <div className="relative z-10 flex flex-col items-center text-center px-6 mt-auto mb-24">
+          {/* Kicker */}
+          <div className="mb-6 rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 backdrop-blur-md">
+            <span className="bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-xs font-semibold tracking-[0.2em] text-transparent uppercase">
+              EU CSRD & CSDDD Compliant
+            </span>
+          </div>
+
+          {/* Main Headline */}
+          <h1 className="mb-6 max-w-5xl text-center text-5xl font-light leading-[1.1] tracking-tight text-white md:text-7xl lg:text-[5.5rem]">
+            Find what your suppliers are{' '}
+            <span className="bg-gradient-to-r from-[#818cf8] via-[#c084fc] to-[#e879f9] bg-clip-text text-transparent font-normal">
+              hiding.
+            </span>
+          </h1>
+
+          {/* Subheadline */}
+          <p className="mb-12 max-w-2xl text-center text-lg font-light leading-relaxed text-[#a3a3a3] md:text-xl">
+            AI-powered supply chain risk intelligence. Automatically audit your entire network, detect ESG violations, and prevent CSRD fines before regulators step in.
+          </p>
+
+          {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center gap-4">
             <button
               onClick={() => navigate('/auth')}
@@ -247,11 +256,11 @@ export default function Home() {
               View Live Demo
             </button>
           </div>
-        </motion.div>
+        </div>
 
-        {/* Bottom fade to black for smooth transition to dashboard */}
+        {/* Bottom fade to black */}
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent z-[5] pointer-events-none" />
-      </section>
+      </div>
 
       {/* ═══ MAC WINDOW DASHBOARD — LARGE, SCROLL-DRIVEN ═══ */}
       <section className="relative px-6 -mt-20 pb-32">
@@ -713,8 +722,10 @@ export default function Home() {
       <footer className="relative z-10 border-t border-white/[0.04] py-12 px-6">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2.5">
-            <Shield className="h-5 w-5 text-cyan-400" />
-            <span className="font-heading font-semibold text-neutral-500 text-sm">Scope3Scout</span>
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#818cf8] via-[#c084fc] to-[#e879f9] flex items-center justify-center shadow-[0_0_12px_rgba(129,140,248,0.3)]">
+              <Shield className="h-3.5 w-3.5 text-white" />
+            </div>
+            <span className="font-heading font-semibold text-neutral-400 text-sm tracking-tight">Scope3Scout</span>
           </div>
           <p className="text-[11px] text-neutral-700">ESG Supply Chain Intelligence. Built for EU compliance.</p>
           <div className="flex gap-8 text-[11px] text-neutral-700">

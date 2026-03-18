@@ -44,16 +44,18 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
       )}
     >
       {/* Logo */}
-      <div className="h-16 flex items-center px-5 border-b border-white/[0.04] shrink-0">
+      <NavLink to="/" className="h-16 flex items-center px-5 border-b border-white/[0.04] shrink-0 hover:bg-white/[0.02] transition-colors">
         <div className="flex items-center gap-2.5 min-w-0">
-          <Shield className="h-5 w-5 text-cyan-400 shrink-0" />
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#818cf8] via-[#c084fc] to-[#e879f9] flex items-center justify-center shadow-[0_0_12px_rgba(129,140,248,0.4)] shrink-0">
+            <Shield className="h-3.5 w-3.5 text-white" />
+          </div>
           {!collapsed && (
-            <span className="font-heading font-bold text-sm text-white block truncate tracking-tight">
+            <span className="font-heading font-semibold text-[15px] tracking-tight bg-gradient-to-r from-white to-neutral-400 bg-clip-text text-transparent block truncate">
               Scope3Scout
             </span>
           )}
         </div>
-      </div>
+      </NavLink>
 
       {/* Navigation */}
       <nav className="flex-1 p-2.5 space-y-0.5 mt-1">
