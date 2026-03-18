@@ -224,12 +224,8 @@ export default function Home() {
             <Spline scene="https://prod.spline.design/YPaOvWpo21wNAioe/scene.splinecode" />
           </Suspense>
         </div>
-        {/* Hide Spline watermark */}
-        <style>{`
-          a[href*="spline.design"],
-          a[href*="spline.design"] img,
-          div:has(> a[href*="spline.design"]) { display: none !important; opacity: 0 !important; pointer-events: none !important; }
-        `}</style>
+        {/* Cover the bottom-right corner where Spline watermark appears */}
+        <div className="absolute bottom-0 right-0 w-48 h-16 bg-black z-[9]" />
 
         {/* CTA buttons — floating at bottom center, above the Spline */}
         <motion.div

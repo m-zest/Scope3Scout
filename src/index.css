@@ -15,10 +15,29 @@ div:has(> canvas[data-engine]) {
   touch-action: none !important;
 }
 
-/* Hide Spline "Built with Spline" watermark */
-a[href*="spline.design"] {
+/* Hide Spline "Built with Spline" watermark — nuclear approach */
+a[href*="spline"],
+a[href*="spline"] *,
+a[href*="spline.design"],
+a[href*="spline.design"] *,
+img[alt*="spline" i],
+img[src*="spline" i],
+div[style*="position: absolute"] > a,
+canvas ~ a,
+canvas ~ div:not([class]):last-child,
+canvas + div:not([class]),
+[id*="spline-watermark"],
+[class*="watermark"],
+[data-spline-watermark] {
   display: none !important;
   opacity: 0 !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  clip: rect(0, 0, 0, 0) !important;
 }
 
 @layer base {
