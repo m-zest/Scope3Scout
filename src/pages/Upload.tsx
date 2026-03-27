@@ -170,7 +170,7 @@ export default function Upload() {
     if (fileInputRef.current) fileInputRef.current.value = '';
   }, []);
 
-  const inputCls = 'w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08] text-white placeholder-neutral-600 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500/50 transition-colors';
+  const inputCls = 'w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08] text-white placeholder-neutral-600 text-sm focus:outline-none focus:ring-2 focus:ring-[#818cf8]/30 focus:border-[#818cf8]/50 transition-colors';
 
   return (
     <motion.div
@@ -181,10 +181,10 @@ export default function Upload() {
     >
       {/* Demo banner */}
       {DEMO_MODE && (
-        <motion.div variants={fadeUp} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-500/[0.06] border border-amber-500/[0.12] text-sm">
-          <Info className="h-4 w-4 text-amber-400 shrink-0" />
-          <span className="text-amber-300/80">
-            <span className="font-semibold text-amber-300">Demo Mode</span> — uploads are simulated, no data is saved
+        <motion.div variants={fadeUp} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#818cf8]/[0.06] border border-[#818cf8]/[0.12] text-sm">
+          <Info className="h-4 w-4 text-[#818cf8] shrink-0" />
+          <span className="text-[#818cf8]/80">
+            <span className="font-semibold text-[#818cf8]">Demo Mode</span> — uploads are simulated, no data is saved
           </span>
         </motion.div>
       )}
@@ -289,7 +289,7 @@ TextilePro,textilepro.bd,Bangladesh,Textile`}
 
               <button
                 onClick={handleConfirmUpload}
-                className="w-full flex items-center justify-center gap-2 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-white rounded-xl text-sm font-medium transition-colors shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]"
+                className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-[#818cf8] to-[#c084fc] hover:shadow-[0_0_20px_rgba(129,140,248,0.3)] text-white rounded-xl text-sm font-medium transition-colors shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]"
               >
                 Upload {parsedRows.length} Supplier{parsedRows.length !== 1 ? 's' : ''}
                 <ArrowRight className="h-4 w-4" />
@@ -311,7 +311,7 @@ TextilePro,textilepro.bd,Bangladesh,Textile`}
                 {parsedRows.length} supplier{parsedRows.length !== 1 ? 's' : ''} uploaded!
               </p>
               <div className="flex gap-3 justify-center">
-                <button onClick={() => navigate('/dashboard')} className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-white rounded-xl text-sm font-medium transition-colors">Go to Dashboard</button>
+                <button onClick={() => navigate('/dashboard')} className="px-4 py-2 bg-gradient-to-r from-[#818cf8] to-[#c084fc] hover:shadow-[0_0_20px_rgba(129,140,248,0.3)] text-white rounded-xl text-sm font-medium transition-colors">Go to Dashboard</button>
                 <button onClick={resetCsv} className="px-4 py-2 bg-white/[0.04] border border-white/[0.08] text-neutral-300 rounded-xl text-sm font-medium hover:bg-white/[0.06] transition-colors">Upload More</button>
               </div>
             </div>
@@ -370,7 +370,7 @@ TextilePro,textilepro.bd,Bangladesh,Textile`}
             <button
               onClick={handleManualAdd}
               disabled={!manualName.trim()}
-              className="w-full flex items-center justify-center gap-2 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]"
+              className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-[#818cf8] to-[#c084fc] hover:shadow-[0_0_20px_rgba(129,140,248,0.3)] text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]"
             >
               <Plus className="h-4 w-4" />
               Add Supplier

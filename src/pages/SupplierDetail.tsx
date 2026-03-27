@@ -17,6 +17,7 @@ import { useViolations } from '@/hooks/useViolations';
 import { useLatestSimulation } from '@/hooks/useSimulations';
 import { getDemoSuppliers } from '@/data/demoSuppliers';
 import { cn } from '@/lib/utils';
+import { TinyFishGrid } from '@/components/dashboard/TinyFishGrid';
 import type { Supplier, Violation, SimulationOutput } from '@/types';
 
 const riskLevelConfig = {
@@ -125,9 +126,9 @@ export default function SupplierDetail() {
     >
       {/* Demo banner */}
       {isDemo && (
-        <motion.div variants={fadeUp} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-500/[0.06] border border-amber-500/[0.12] text-sm">
-          <Info className="h-4 w-4 text-amber-400 shrink-0" />
-          <span className="text-amber-300/80"><span className="font-semibold text-amber-300">Demo Mode</span> — viewing sample supplier data</span>
+        <motion.div variants={fadeUp} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#818cf8]/[0.06] border border-[#818cf8]/[0.12] text-sm">
+          <Info className="h-4 w-4 text-[#818cf8] shrink-0" />
+          <span className="text-[#818cf8]/80"><span className="font-semibold text-[#818cf8]">Demo Mode</span> — viewing sample supplier data</span>
         </motion.div>
       )}
 
@@ -186,6 +187,11 @@ export default function SupplierDetail() {
             )}
           </div>
         </div>
+      </motion.div>
+
+      {/* TinyFish Agent Scan */}
+      <motion.div variants={fadeUp} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl p-6">
+        <TinyFishGrid supplierName={supplier.name} />
       </motion.div>
 
       {/* Risk Assessment */}
