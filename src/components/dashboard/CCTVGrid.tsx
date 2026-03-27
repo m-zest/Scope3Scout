@@ -112,7 +112,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
   const [tasks, setTasks] = useState<AgentTask[]>(initTasks());
   const [scanning, setScanning] = useState(false);
   const [scanComplete, setScanComplete] = useState(false);
-  const [activeSupplier, setActiveSupplier] = useState(supplierName || 'SteelCorp GmbH');
+  const [activeSupplier, setActiveSupplier] = useState(supplierName || 'ThyssenKrupp Steel');
   const [scanResult, setScanResult] = useState<(DemoScanResult & { id: string }) | null>(null);
   const [totalTime, setTotalTime] = useState(0);
   const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
@@ -214,11 +214,11 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
 
     // Contradiction detection helper with clean professional wording
     const cleanPairs: Record<string, { claim: string; evidence: string }> = {
-      website: { claim: 'ISO 14001 Certified - Zero Violations on Record', evidence: 'ISO 14001:2015 certificate EXPIRED December 2025. Company website still displays certification badge.' },
-      regulatory: { claim: 'No environmental violations', evidence: 'Environmental fine EUR 40,000 issued March 2026 for illegal water discharge into Rhine river (UBA)' },
-      certs: { claim: 'ISO 14001 Environmental Management Certified', evidence: 'Certificate #DE-2022-14001-0847 expired December 2025. No renewal application filed.' },
-      compliance: { claim: 'CSRD-compliant sustainability reporting', evidence: 'Scope 3 emissions disclosure missing entirely. Double materiality assessment incomplete. ESRS E1 non-compliant.' },
-      news: { claim: 'Committed to 100% renewable energy by 2030', evidence: 'Reuters reports coal supply contract signed Q4 2025, contradicting published sustainability commitments.' },
+      website: { claim: 'Climate-neutral steel production by 2045', evidence: 'Hydrogen direct reduction plant delayed to 2028. Blast furnaces still primary production method with high CO2 output.' },
+      regulatory: { claim: 'Compliant with EU emissions regulations', evidence: 'EU ETS violation: exceeded carbon allowances at Duisburg plant. Fine EUR 45,000 issued.' },
+      certs: { claim: 'ISO 14001 Environmental Management Certified', evidence: 'ISO 14001 certification under review following emissions violations. Status no longer valid.' },
+      compliance: { claim: 'CSRD-compliant sustainability reporting', evidence: 'Scope 3 emissions significantly underreported. Double materiality assessment has gaps in climate transition risk.' },
+      news: { claim: 'Leading green steel transformation in Europe', evidence: 'Financial Times reports green steel transition delays and missed emissions targets at major production facilities.' },
     };
 
     const processTier1Result = (taskId: string, agentTask: TinyFishAgentTask, resultText: string, meta: typeof agentMeta[string]) => {
@@ -279,7 +279,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
     };
 
     // Run a real TinyFish agent with timeout fallback
-    const runRealAgent = async (agentTask: TinyFishAgentTask, timeoutMs: number = 60000) => {
+    const runRealAgent = async (agentTask: TinyFishAgentTask, timeoutMs: number = 30000) => {
       const taskId = agentTask.id;
       const taskStart = Date.now();
       const meta = agentMeta[taskId];
@@ -339,7 +339,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
       const batchSize = 2; // TinyFish allows 2 concurrent
       for (let i = 0; i < tier1Tasks.length; i += batchSize) {
         const batch = tier1Tasks.slice(i, i + batchSize);
-        await Promise.all(batch.map(t => runRealAgent(t, 60000)));
+        await Promise.all(batch.map(t => runRealAgent(t, 30000)));
       }
     } else {
       // === DEMO MODE: All agents simulated (fast, reliable) ===

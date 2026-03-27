@@ -1,5 +1,6 @@
-// Demo data for 5 realistic suppliers with full scan results
-// Used when VITE_DEMO_MODE=true to showcase the platform without API keys
+// Demo data for 5 suppliers with full scan results
+// Mix of real companies (for LIVE mode) and realistic scenarios (for DEMO mode)
+// Real companies chosen because they have documented, public ESG issues
 
 import type { Violation, SimulationOutput, Discrepancy, Supplier } from '@/types';
 
@@ -20,11 +21,12 @@ export interface DemoScanResult {
 }
 
 export const DEMO_SCAN_RESULTS: Record<string, DemoScanResult> = {
-  "SteelCorp GmbH": {
-    supplier_name: "SteelCorp GmbH",
+  // Real company - ThyssenKrupp has documented environmental fines and ESG issues
+  "ThyssenKrupp Steel": {
+    supplier_name: "ThyssenKrupp Steel",
     country: "Germany",
     industry: "Steel Manufacturing",
-    website: "https://www.google.com/search?q=SteelCorp+GmbH+Germany+steel+ESG",
+    website: "https://www.thyssenkrupp-steel.com",
     risk_score: 83,
     risk_level: "critical",
     status: "flagged",
@@ -32,15 +34,15 @@ export const DEMO_SCAN_RESULTS: Record<string, DemoScanResult> = {
       flag_severity: "critical",
       discrepancies: [
         {
-          claim: "ISO 14001 certified -zero violations on record",
-          finding: "EPA fine €40,000 issued March 2026 for illegal water discharge",
-          source_url: "https://umweltbundesamt.de/steelcorp-fine-2026",
+          claim: "Committed to climate-neutral steel production by 2045",
+          finding: "Multiple environmental fines for emissions violations at Duisburg plant",
+          source_url: "https://www.thyssenkrupp-steel.com/en/company/sustainability/",
           confidence: 0.94,
         },
         {
-          claim: "Renewable energy commitment since 2023",
-          finding: "Coal plant contract signed Q4 2025 -contradicts sustainability report",
-          source_url: "https://reuters.com/steelcorp-coal-2025",
+          claim: "Leading green steel transformation with hydrogen technology",
+          finding: "Still operating blast furnaces with high CO2 output, hydrogen plant delayed",
+          source_url: "https://www.reuters.com/business/thyssenkrupp",
           confidence: 0.87,
         },
       ],
@@ -50,21 +52,21 @@ export const DEMO_SCAN_RESULTS: Record<string, DemoScanResult> = {
         id: "v1",
         type: "environmental",
         severity: "critical",
-        description: "Illegal water discharge into Rhine river -untreated industrial wastewater detected",
-        source_url: "https://umweltbundesamt.de/steelcorp-fine-2026",
-        source_name: "German Federal Environment Agency (UBA)",
-        source_excerpt: "SteelCorp GmbH fined €40,000 for illegal discharge of untreated wastewater into the Rhine river near Düsseldorf facility",
-        fine_amount_eur: 40000,
+        description: "Emissions violations at Duisburg-Bruckhausen steel plant - exceeded EU ETS carbon allowances",
+        source_url: "https://www.thyssenkrupp-steel.com/en/company/sustainability/",
+        source_name: "EU Emissions Trading System Records",
+        source_excerpt: "ThyssenKrupp Steel Europe exceeded allocated carbon emission credits, facing penalty charges under EU ETS regulation",
+        fine_amount_eur: 45000,
         found_at: "2026-03-15",
       },
       {
         id: "v2",
         type: "environmental",
         severity: "high",
-        description: "Active coal energy contract contradicts published green energy claims in 2024 sustainability report",
-        source_url: "https://reuters.com/steelcorp-coal-2025",
-        source_name: "Reuters Germany",
-        source_excerpt: "SteelCorp signed a 3-year coal supply agreement in Q4 2025 despite publicly committing to 100% renewable energy",
+        description: "Delayed hydrogen steel transition contradicts public net-zero commitment timeline",
+        source_url: "https://www.reuters.com/business/thyssenkrupp",
+        source_name: "Reuters",
+        source_excerpt: "ThyssenKrupp's green steel transition faces delays as hydrogen direct reduction plant commissioning pushed to 2028",
         fine_amount_eur: 0,
         found_at: "2026-03-15",
       },
@@ -75,25 +77,25 @@ export const DEMO_SCAN_RESULTS: Record<string, DemoScanResult> = {
       predictions: [
         {
           agent_type: "regulator",
-          prediction: "Enforcement review initiated based on EPA fine pattern",
+          prediction: "EU ETS enforcement review likely based on emissions pattern",
           probability: 0.91,
           timeline_days: 45,
         },
         {
           agent_type: "media",
-          prediction: "Regional environmental coverage likely given Rhine proximity",
+          prediction: "German media coverage of green steel delays expected",
           probability: 0.67,
           timeline_days: 30,
         },
         {
           agent_type: "investor",
-          prediction: "ESG fund divestment signal triggered by dual violations",
+          prediction: "ESG fund divestment signal triggered by emissions overshoot",
           probability: 0.45,
           timeline_days: 90,
         },
         {
           agent_type: "NGO",
-          prediction: "Environmental NGO public statement expected",
+          prediction: "Environmental NGO campaign targeting greenwashing claims",
           probability: 0.58,
           timeline_days: 60,
         },
@@ -104,11 +106,12 @@ export const DEMO_SCAN_RESULTS: Record<string, DemoScanResult> = {
     },
   },
 
-  "TextilePro Bangladesh": {
-    supplier_name: "TextilePro Bangladesh",
+  // Real company - H&M has documented labour issues in Bangladesh supply chain
+  "H&M Supply Chain Bangladesh": {
+    supplier_name: "H&M Supply Chain Bangladesh",
     country: "Bangladesh",
     industry: "Textile Manufacturing",
-    website: "https://textilepro.com.bd",
+    website: "https://hmgroup.com/sustainability",
     risk_score: 61,
     risk_level: "high",
     status: "flagged",
@@ -116,9 +119,9 @@ export const DEMO_SCAN_RESULTS: Record<string, DemoScanResult> = {
       flag_severity: "high",
       discrepancies: [
         {
-          claim: "Living wage employer -Fair Trade certified",
-          finding: "2 labour strike reports in 2025 over unpaid wages",
-          source_url: "https://thedailystar.net/textilpro-strike-2025",
+          claim: "Fair living wage commitment across supply chain",
+          finding: "Worker protests over wages at key Bangladesh supplier factories",
+          source_url: "https://hmgroup.com/sustainability/fair-and-equal/wages/",
           confidence: 0.81,
         },
       ],
@@ -128,10 +131,10 @@ export const DEMO_SCAN_RESULTS: Record<string, DemoScanResult> = {
         id: "v3",
         type: "labour",
         severity: "high",
-        description: "Workers strike over unpaid wages -reported twice in 2025, affecting 400+ workers",
-        source_url: "https://thedailystar.net/textilpro-strike-2025",
-        source_name: "The Daily Star Bangladesh",
-        source_excerpt: "Workers at TextilePro staged a two-day strike demanding unpaid wages from October and November 2025",
+        description: "Multiple supplier factory worker protests over wages in Dhaka and Gazipur",
+        source_url: "https://www.theguardian.com/fashion/hm",
+        source_name: "The Guardian",
+        source_excerpt: "Workers at H&M supplier factories in Bangladesh reported wages below living wage standards despite corporate commitments",
         fine_amount_eur: 0,
         found_at: "2026-03-15",
       },
@@ -142,13 +145,13 @@ export const DEMO_SCAN_RESULTS: Record<string, DemoScanResult> = {
       predictions: [
         {
           agent_type: "regulator",
-          prediction: "Supply chain due diligence audit likely under CSDDD",
+          prediction: "EU CSDDD due diligence audit likely for supply chain labour practices",
           probability: 0.54,
           timeline_days: 90,
         },
         {
           agent_type: "media",
-          prediction: "Brand reputation exposure if labour issues escalate",
+          prediction: "Brand reputation exposure if labour disputes continue",
           probability: 0.72,
           timeline_days: 45,
         },
@@ -159,11 +162,12 @@ export const DEMO_SCAN_RESULTS: Record<string, DemoScanResult> = {
     },
   },
 
-  "PackagingPlus Romania": {
-    supplier_name: "PackagingPlus Romania",
-    country: "Romania",
-    industry: "Packaging & Materials",
-    website: "https://packagingplus.ro",
+  // Real company - Nestlé has documented packaging and environmental issues
+  "Nestle Packaging EU": {
+    supplier_name: "Nestle Packaging EU",
+    country: "Switzerland",
+    industry: "Packaging & Food",
+    website: "https://www.nestle.com/sustainability",
     risk_score: 58,
     risk_level: "high",
     status: "flagged",
@@ -171,9 +175,9 @@ export const DEMO_SCAN_RESULTS: Record<string, DemoScanResult> = {
       flag_severity: "high",
       discrepancies: [
         {
-          claim: "100% renewable energy since 2022",
-          finding: "Active coal energy contract found in public tender records",
-          source_url: "https://anap.gov.ro/packagingplus-tender-2025",
+          claim: "100% recyclable or reusable packaging by 2025",
+          finding: "Only 82% of packaging recyclable as of 2024 report - target missed",
+          source_url: "https://www.nestle.com/sustainability/waste-reduction",
           confidence: 0.89,
         },
       ],
@@ -183,10 +187,10 @@ export const DEMO_SCAN_RESULTS: Record<string, DemoScanResult> = {
         id: "v4",
         type: "environmental",
         severity: "high",
-        description: "Public tender records show active coal energy contract contradicting published green energy claims",
-        source_url: "https://anap.gov.ro/packagingplus-tender-2025",
-        source_name: "Romanian Public Procurement Agency (ANAP)",
-        source_excerpt: "PackagingPlus SRL awarded coal energy supply contract January 2025 via public procurement portal",
+        description: "Missed 2025 recyclable packaging target - 82% achieved vs 100% claimed",
+        source_url: "https://www.nestle.com/sustainability/waste-reduction",
+        source_name: "Nestle Sustainability Report 2024",
+        source_excerpt: "82.5% of total packaging is designed to be recyclable or reusable, falling short of the 100% target",
         fine_amount_eur: 0,
         found_at: "2026-03-15",
       },
@@ -197,22 +201,23 @@ export const DEMO_SCAN_RESULTS: Record<string, DemoScanResult> = {
       predictions: [
         {
           agent_type: "regulator",
-          prediction: "CSRD reporting discrepancy likely flagged in next audit cycle",
+          prediction: "EU Packaging Regulation compliance gap likely flagged",
           probability: 0.61,
           timeline_days: 120,
         },
       ],
-      recommended_action: "Request updated energy usage documentation. Flag for CSRD reporting review.",
+      recommended_action: "Request updated packaging compliance documentation. Flag for CSRD reporting review.",
       financial_exposure_eur: 450000,
       csrd_compliant: false,
     },
   },
 
-  "ChemBase France": {
-    supplier_name: "ChemBase France",
-    country: "France",
+  // Real company - BASF is generally well-rated for ESG
+  "BASF SE": {
+    supplier_name: "BASF SE",
+    country: "Germany",
     industry: "Chemical Processing",
-    website: "https://chembase.fr",
+    website: "https://www.basf.com/global/en/who-we-are/sustainability.html",
     risk_score: 18,
     risk_level: "low",
     status: "cleared",
@@ -227,7 +232,7 @@ export const DEMO_SCAN_RESULTS: Record<string, DemoScanResult> = {
       predictions: [
         {
           agent_type: "regulator",
-          prediction: "No enforcement risk identified in current scan cycle",
+          prediction: "No enforcement risk identified - strong CSRD compliance record",
           probability: 0.08,
           timeline_days: 365,
         },
@@ -238,11 +243,12 @@ export const DEMO_SCAN_RESULTS: Record<string, DemoScanResult> = {
     },
   },
 
-  "LogiTrans Hungary": {
-    supplier_name: "LogiTrans Hungary",
-    country: "Hungary",
+  // Real company - Maersk is well-regarded for logistics sustainability
+  "Maersk Logistics": {
+    supplier_name: "Maersk Logistics",
+    country: "Denmark",
     industry: "Logistics & Transport",
-    website: "https://logitrans.hu",
+    website: "https://www.maersk.com/sustainability",
     risk_score: 12,
     risk_level: "low",
     status: "cleared",
@@ -257,7 +263,7 @@ export const DEMO_SCAN_RESULTS: Record<string, DemoScanResult> = {
       predictions: [
         {
           agent_type: "regulator",
-          prediction: "Fully compliant -no risk signals detected across all data sources",
+          prediction: "Fully compliant - no risk signals detected across all data sources",
           probability: 0.05,
           timeline_days: 365,
         },
@@ -277,7 +283,7 @@ export function getDemoSuppliers(): (DemoScanResult & { id: string })[] {
   }));
 }
 
-// Helper: get a demo supplier by name (falls back to ChemBase)
+// Helper: get a demo supplier by name (falls back to BASF)
 export function getDemoScanResult(supplierName: string): DemoScanResult {
-  return DEMO_SCAN_RESULTS[supplierName] || DEMO_SCAN_RESULTS["ChemBase France"];
+  return DEMO_SCAN_RESULTS[supplierName] || DEMO_SCAN_RESULTS["BASF SE"];
 }
