@@ -22,6 +22,8 @@ interface LiveAgentCardProps {
   onClick?: () => void;
   isExpanded?: boolean;
   isHero?: boolean;
+  isFocused?: boolean;
+  isAnyRunning?: boolean;
 }
 
 export function LiveAgentCard({
@@ -41,6 +43,8 @@ export function LiveAgentCard({
   onClick,
   isExpanded,
   isHero,
+  isFocused,
+  isAnyRunning,
 }: LiveAgentCardProps) {
   const latestScreenshot = screenshots.at(-1);
   const latestLog = steps.at(-1);
@@ -50,11 +54,11 @@ export function LiveAgentCard({
     <div>
       <motion.div
         className={cn(
-          'relative rounded-xl border overflow-hidden cursor-pointer transition-all duration-300',
+          'relative rounded-xl border overflow-hidden cursor-pointer transition-all duration-500',
           status === 'running'
-            ? 'border-cyan-500/30 bg-black/80 shadow-[0_0_25px_rgba(6,182,212,0.1)]'
+            ? 'border-cyan-400/50 bg-black/80 shadow-[0_0_40px_rgba(6,182,212,0.2)] ring-1 ring-cyan-400/20'
             : status === 'queued'
-              ? 'bg-white/[0.01] border-white/[0.05] opacity-60'
+              ? 'bg-white/[0.01] border-white/[0.05] opacity-50'
               : status === 'idle'
                 ? 'bg-white/[0.01] border-white/[0.05] hover:bg-white/[0.03]'
                 : hasContradiction
@@ -63,10 +67,15 @@ export function LiveAgentCard({
                     ? 'bg-amber-500/[0.04] border-amber-500/15'
                     : status === 'error'
                       ? 'bg-red-500/[0.04] border-red-500/15'
-                      : 'bg-emerald-500/[0.03] border-emerald-500/15'
+                      : 'bg-emerald-500/[0.03] border-emerald-500/15',
+          // Active agent zoom: running agents pop, others fade
+          isAnyRunning && status === 'running' && 'scale-[1.03] z-10',
+          isAnyRunning && status !== 'running' && status !== 'idle' && status !== 'queued' && 'opacity-70 scale-[0.97]',
+          // Focus mode: when this card is focused, it dominates
+          isFocused && 'scale-[1.02] ring-2 ring-cyan-400/40 shadow-[0_0_60px_rgba(6,182,212,0.25)]',
         )}
         onClick={onClick}
-        animate={status === 'running' ? { scale: [1, 1.005, 1] } : {}}
+        animate={status === 'running' ? { scale: [1.03, 1.04, 1.03] } : {}}
         transition={{ repeat: Infinity, duration: 2 }}
       >
         {/* Top bar */}

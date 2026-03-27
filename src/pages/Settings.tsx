@@ -8,14 +8,13 @@ import {
   Shield,
   Save,
   CheckCircle2,
-  ExternalLink,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import {
-  getTinyFishKey, setTinyFishKey as saveTinyFishKey,
-  getGeminiKey, setGeminiKey as saveGeminiKey,
-  getOpenAIKey, setOpenAIKey as saveOpenAIKey,
+  getTinyFishKey,
+  getGeminiKey,
+  getOpenAIKey,
   getOrgName, setOrgName as saveOrgName,
   getNotifPrefs, setNotifPrefs as saveNotifPrefs,
 } from '@/lib/keys';
@@ -76,12 +75,28 @@ function InputField({ label, value, onChange, type = 'text', placeholder, disabl
   );
 }
 
+function KeyStatus({ label, hasKey }: { label: string; hasKey: boolean }) {
+  return (
+    <div className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+      <span className="text-sm text-neutral-300 font-medium">{label}</span>
+      {hasKey ? (
+        <span className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400">
+          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+          Connected
+        </span>
+      ) : (
+        <span className="flex items-center gap-1.5 text-[11px] font-semibold text-neutral-600">
+          <span className="w-2 h-2 rounded-full bg-neutral-700" />
+          Not configured
+        </span>
+      )}
+    </div>
+  );
+}
+
 export default function Settings() {
   const [saved, setSaved] = useState(false);
   const [orgName, setOrgName] = useState(getOrgName());
-  const [tinyfishKey, setTinyfishKey] = useState(getTinyFishKey());
-  const [geminiKey, setGeminiKey] = useState(getGeminiKey());
-  const [openaiKey, setOpenaiKey] = useState(getOpenAIKey());
 
   const notifPrefs = getNotifPrefs();
   const [alertEmail, setAlertEmail] = useState(notifPrefs.email);
@@ -97,11 +112,7 @@ export default function Settings() {
   }, []);
 
   const handleSave = () => {
-    // Persist all settings to localStorage
     saveOrgName(orgName);
-    saveTinyFishKey(tinyfishKey);
-    saveGeminiKey(geminiKey);
-    saveOpenAIKey(openaiKey);
     saveNotifPrefs({ email: alertEmail, critical: alertCritical, high: alertHigh, medium: alertMedium });
 
     setSaved(true);
@@ -152,35 +163,21 @@ export default function Settings() {
         </div>
       </SettingsCard>
 
-      {/* API Keys */}
+      {/* API Keys — Environment Variables */}
       <SettingsCard
         icon={Key}
         iconColor="text-amber-400"
         iconBg="bg-amber-500/10 border-amber-500/20"
-        title="API Keys"
-        description="External service credentials"
+        title="API Connections"
+        description="Managed via environment variables"
       >
-        <div className="grid gap-4">
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-medium text-neutral-400">TinyFish API Key</label>
-              <a href="https://tinyfish.ai" target="_blank" rel="noopener noreferrer" className="text-[10px] text-[#818cf8] hover:text-[#c084fc] transition-colors flex items-center gap-1">
-                Get key <ExternalLink className="h-2.5 w-2.5" />
-              </a>
-            </div>
-            <input
-              type="password"
-              value={tinyfishKey}
-              onChange={(e) => setTinyfishKey(e.target.value)}
-              placeholder="tf_xxxxxxxxxxxxxxxxxxxxxxxx"
-              className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08] text-white placeholder-neutral-600 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-[#818cf8]/40 focus:border-[#818cf8]/50 transition-all"
-            />
-          </div>
-          <InputField label="Gemini API Key" value={geminiKey} onChange={setGeminiKey} type="password" placeholder="AIzaxxxxxxxxxxxxxxxxxx" mono />
-          <InputField label="OpenAI API Key" value={openaiKey} onChange={setOpenaiKey} type="password" placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxx" mono />
+        <div className="grid gap-3">
+          <KeyStatus label="TinyFish Web Agent" hasKey={getTinyFishKey().length > 0} />
+          <KeyStatus label="Google Gemini AI" hasKey={getGeminiKey().length > 0} />
+          <KeyStatus label="OpenAI" hasKey={getOpenAIKey().length > 0} />
         </div>
         <p className="text-[10px] text-neutral-600 mt-3 flex items-center gap-1">
-          <Shield className="h-3 w-3" /> Keys are stored locally in your browser session and never sent to our servers.
+          <Shield className="h-3 w-3" /> API keys are securely configured via environment variables (Vercel / .env) and never exposed to the browser.
         </p>
       </SettingsCard>
 

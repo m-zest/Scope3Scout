@@ -123,6 +123,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
   const [showAllTier2, setShowAllTier2] = useState(false);
   const [showAllTier3, setShowAllTier3] = useState(false);
   const [dimBackground, setDimBackground] = useState(false);
+  const [focusedAgentId, setFocusedAgentId] = useState<string | null>(null);
 
   const contradictionRef = useRef<HTMLDivElement>(null);
   const suppliers = getDemoSuppliers();
@@ -136,14 +137,17 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
     setTasks((prev) => prev.map((t) => t.id === taskId ? { ...t, ...updates } : t));
   }, []);
 
-  // Auto-scroll to contradiction when detected
+  // Auto-scroll to contradiction when detected — slight dramatic delay
   useEffect(() => {
     if (contradictions.length > 0 && contradictionRef.current) {
-      setDimBackground(true);
+      // 0.8s dramatic pause before showing contradiction
       setTimeout(() => {
-        contradictionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        setTimeout(() => setDimBackground(false), 2000);
-      }, 300);
+        setDimBackground(true);
+        setTimeout(() => {
+          contradictionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => setDimBackground(false), 2500);
+        }, 400);
+      }, 800);
     }
   }, [contradictions.length]);
 
@@ -414,11 +418,12 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
     setExpandedTask(expandedTask === taskId ? null : taskId);
   };
 
-  // Get hero vs secondary agents for Tier 1
-  const tier1Hero = tasks.filter((t) => heroAgentIds.includes(t.id));
-  const tier1Secondary = tasks.filter((t) => !heroAgentIds.includes(t.id) && allAgentIds.indexOf(t.id) < 8);
-  const tier2Tasks = tasks.slice(8, 12);
-  const tier3Tasks = tasks.slice(12, 16);
+  // Only 4 visible hero agents for clean, focused demo
+  const heroAgents = tasks.filter((t) => heroAgentIds.includes(t.id));
+  const backgroundAgents = tasks.filter((t) => !heroAgentIds.includes(t.id));
+  const backgroundComplete = backgroundAgents.filter(t => t.status === 'success' || t.status === 'warning').length;
+  const isAnyHeroRunning = heroAgents.some(t => t.status === 'running');
+  const focusedAgent = focusedAgentId ? tasks.find(t => t.id === focusedAgentId) : null;
 
   return (
     <div className="space-y-5">
@@ -439,8 +444,8 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
         supplierName={activeSupplier}
         status={scanStatus}
         progress={allAgentIds.length > 0 ? (agentsComplete / allAgentIds.length) * 100 : 0}
-        agentsComplete={agentsComplete}
-        totalAgents={allAgentIds.length}
+        agentsComplete={heroAgents.filter(t => t.status === 'success' || t.status === 'warning').length}
+        totalAgents={4}
         elapsed={elapsed}
         contradictions={contradictions.length}
       />
@@ -500,174 +505,131 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
         {/* Left: Agent Grid */}
         <div className="space-y-5">
 
-          {/* TIER 1 — Hero Agents (4 prominent cards) */}
-          <div>
-            <p className={cn('text-[10px] font-bold uppercase tracking-[0.15em] mb-2.5 flex items-center gap-2', tierLabels[0].color)}>
-              {tierLabels[0].label}
-              {isLive && (
-                <span className="relative flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                  <span className="text-[8px] text-red-400">LIVE</span>
-                </span>
-              )}
-            </p>
-
-            {/* 4 Hero agents — 2x2 grid, larger */}
-            <div className="grid grid-cols-2 gap-3">
-              {tier1Hero.map((task) => (
+          {/* Focus Mode — Single agent big view (click to dismiss) */}
+          <AnimatePresence>
+            {focusedAgent && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.3 }}
+                className="relative"
+              >
+                <button
+                  onClick={() => setFocusedAgentId(null)}
+                  className="absolute top-2 right-2 z-20 text-[10px] text-neutral-500 hover:text-white bg-black/60 px-2 py-1 rounded-lg border border-white/[0.08] transition-colors"
+                >
+                  Exit Focus
+                </button>
                 <LiveAgentCard
-                  key={task.id}
-                  {...task}
+                  {...focusedAgent}
                   isLive={isLive}
-                  onClick={() => task.status !== 'idle' && task.status !== 'queued' && toggleExpand(task.id)}
-                  isExpanded={expandedTask === task.id}
+                  onClick={() => setFocusedAgentId(null)}
+                  isExpanded={true}
                   isHero
+                  isFocused
+                  isAnyRunning={false}
                 />
-              ))}
-            </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-            {/* Secondary agents — collapsed by default */}
-            {tier1Secondary.length > 0 && (
-              <div className="mt-2">
+          {/* 4 Hero Agents — Clean 2x2 Grid */}
+          {!focusedAgent && (
+            <div>
+              <p className={cn('text-[10px] font-bold uppercase tracking-[0.15em] mb-3 flex items-center gap-2', tierLabels[0].color)}>
+                AUTONOMOUS AI AGENTS
+                {isLive && (
+                  <span className="relative flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                    <span className="text-[8px] text-red-400">LIVE</span>
+                  </span>
+                )}
+                {scanning && (
+                  <span className="text-[9px] text-cyan-400/70 font-normal normal-case tracking-normal ml-1">
+                    — {heroAgents.filter(t => t.status === 'running').length > 0 ? `${heroAgents.filter(t => t.status === 'running').length} active` : 'processing'}
+                  </span>
+                )}
+              </p>
+
+              <div className="grid grid-cols-2 gap-6">
+                {heroAgents.map((task) => (
+                  <LiveAgentCard
+                    key={task.id}
+                    {...task}
+                    isLive={isLive}
+                    onClick={() => {
+                      if (task.status !== 'idle' && task.status !== 'queued') {
+                        setFocusedAgentId(task.id);
+                      }
+                    }}
+                    isExpanded={false}
+                    isHero
+                    isAnyRunning={isAnyHeroRunning}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Background agents compact summary — only when they're processing */}
+          {(scanning || scanComplete) && !focusedAgent && backgroundComplete > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="rounded-xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl px-4 py-3"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1">
+                    {backgroundAgents.filter(t => t.status === 'success' || t.status === 'warning').slice(0, 6).map((t, i) => (
+                      <div
+                        key={t.id}
+                        className={cn(
+                          'w-2 h-2 rounded-full transition-all duration-300',
+                          t.status === 'warning' ? 'bg-amber-500' : 'bg-emerald-500',
+                          i > 0 && '-ml-0.5'
+                        )}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-[10px] text-neutral-500">
+                    +{backgroundComplete} background agents completed
+                  </span>
+                </div>
                 <button
                   onClick={() => setShowAllTier1(!showAllTier1)}
-                  className="flex items-center gap-1.5 text-[10px] text-neutral-500 hover:text-neutral-300 transition-colors py-1"
+                  className="flex items-center gap-1 text-[10px] text-neutral-600 hover:text-neutral-300 transition-colors"
                 >
+                  {showAllTier1 ? 'Hide' : 'Show details'}
                   {showAllTier1 ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                  {showAllTier1 ? 'Collapse' : `+ ${tier1Secondary.length} more agents`}
-                  {!showAllTier1 && tier1Secondary.some(t => t.status === 'warning' || t.status === 'error') && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                  )}
                 </button>
-                <AnimatePresence>
-                  {showAllTier1 && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
-                        {tier1Secondary.map((task) => (
-                          <LiveAgentCard
-                            key={task.id}
-                            {...task}
-                            isLive={isLive}
-                            onClick={() => task.status !== 'idle' && task.status !== 'queued' && toggleExpand(task.id)}
-                            isExpanded={expandedTask === task.id}
-                          />
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </div>
-            )}
-          </div>
-
-          {/* TIER 2 — LLM */}
-          <div>
-            <div className="flex items-center justify-between">
-              <p className={cn('text-[10px] font-bold uppercase tracking-[0.15em] mb-2.5 flex items-center gap-2', tierLabels[1].color)}>
-                {tierLabels[1].label}
-              </p>
-              {tier2Tasks.some(t => t.status !== 'idle') && (
-                <button
-                  onClick={() => setShowAllTier2(!showAllTier2)}
-                  className="flex items-center gap-1 text-[10px] text-neutral-500 hover:text-neutral-300 transition-colors"
-                >
-                  {showAllTier2 ? 'Collapse' : 'Expand'}
-                  {showAllTier2 ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                </button>
-              )}
-            </div>
-            {/* Always show greenwash detector prominently */}
-            <div className="grid grid-cols-2 gap-2">
-              {tier2Tasks.filter(t => t.id === 'greenwash' || t.id === 'classifier').map((task) => (
-                <LiveAgentCard
-                  key={task.id}
-                  {...task}
-                  isLive={false}
-                  onClick={() => task.status !== 'idle' && task.status !== 'queued' && toggleExpand(task.id)}
-                  isExpanded={expandedTask === task.id}
-                />
-              ))}
-            </div>
-            <AnimatePresence>
-              {showAllTier2 && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="grid grid-cols-2 gap-2 mt-2">
-                    {tier2Tasks.filter(t => t.id !== 'greenwash' && t.id !== 'classifier').map((task) => (
-                      <LiveAgentCard
-                        key={task.id}
-                        {...task}
-                        isLive={false}
-                        onClick={() => task.status !== 'idle' && task.status !== 'queued' && toggleExpand(task.id)}
-                        isExpanded={expandedTask === task.id}
-                      />
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* TIER 3 — Risk */}
-          <div>
-            <div className="flex items-center justify-between">
-              <p className={cn('text-[10px] font-bold uppercase tracking-[0.15em] mb-2.5 flex items-center gap-2', tierLabels[2].color)}>
-                {tierLabels[2].label}
-              </p>
-              {tier3Tasks.some(t => t.status !== 'idle') && (
-                <button
-                  onClick={() => setShowAllTier3(!showAllTier3)}
-                  className="flex items-center gap-1 text-[10px] text-neutral-500 hover:text-neutral-300 transition-colors"
-                >
-                  {showAllTier3 ? 'Collapse' : 'Expand'}
-                  {showAllTier3 ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                </button>
-              )}
-            </div>
-            {/* Show regulator predictor by default */}
-            <div className="grid grid-cols-2 gap-2">
-              {tier3Tasks.filter(t => t.id === 'regulator' || t.id === 'media').map((task) => (
-                <LiveAgentCard
-                  key={task.id}
-                  {...task}
-                  isLive={false}
-                  onClick={() => task.status !== 'idle' && task.status !== 'queued' && toggleExpand(task.id)}
-                  isExpanded={expandedTask === task.id}
-                />
-              ))}
-            </div>
-            <AnimatePresence>
-              {showAllTier3 && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="grid grid-cols-2 gap-2 mt-2">
-                    {tier3Tasks.filter(t => t.id !== 'regulator' && t.id !== 'media').map((task) => (
-                      <LiveAgentCard
-                        key={task.id}
-                        {...task}
-                        isLive={false}
-                        onClick={() => task.status !== 'idle' && task.status !== 'queued' && toggleExpand(task.id)}
-                        isExpanded={expandedTask === task.id}
-                      />
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+              <AnimatePresence>
+                {showAllTier1 && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3 pt-3 border-t border-white/[0.04]">
+                      {backgroundAgents.filter(t => t.status !== 'idle' && t.status !== 'queued').map((task) => (
+                        <LiveAgentCard
+                          key={task.id}
+                          {...task}
+                          isLive={false}
+                          onClick={() => setFocusedAgentId(task.id)}
+                          isExpanded={false}
+                          isAnyRunning={false}
+                        />
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          )}
         </div>
 
         {/* Right: Timeline Feed */}
