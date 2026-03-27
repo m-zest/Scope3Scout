@@ -231,6 +231,8 @@ export default function Upload() {
               <h2 className="font-heading text-base font-semibold text-white">CSV Upload</h2>
               <p className="text-xs text-neutral-500">
                 Columns: <code className="text-[10px] bg-white/[0.04] px-1 py-0.5 rounded text-neutral-400">name</code>, <code className="text-[10px] bg-white/[0.04] px-1 py-0.5 rounded text-neutral-400">website</code>, <code className="text-[10px] bg-white/[0.04] px-1 py-0.5 rounded text-neutral-400">country</code>, <code className="text-[10px] bg-white/[0.04] px-1 py-0.5 rounded text-neutral-400">industry</code>
+                <span className="mx-1.5 text-neutral-700">|</span>
+                <a href="/demo-suppliers.csv" download className="text-[#818cf8]/70 hover:text-[#818cf8] transition-colors underline underline-offset-2">Download Sample CSV</a>
               </p>
             </div>
           </div>

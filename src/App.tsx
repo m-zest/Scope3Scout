@@ -24,13 +24,6 @@ const queryClient = new QueryClient({
   },
 });
 
-function ProtectedRoute({ children, session }: { children: React.ReactNode; session: Session | null }) {
-  if (!session) {
-    return <Navigate to="/auth" replace />;
-  }
-  return <>{children}</>;
-}
-
 function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
@@ -82,12 +75,10 @@ function App() {
               }
             />
 
-            {/* Protected routes with layout */}
+            {/* App routes with layout (accessible with or without auth) */}
             <Route
               element={
-                <ProtectedRoute session={session}>
-                  <AppLayout userEmail={session?.user?.email} />
-                </ProtectedRoute>
+                <AppLayout userEmail={session?.user?.email} />
               }
             >
               <Route path="/dashboard" element={<Dashboard />} />

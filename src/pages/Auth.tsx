@@ -187,6 +187,16 @@ export default function Auth() {
                   : 'Already have an account? Sign in'}
               </button>
             </div>
+
+            <div className="mt-4 pt-4 border-t border-white/[0.06]">
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-white/[0.08] bg-white/[0.03] text-neutral-400 text-sm font-medium hover:bg-white/[0.06] hover:text-neutral-200 hover:border-white/[0.12] transition-all"
+              >
+                Try Demo - No Account Needed
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </motion.div>
       </div>
