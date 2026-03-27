@@ -47,54 +47,116 @@ export function buildAgentTasks(supplier: SupplierInput): TinyFishAgentTask[] {
   const country = supplier.country || 'EU';
   const tasks: TinyFishAgentTask[] = [];
 
-  // Always use Google search for Claim Extractor - ensures real browsable results
-  // even if the supplier's direct website is unavailable or fake
+  // Claim Extractor - interactive Google search with clicks and navigation
   tasks.push({
     id: 'website',
-    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' ESG sustainability claims certifications ISO 14001 ' + country)}`,
-    goal: `You are an autonomous ESG compliance audit agent. Search for "${name}" and find their ESG claims, sustainability commitments, ISO certifications, and environmental policies. Click on relevant results and extract specific claims with direct quotes. Navigate to at least 2 pages. When evidence is found include: claim text, source URL. If any claim contradicts public records, output: "CLAIM-EVIDENCE MISMATCH". Always describe what you are doing before each action. Always capture a screenshot when you find important information.`,
+    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' sustainability report ESG certifications ' + country)}`,
+    goal: `Do these steps in order for "${name}":
+1. Look at the Google search results on this page
+2. Click on the FIRST search result link that mentions "${name}" or sustainability
+3. On that page, scroll down and look for ESG claims, ISO certifications, or sustainability commitments
+4. Take a screenshot of any claims you find
+5. Go back to Google results
+6. Click on the SECOND result
+7. Extract any environmental policies, carbon targets, or certification mentions
+8. Take a screenshot
+9. Summarize ALL claims found as a numbered list
+If any claim seems contradicted by other information, write "CLAIM-EVIDENCE MISMATCH" followed by the details.`,
   });
 
+  // Regulatory - search for fines and click through results
   tasks.push({
     id: 'regulatory',
-    url: `https://www.google.com/search?q=${encodeURIComponent('"' + name + '" fine OR penalty OR violation OR sanction ' + country + ' environmental')}`,
-    goal: `You are an autonomous compliance audit agent. Search for environmental fines, penalties, or regulatory violations for "${name}" in ${country}. Click on government websites, news articles, and court records. Find specific fine amounts in EUR, dates, and issuing authority. Navigate to at least 2 results. If a fine or penalty is found, output "FOUND:" followed by details. Always describe your actions step by step. Capture screenshots of evidence.`,
+    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' environmental fine penalty violation ' + country + ' 2024 2025 2026')}`,
+    goal: `Do these steps in order for "${name}":
+1. Read the Google search results on this page
+2. Click on the first result that mentions a fine, penalty, or violation
+3. On that page, find the specific fine amount, date, and reason
+4. Take a screenshot of the evidence
+5. Go back and click on another relevant result
+6. Extract any additional regulatory actions or sanctions
+7. Summarize findings with: company name, fine amount in EUR, date, reason, source URL
+If a fine or violation is found, start your summary with "FOUND:" followed by details.`,
   });
 
+  // News Scanner - browse Google News for controversies
   tasks.push({
     id: 'news',
-    url: `https://news.google.com/search?q=${encodeURIComponent('"' + name + '" environment OR violation OR labour OR scandal OR fine')}`,
-    goal: `You are an autonomous compliance audit agent. Find recent news articles (last 12 months) about "${name}" related to environmental issues, labour disputes, legal problems, ESG controversies, or regulatory actions. Summarize each article with source and date. Always capture a screenshot when a result is found.`,
+    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' controversy OR scandal OR violation OR fine news ' + country)}&tbm=nws`,
+    goal: `Do these steps in order for "${name}":
+1. Read the news search results on this page
+2. Click on the first news article about "${name}"
+3. Read the article and extract: headline, date, key issue, source name
+4. Take a screenshot of the article
+5. Go back and click on a second news article
+6. Extract the same details
+7. Summarize all articles found with: title, source, date, and relevance to ESG compliance
+If negative news is found, include the severity (critical/high/medium).`,
   });
 
+  // Certification Verifier - check ISO registries
   tasks.push({
     id: 'certs',
-    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' ISO 14001 certification verification')}`,
-    goal: `You are an autonomous compliance audit agent. Verify if "${name}" holds valid ISO 14001, ISO 45001, or other environmental/safety certifications. Check if certifications are current, expired, or suspended. Return certificate numbers and validity dates if found. If mismatch is found output: "CLAIM-EVIDENCE MISMATCH". Always capture a screenshot when a result is found.`,
+    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' ISO 14001 certificate valid OR expired OR suspended')}`,
+    goal: `Do these steps in order for "${name}":
+1. Search results show ISO certification information
+2. Click on the first result about ISO certification for "${name}"
+3. Look for: certificate number, issue date, expiry date, certification body
+4. Take a screenshot of certificate details
+5. Check if the certification is VALID, EXPIRED, or SUSPENDED
+6. Go back and check a second source for verification
+7. If the company claims ISO 14001 but the certificate is expired, write "CLAIM-EVIDENCE MISMATCH: ISO 14001 certificate expired"
+Summarize: certification name, status (valid/expired), dates, certificate number if found.`,
   });
 
+  // LinkedIn - check workforce changes
   tasks.push({
     id: 'linkedin',
-    url: `https://www.google.com/search?q=${encodeURIComponent('site:linkedin.com/company ' + name)}`,
-    goal: `You are an autonomous compliance audit agent. Find "${name}" on LinkedIn. Check for recent layoffs, restructuring, ESG/compliance officer departures, or significant hiring changes. Look for any red flags in recent activity. Always capture a screenshot when a result is found.`,
+    url: `https://www.google.com/search?q=${encodeURIComponent('site:linkedin.com "' + name + '" company')}`,
+    goal: `Do these steps for "${name}":
+1. Click on the LinkedIn company page result
+2. Look for recent posts, employee count changes, and key departures
+3. Check if any sustainability or compliance officers recently left
+4. Take a screenshot of the company page
+5. Summarize: employee count, recent changes, any red flags in leadership or ESG team.`,
   });
 
+  // Supply Chain Mapper
   tasks.push({
     id: 'supply',
-    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' supply chain suppliers sub-contractors')}`,
-    goal: `You are an autonomous compliance audit agent. Map the known supply chain of "${name}". Find any sub-suppliers, contractors, or business partners. Look for supply chain risks, dependency on high-risk regions, or known issues with their suppliers. Always capture a screenshot when a result is found.`,
+    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' suppliers sub-suppliers supply chain partners ' + country)}`,
+    goal: `Do these steps for "${name}":
+1. Click on search results about "${name}" supply chain
+2. Find any named sub-suppliers, contractors, or partners
+3. Check if any suppliers are in high-risk regions
+4. Take screenshots of supply chain information
+5. Summarize: list of known suppliers, their countries, and any risk flags.`,
   });
 
+  // Financial Analyst
   tasks.push({
     id: 'financial',
-    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' financial report annual revenue debt risk')}`,
-    goal: `You are an autonomous compliance audit agent. Find financial information about "${name}". Look for annual reports, revenue figures, debt levels, credit ratings, or any financial instability signals. Check for bankruptcy risk or payment defaults. Always capture a screenshot when a result is found.`,
+    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' annual report revenue financial statements ' + country)}`,
+    goal: `Do these steps for "${name}":
+1. Click on financial information results
+2. Find: revenue, debt levels, credit rating, profitability
+3. Check for any financial distress signals (losses, downgrades, defaults)
+4. Take a screenshot of financial data
+5. Summarize: revenue, debt-to-equity ratio, credit rating, any risk signals.`,
   });
 
+  // CSRD Compliance Validator
   tasks.push({
     id: 'compliance',
-    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' CSRD sustainability report ESG disclosure ' + country)}`,
-    goal: `You are an autonomous compliance audit agent. Check if "${name}" has published a CSRD-compliant sustainability report. Verify their ESG disclosures against EU CSRD requirements. Flag any gaps in reporting or potential greenwashing. If mismatch is found output: "CLAIM-EVIDENCE MISMATCH". Always capture a screenshot when a result is found.`,
+    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' CSRD sustainability report 2024 2025 ESG disclosure ' + country)}`,
+    goal: `Do these steps for "${name}":
+1. Click on results about their sustainability or CSRD report
+2. Check if a CSRD-compliant report exists and when it was published
+3. Look for: Scope 1/2/3 emissions, double materiality assessment, ESRS compliance
+4. Take a screenshot of the report or disclosure page
+5. Flag any gaps: missing emissions data, no double materiality, incomplete ESRS
+6. If claims on website contradict the report, write "CLAIM-EVIDENCE MISMATCH"
+Summarize: report exists (yes/no), year, key disclosures found, gaps identified.`,
   });
 
   return tasks;
