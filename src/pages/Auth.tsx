@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Shield, ArrowRight, Loader2, Fingerprint, Lock } from 'lucide-react';
+import { ArrowRight, Loader2, Fingerprint, Lock } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { Logo } from '@/components/Logo';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -51,9 +52,7 @@ export default function Auth() {
       <div className="hidden lg:flex flex-col justify-between w-1/2 p-12 relative z-10">
         <div>
           <div className="flex items-center gap-2.5 mb-20 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#818cf8] via-[#c084fc] to-[#e879f9] flex items-center justify-center shadow-[0_0_16px_rgba(129,140,248,0.4)]">
-              <Shield className="h-4 w-4 text-white" />
-            </div>
+            <Logo size={32} />
             <span className="font-heading font-semibold text-lg tracking-tight bg-gradient-to-r from-white to-neutral-400 bg-clip-text text-transparent">
               Scope3Scout
             </span>
@@ -108,9 +107,7 @@ export default function Auth() {
         >
           {/* Mobile logo */}
           <div className="flex items-center gap-2.5 mb-10 lg:hidden cursor-pointer" onClick={() => navigate('/')}>
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#818cf8] via-[#c084fc] to-[#e879f9] flex items-center justify-center shadow-[0_0_12px_rgba(129,140,248,0.4)]">
-              <Shield className="h-3.5 w-3.5 text-white" />
-            </div>
+            <Logo size={28} />
             <span className="font-heading font-semibold text-base tracking-tight bg-gradient-to-r from-white to-neutral-400 bg-clip-text text-transparent">
               Scope3Scout
             </span>

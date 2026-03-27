@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Scan, Shield, Clock, Loader2 } from 'lucide-react';
+import { Scan, Shield, Clock, Loader2, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { hasTinyFishKey } from '@/lib/tinyfish';
 
@@ -22,6 +22,12 @@ export function MissionControl({
   elapsed,
   contradictions,
 }: MissionControlProps) {
+  // Confidence score: starts at 60%, increases with agents, boosts with contradictions found (more data = more confidence)
+  const confidenceScore = status === 'idle' ? 0
+    : status === 'scanning' ? Math.min(60 + Math.round((agentsComplete / totalAgents) * 30) + (contradictions > 0 ? 5 : 0), 95)
+    : status === 'complete' ? (contradictions > 0 ? 96 : 92)
+    : 0;
+
   const statusLabel = {
     idle: 'Ready to Scan',
     scanning: 'Auditing in Progress',
@@ -112,6 +118,23 @@ export function MissionControl({
 
           {/* Right: Metrics */}
           <div className="flex items-center gap-6">
+            {/* Confidence Score */}
+            {status !== 'idle' && (
+              <div className="text-center">
+                <div className="flex items-center gap-1 text-neutral-500">
+                  <Activity className="h-3 w-3" />
+                  <span className="text-[10px] uppercase tracking-wider">Confidence</span>
+                </div>
+                <motion.p
+                  key={confidenceScore}
+                  initial={{ scale: 1.2, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="text-sm font-mono font-bold text-[#818cf8] mt-0.5"
+                >
+                  {confidenceScore}%
+                </motion.p>
+              </div>
+            )}
             <div className="text-center">
               <div className="flex items-center gap-1 text-neutral-500">
                 <Clock className="h-3 w-3" />

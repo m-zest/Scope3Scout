@@ -6,13 +6,13 @@ import {
   Bell,
   Settings,
   LogOut,
-  Shield,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
+import { Logo } from '@/components/Logo';
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -46,9 +46,7 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
       {/* Logo */}
       <NavLink to="/" className="h-16 flex items-center px-5 border-b border-white/[0.04] shrink-0 hover:bg-white/[0.02] transition-colors">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#818cf8] via-[#c084fc] to-[#e879f9] flex items-center justify-center shadow-[0_0_12px_rgba(129,140,248,0.4)] shrink-0">
-            <Shield className="h-3.5 w-3.5 text-white" />
-          </div>
+          <Logo size={28} className="shrink-0" />
           {!collapsed && (
             <span className="font-heading font-semibold text-[15px] tracking-tight bg-gradient-to-r from-white to-neutral-400 bg-clip-text text-transparent block truncate">
               Scope3Scout

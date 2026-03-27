@@ -644,6 +644,30 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
         )}
       </div>
 
+      {/* Headline Insight — instant risk summary */}
+      {contradictions.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: -10, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="rounded-2xl border-2 border-red-500/40 bg-gradient-to-r from-red-500/[0.12] via-red-500/[0.06] to-black/60 backdrop-blur-2xl px-6 py-4 shadow-[0_0_60px_rgba(239,68,68,0.15)]"
+        >
+          <div className="flex items-center gap-3">
+            <motion.div
+              animate={{ scale: [1, 1.15, 1], opacity: [1, 0.7, 1] }}
+              transition={{ repeat: Infinity, duration: 1.2 }}
+              className="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.6)]"
+            />
+            <p className="font-heading text-lg md:text-xl font-bold tracking-tight text-red-400">
+              Supplier is NON-COMPLIANT — Immediate Risk Detected
+            </p>
+          </div>
+          <p className="text-sm text-red-400/60 mt-1 ml-6">
+            {contradictions.length} critical finding{contradictions.length > 1 ? 's' : ''} detected across {new Set(contradictions.map(c => c.agent)).size} agent{new Set(contradictions.map(c => c.agent)).size > 1 ? 's' : ''} · Action required
+          </p>
+        </motion.div>
+      )}
+
       {/* Contradiction Panel — the winning moment */}
       <div ref={contradictionRef} className="relative z-50">
         {contradictions.length > 0 && (
@@ -660,6 +684,67 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
           totalTime={totalTime}
           isLive={isLive}
         />
+      )}
+
+      {/* Final Status — closes the story */}
+      {scanComplete && scanResult && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className={cn(
+            'rounded-2xl border-2 backdrop-blur-2xl px-6 py-5 text-center',
+            contradictions.length > 0
+              ? 'border-red-500/30 bg-gradient-to-b from-red-500/[0.08] to-black/60 shadow-[0_0_60px_rgba(239,68,68,0.1)]'
+              : 'border-emerald-500/30 bg-gradient-to-b from-emerald-500/[0.08] to-black/60 shadow-[0_0_60px_rgba(16,185,129,0.1)]'
+          )}
+        >
+          <motion.div
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.4, delay: 0.5 }}
+            className="flex flex-col items-center gap-3"
+          >
+            <div className={cn(
+              'w-14 h-14 rounded-2xl flex items-center justify-center border',
+              contradictions.length > 0
+                ? 'bg-red-500/10 border-red-500/30'
+                : 'bg-emerald-500/10 border-emerald-500/30'
+            )}>
+              {contradictions.length > 0 ? (
+                <AlertTriangle className="h-7 w-7 text-red-400" />
+              ) : (
+                <Shield className="h-7 w-7 text-emerald-400" />
+              )}
+            </div>
+            <div>
+              <h3 className="font-heading text-xl font-bold text-white tracking-tight">
+                Audit Complete
+              </h3>
+              <div className="flex items-center justify-center gap-4 mt-2">
+                <span className={cn(
+                  'text-sm font-semibold px-3 py-1 rounded-lg border',
+                  scanResult.risk_level === 'critical' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                  scanResult.risk_level === 'high' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' :
+                  scanResult.risk_level === 'medium' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
+                  'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                )}>
+                  Risk Level: {scanResult.risk_level.toUpperCase()}
+                </span>
+                {scanResult.simulation_output.recommended_action && (
+                  <span className="text-sm text-neutral-400">
+                    Action Recommended: <strong className={cn(
+                      contradictions.length > 0 ? 'text-red-300' : 'text-emerald-300'
+                    )}>{scanResult.simulation_output.recommended_action}</strong>
+                  </span>
+                )}
+              </div>
+            </div>
+            <p className="text-[11px] text-neutral-600 mt-1">
+              {totalTime}s · 16 agents · {contradictions.length} contradiction{contradictions.length !== 1 ? 's' : ''} · {scanResult.violations.length} violation{scanResult.violations.length !== 1 ? 's' : ''}
+            </p>
+          </motion.div>
+        </motion.div>
       )}
     </div>
   );
