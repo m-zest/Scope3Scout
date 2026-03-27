@@ -20,6 +20,18 @@ export interface TinyFishSSEEvent {
   type: 'step' | 'result' | 'error' | 'done';
   data: string;
   timestamp?: number;
+  screenshot?: string;
+  url?: string;
+}
+
+export interface AgentEvent {
+  agent: string;
+  step: string;
+  status: 'running' | 'completed' | 'error';
+  message: string;
+  screenshot?: string;
+  url?: string;
+  timestamp: number;
 }
 
 export interface SupplierInput {
@@ -39,110 +51,124 @@ export function buildAgentTasks(supplier: SupplierInput): TinyFishAgentTask[] {
     tasks.push({
       id: 'website',
       url: supplier.website,
-      goal: `Extract all ESG claims, sustainability commitments, certifications (ISO 14001, etc), and environmental policies from this company website for "${name}". List each claim with a direct quote.`,
+      goal: `You are an autonomous compliance audit agent. Act step-by-step like a human browsing. Extract all ESG claims, sustainability commitments, certifications (ISO 14001, etc), and environmental policies from this company website for "${name}". List each claim with a direct quote. Always describe your action before executing it. When evidence is found include: claim, evidence, source URL, confidence. If mismatch is found output: "CLAIM–EVIDENCE MISMATCH". Always capture a screenshot when a result or contradiction is found.`,
     });
   } else {
     tasks.push({
       id: 'website',
       url: `https://www.google.com/search?q=${encodeURIComponent(name + ' company website ESG sustainability')}`,
-      goal: `Find the official website of "${name}" and extract any ESG claims, certifications, or sustainability commitments they make.`,
+      goal: `You are an autonomous compliance audit agent. Find the official website of "${name}" and extract any ESG claims, certifications, or sustainability commitments they make. Click buttons, fill search fields, and navigate pages. Do not stop at the first page — explore until evidence is found. Always capture a screenshot when a result or contradiction is found.`,
     });
   }
 
   tasks.push({
     id: 'regulatory',
     url: `https://www.google.com/search?q=${encodeURIComponent(name + ' environmental fine penalty violation ' + country)}`,
-    goal: `Search for any environmental fines, penalties, regulatory violations, or sanctions related to "${name}" in ${country}. Find government enforcement actions, court records, or EPA-equivalent penalties. Return specific amounts and dates.`,
+    goal: `You are an autonomous compliance audit agent. Search for any environmental fines, penalties, regulatory violations, or sanctions related to "${name}" in ${country}. Find government enforcement actions, court records, or EPA-equivalent penalties. Return specific amounts and dates. When evidence is found include: claim, evidence, source URL, confidence. If mismatch is found output: "CLAIM–EVIDENCE MISMATCH". Always capture a screenshot when a result is found.`,
   });
 
   tasks.push({
     id: 'news',
     url: `https://news.google.com/search?q=${encodeURIComponent('"' + name + '" environment OR violation OR labour OR scandal OR fine')}`,
-    goal: `Find recent news articles (last 12 months) about "${name}" related to environmental issues, labour disputes, legal problems, ESG controversies, or regulatory actions. Summarize each article with source and date.`,
+    goal: `You are an autonomous compliance audit agent. Find recent news articles (last 12 months) about "${name}" related to environmental issues, labour disputes, legal problems, ESG controversies, or regulatory actions. Summarize each article with source and date. Always capture a screenshot when a result is found.`,
   });
 
   tasks.push({
     id: 'certs',
     url: `https://www.google.com/search?q=${encodeURIComponent(name + ' ISO 14001 certification verification')}`,
-    goal: `Verify if "${name}" holds valid ISO 14001, ISO 45001, or other environmental/safety certifications. Check if certifications are current, expired, or suspended. Return certificate numbers and validity dates if found.`,
+    goal: `You are an autonomous compliance audit agent. Verify if "${name}" holds valid ISO 14001, ISO 45001, or other environmental/safety certifications. Check if certifications are current, expired, or suspended. Return certificate numbers and validity dates if found. If mismatch is found output: "CLAIM–EVIDENCE MISMATCH". Always capture a screenshot when a result is found.`,
   });
 
   tasks.push({
     id: 'linkedin',
     url: `https://www.google.com/search?q=${encodeURIComponent('site:linkedin.com/company ' + name)}`,
-    goal: `Find "${name}" on LinkedIn. Check for recent layoffs, restructuring, ESG/compliance officer departures, or significant hiring changes. Look for any red flags in recent activity.`,
+    goal: `You are an autonomous compliance audit agent. Find "${name}" on LinkedIn. Check for recent layoffs, restructuring, ESG/compliance officer departures, or significant hiring changes. Look for any red flags in recent activity. Always capture a screenshot when a result is found.`,
   });
 
   tasks.push({
     id: 'supply',
     url: `https://www.google.com/search?q=${encodeURIComponent(name + ' supply chain suppliers sub-contractors')}`,
-    goal: `Map the known supply chain of "${name}". Find any sub-suppliers, contractors, or business partners. Look for supply chain risks, dependency on high-risk regions, or known issues with their suppliers.`,
+    goal: `You are an autonomous compliance audit agent. Map the known supply chain of "${name}". Find any sub-suppliers, contractors, or business partners. Look for supply chain risks, dependency on high-risk regions, or known issues with their suppliers. Always capture a screenshot when a result is found.`,
   });
 
   tasks.push({
     id: 'financial',
     url: `https://www.google.com/search?q=${encodeURIComponent(name + ' financial report annual revenue debt risk')}`,
-    goal: `Find financial information about "${name}". Look for annual reports, revenue figures, debt levels, credit ratings, or any financial instability signals. Check for bankruptcy risk or payment defaults.`,
+    goal: `You are an autonomous compliance audit agent. Find financial information about "${name}". Look for annual reports, revenue figures, debt levels, credit ratings, or any financial instability signals. Check for bankruptcy risk or payment defaults. Always capture a screenshot when a result is found.`,
   });
 
   tasks.push({
     id: 'compliance',
     url: `https://www.google.com/search?q=${encodeURIComponent(name + ' CSRD sustainability report ESG disclosure ' + country)}`,
-    goal: `Check if "${name}" has published a CSRD-compliant sustainability report. Verify their ESG disclosures against EU CSRD requirements. Flag any gaps in reporting or potential greenwashing.`,
+    goal: `You are an autonomous compliance audit agent. Check if "${name}" has published a CSRD-compliant sustainability report. Verify their ESG disclosures against EU CSRD requirements. Flag any gaps in reporting or potential greenwashing. If mismatch is found output: "CLAIM–EVIDENCE MISMATCH". Always capture a screenshot when a result is found.`,
   });
 
   return tasks;
 }
 
-// Parse TinyFish SSE events into human-readable text
-function parseTinyFishEvent(event: Record<string, unknown>): string {
+// Parse TinyFish SSE events into human-readable text + extract metadata
+function parseTinyFishEvent(event: Record<string, unknown>): { text: string; screenshot?: string; url?: string } {
   const type = (event.type as string) || '';
+  const screenshot = (event.screenshot as string) || (event.image as string) || undefined;
+  const url = (event.url as string) || (event.target_url as string) || (event.current_url as string) || undefined;
+
+  let text = '';
 
   switch (type) {
     case 'STREAMING_URL':
-      return `Agent started — streaming live`;
+      text = `Agent started — streaming live`;
+      break;
     case 'PROGRESS':
     case 'STEP': {
       const step = (event.step as string) || (event.message as string) || '';
       const action = (event.action as string) || '';
-      if (step) return step;
-      if (action) return `Action: ${action}`;
-      return 'Processing...';
+      if (step) text = step;
+      else if (action) text = `Action: ${action}`;
+      else text = 'Processing...';
+      break;
     }
     case 'ACTION': {
       const actionType = (event.action_type as string) || (event.action as string) || '';
-      const url = (event.url as string) || (event.target_url as string) || '';
-      if (actionType === 'navigate' || actionType === 'goto') return `Navigating to ${url ? shortenUrl(url) : 'page'}`;
-      if (actionType === 'click') return `Clicking element on page`;
-      if (actionType === 'extract' || actionType === 'scrape') return `Extracting content from page`;
-      if (actionType === 'scroll') return `Scrolling page`;
-      if (actionType === 'type' || actionType === 'input') return `Entering search query`;
-      if (actionType) return `${actionType.charAt(0).toUpperCase() + actionType.slice(1)}`;
-      return 'Performing action...';
+      if (actionType === 'navigate' || actionType === 'goto') text = `Navigating to ${url ? shortenUrl(url) : 'page'}`;
+      else if (actionType === 'click') text = `Clicking element on page`;
+      else if (actionType === 'extract' || actionType === 'scrape') text = `Extracting content from page`;
+      else if (actionType === 'scroll') text = `Scrolling page`;
+      else if (actionType === 'type' || actionType === 'input') text = `Entering search query`;
+      else if (actionType === 'screenshot') text = `Capturing screenshot`;
+      else if (actionType) text = `${actionType.charAt(0).toUpperCase() + actionType.slice(1)}`;
+      else text = 'Performing action...';
+      break;
     }
     case 'NAVIGATION':
-      return `Navigating to ${shortenUrl((event.url as string) || '')}`;
+      text = `Navigating to ${shortenUrl(url || '')}`;
+      break;
+    case 'SCREENSHOT':
+      text = 'Captured screenshot';
+      break;
     case 'EXTRACTION':
     case 'CONTENT':
-      return 'Extracting page content...';
+      text = 'Extracting page content...';
+      break;
     case 'RESULT':
     case 'COMPLETED':
     case 'FINAL_RESULT': {
       const result = (event.result as string) || (event.extracted_content as string) || (event.output as string) || '';
-      return result ? (result.length > 100 ? result.substring(0, 100) + '...' : result) : 'Analysis complete';
+      text = result ? (result.length > 200 ? result.substring(0, 200) + '...' : result) : 'Analysis complete';
+      break;
     }
     case 'ERROR':
     case 'FAILED':
-      return (event.error as string) || (event.message as string) || 'Error occurred';
+      text = (event.error as string) || (event.message as string) || 'Error occurred';
+      break;
     default: {
-      // Try to extract meaningful text from unknown events
       const msg = (event.message as string) || (event.step as string) || (event.action as string) || '';
-      if (msg) return msg;
-      // For truly unknown events, show type
-      if (type) return `${type.toLowerCase().replace(/_/g, ' ')}`;
-      return 'Processing...';
+      if (msg) text = msg;
+      else if (type) text = `${type.toLowerCase().replace(/_/g, ' ')}`;
+      else text = 'Processing...';
     }
   }
+
+  return { text, screenshot, url };
 }
 
 function shortenUrl(url: string): string {
@@ -158,22 +184,31 @@ function shortenUrl(url: string): string {
 export async function runTinyFishAgent(
   task: TinyFishAgentTask,
   onEvent?: (event: TinyFishSSEEvent) => void,
-): Promise<{ result: string; steps: string[]; error?: string }> {
+): Promise<{ result: string; steps: string[]; screenshots: string[]; error?: string }> {
   // Demo mode fallback
   if (DEMO_MODE || !hasTinyFishKey()) {
     const delay = 1500 + Math.random() * 2000;
-    const steps = ['Navigating to page...', 'Extracting content...', 'Analyzing data...'];
-    for (const step of steps) {
-      await new Promise((r) => setTimeout(r, delay / steps.length));
-      onEvent?.({ type: 'step', data: step });
+    const demoSteps = [
+      `Agent started — navigating to target`,
+      `Navigating to ${shortenUrl(task.url)}`,
+      `Clicking search results...`,
+      `Extracting page content...`,
+      `Scrolling to find evidence...`,
+      `Analyzing extracted data...`,
+    ];
+    const screenshots: string[] = [];
+    for (let i = 0; i < demoSteps.length; i++) {
+      await new Promise((r) => setTimeout(r, delay / demoSteps.length));
+      onEvent?.({ type: 'step', data: demoSteps[i], url: task.url, timestamp: Date.now() });
     }
     const demoResult = getDemoResultForTask(task.id);
-    onEvent?.({ type: 'done', data: demoResult });
-    return { result: demoResult, steps };
+    onEvent?.({ type: 'done', data: demoResult, timestamp: Date.now() });
+    return { result: demoResult, steps: demoSteps, screenshots };
   }
 
   // Real TinyFish SSE call
   const steps: string[] = [];
+  const screenshots: string[] = [];
   let finalResult = '';
 
   try {
@@ -192,8 +227,8 @@ export async function runTinyFishAgent(
 
     if (!response.ok) {
       const errText = await response.text();
-      onEvent?.({ type: 'error', data: `API ${response.status}: ${errText}` });
-      return { result: '', steps, error: `API ${response.status}` };
+      onEvent?.({ type: 'error', data: `API ${response.status}: ${errText}`, timestamp: Date.now() });
+      return { result: '', steps, screenshots, error: `API ${response.status}` };
     }
 
     // Parse SSE stream
@@ -219,31 +254,34 @@ export async function runTinyFishAgent(
           const data = trimmed.slice(5).trim();
           try {
             const parsed = JSON.parse(data);
-            const stepText = parseTinyFishEvent(parsed);
+            const { text: stepText, screenshot, url } = parseTinyFishEvent(parsed);
+
+            // Collect screenshots
+            if (screenshot) {
+              const imgSrc = screenshot.startsWith('data:') ? screenshot : `data:image/jpeg;base64,${screenshot}`;
+              screenshots.push(imgSrc);
+            }
 
             if (parsed.type === 'RESULT' || parsed.type === 'COMPLETED' || parsed.type === 'FINAL_RESULT') {
               finalResult = parsed.result || parsed.output || parsed.extracted_content || stepText;
-              onEvent?.({ type: 'result', data: finalResult });
+              onEvent?.({ type: 'result', data: finalResult, screenshot: screenshot ? (screenshot.startsWith('data:') ? screenshot : `data:image/jpeg;base64,${screenshot}`) : undefined, url, timestamp: Date.now() });
             } else if (parsed.type === 'ERROR' || parsed.type === 'FAILED') {
               const errMsg = parsed.error || parsed.message || stepText;
-              onEvent?.({ type: 'error', data: errMsg });
-              return { result: '', steps, error: errMsg };
+              onEvent?.({ type: 'error', data: errMsg, timestamp: Date.now() });
+              return { result: '', steps, screenshots, error: errMsg };
             } else {
-              // All other events (STREAMING_URL, PROGRESS, ACTION, STEP, etc.)
               if (stepText) {
                 steps.push(stepText);
-                onEvent?.({ type: 'step', data: stepText });
+                onEvent?.({ type: 'step', data: stepText, screenshot: screenshot ? (screenshot.startsWith('data:') ? screenshot : `data:image/jpeg;base64,${screenshot}`) : undefined, url, timestamp: Date.now() });
               }
-              // Keep updating finalResult with latest meaningful content
               if (parsed.extracted_content || parsed.result || parsed.output) {
                 finalResult = parsed.extracted_content || parsed.result || parsed.output;
               }
             }
           } catch {
-            // Plain text SSE data
             if (data && data.length > 0) {
               steps.push(data);
-              onEvent?.({ type: 'step', data });
+              onEvent?.({ type: 'step', data, timestamp: Date.now() });
               finalResult = data;
             }
           }
@@ -251,26 +289,26 @@ export async function runTinyFishAgent(
       }
     }
 
-    onEvent?.({ type: 'done', data: finalResult });
-    return { result: finalResult, steps };
+    onEvent?.({ type: 'done', data: finalResult, timestamp: Date.now() });
+    return { result: finalResult, steps, screenshots };
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Unknown error';
-    onEvent?.({ type: 'error', data: msg });
-    return { result: '', steps, error: msg };
+    onEvent?.({ type: 'error', data: msg, timestamp: Date.now() });
+    return { result: '', steps, screenshots, error: msg };
   }
 }
 
 // Demo fallback results per agent type
 function getDemoResultForTask(taskId: string): string {
   const results: Record<string, string> = {
-    website: 'Found 3 ESG claims: ISO 14001 certified, carbon neutral by 2030, zero waste policy',
-    regulatory: 'No environmental fines found in public records for this entity',
-    news: 'Found 2 relevant articles in last 90 days, analyzing sentiment...',
-    certs: 'ISO 14001:2015 certificate found — valid until Dec 2026',
-    linkedin: 'No recent layoffs detected. ESG officer position active since 2024',
-    supply: 'Mapped 4 sub-suppliers across 3 countries. No high-risk regions flagged',
-    financial: 'Revenue stable, no debt warnings. Credit rating: BBB+',
-    compliance: 'Partial CSRD report published Q4 2025. Gaps found in Scope 3 emissions disclosure',
+    website: 'Found 3 ESG claims: ISO 14001 certified, carbon neutral by 2030, zero waste policy. CLAIM–EVIDENCE MISMATCH: ISO certificate expired Dec 2025.',
+    regulatory: 'FOUND: Environmental fine €40,000 issued March 2026 for illegal water discharge into Rhine river. Source: German Federal Environment Agency (UBA).',
+    news: 'Found 2 relevant articles: (1) "SteelCorp fined for water pollution" - Reuters, Mar 2026. (2) "Coal contract contradicts green claims" - DW News, Jan 2026.',
+    certs: 'CLAIM–EVIDENCE MISMATCH: ISO 14001:2015 certificate EXPIRED Dec 2025. Company still claims "ISO 14001 certified" on website. Certificate #DE-2022-14001-0847.',
+    linkedin: 'Red flag: Chief Sustainability Officer departed Feb 2026. No replacement hired. ESG team reduced from 8 to 3 members.',
+    supply: 'Mapped 4 sub-suppliers across 3 countries. WARNING: 2 suppliers in high-risk regions (Bangladesh, Myanmar). Sub-supplier TierB-Chem flagged for chemical violations.',
+    financial: 'Revenue: €240M (2025). Debt-to-equity: 1.8 (elevated). Credit rating downgraded to BB- by S&P. Working capital negative for 2 quarters.',
+    compliance: 'CLAIM–EVIDENCE MISMATCH: CSRD report published Q4 2025 but Scope 3 emissions disclosure missing entirely. Double materiality assessment incomplete. ESRS E1 non-compliant.',
   };
   return results[taskId] || 'Analysis complete — no issues detected';
 }

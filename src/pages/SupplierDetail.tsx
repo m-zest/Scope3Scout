@@ -17,7 +17,7 @@ import { useViolations } from '@/hooks/useViolations';
 import { useLatestSimulation } from '@/hooks/useSimulations';
 import { getDemoSuppliers } from '@/data/demoSuppliers';
 import { cn } from '@/lib/utils';
-import { TinyFishGrid } from '@/components/dashboard/TinyFishGrid';
+import { CCTVGrid } from '@/components/dashboard/CCTVGrid';
 import type { Supplier, Violation, SimulationOutput } from '@/types';
 
 const riskLevelConfig = {
@@ -189,9 +189,9 @@ export default function SupplierDetail() {
         </div>
       </motion.div>
 
-      {/* TinyFish Agent Scan */}
-      <motion.div variants={fadeUp} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl p-6">
-        <TinyFishGrid supplierName={supplier.name} />
+      {/* CCTV Agent Scan */}
+      <motion.div variants={fadeUp}>
+        <CCTVGrid supplierName={supplier.name} />
       </motion.div>
 
       {/* Risk Assessment */}

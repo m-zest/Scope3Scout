@@ -13,11 +13,10 @@ import {
   Minus,
   Info,
 } from 'lucide-react';
-// Demo suppliers always shown alongside real data
 import { getDemoSuppliers, type DemoScanResult } from '@/data/demoSuppliers';
 import { useSuppliers } from '@/hooks/useSuppliers';
 import { cn } from '@/lib/utils';
-import { TinyFishGrid } from '@/components/dashboard/TinyFishGrid';
+import { CCTVGrid } from '@/components/dashboard/CCTVGrid';
 
 /* ─── Risk + Status Badge Styles ─── */
 const riskBadge: Record<string, string> = {
@@ -86,7 +85,6 @@ export default function Dashboard() {
   const { data: dbSuppliers } = useSuppliers();
 
   const suppliers: DashboardSupplier[] = useMemo(() => {
-    // Always include demo suppliers for showcase
     const demoList: DashboardSupplier[] = getDemoSuppliers().map((s: DemoScanResult & { id: string }) => ({
       id: s.id,
       name: s.supplier_name,
@@ -100,7 +98,6 @@ export default function Dashboard() {
       financial_exposure_eur: s.simulation_output.financial_exposure_eur,
     }));
 
-    // Add real suppliers from Supabase (if any)
     const realList: DashboardSupplier[] = (dbSuppliers || []).map((s) => ({
       id: s.id,
       name: s.name,
@@ -128,11 +125,11 @@ export default function Dashboard() {
     { label: 'High / Critical', value: highRisk.toString(), icon: ShieldAlert, trend: highRisk > 0 ? 'up' as const : 'flat' as const, iconCls: 'text-red-400', sparkColor: '#f87171' },
     { label: 'Violations', value: totalViolations.toString(), icon: AlertTriangle, trend: totalViolations > 0 ? 'up' as const : 'flat' as const, iconCls: 'text-orange-400', sparkColor: '#fb923c' },
     { label: 'CSRD Compliant', value: `${csrdCompliant}/${totalSuppliers}`, icon: ShieldCheck, trend: csrdCompliant === totalSuppliers ? 'down' as const : 'up' as const, iconCls: 'text-emerald-400', sparkColor: '#34d399' },
-    { label: 'Exposure', value: totalExposure > 0 ? `€${(totalExposure / 1_000_000).toFixed(1)}M` : '€0', icon: Activity, trend: totalExposure > 0 ? 'up' as const : 'flat' as const, iconCls: 'text-[#c084fc]', sparkColor: '#c084fc' },
+    { label: 'Exposure', value: totalExposure > 0 ? `EUR ${(totalExposure / 1_000_000).toFixed(1)}M` : 'EUR 0', icon: Activity, trend: totalExposure > 0 ? 'up' as const : 'flat' as const, iconCls: 'text-[#c084fc]', sparkColor: '#c084fc' },
   ];
 
   return (
-    <motion.div className="space-y-5 max-w-[1400px]" initial="hidden" animate="visible" variants={stagger}>
+    <motion.div className="space-y-6 max-w-[1400px]" initial="hidden" animate="visible" variants={stagger}>
       {/* Info banner */}
       <motion.div
         variants={fadeUp}
@@ -168,12 +165,9 @@ export default function Dashboard() {
         ))}
       </motion.div>
 
-      {/* TinyFish Agent Grid */}
-      <motion.div
-        variants={fadeUp}
-        className="rounded-2xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl p-6"
-      >
-        <TinyFishGrid />
+      {/* CCTV Agent Grid — Main feature */}
+      <motion.div variants={fadeUp}>
+        <CCTVGrid />
       </motion.div>
 
       {/* Supplier Risk Table */}
@@ -272,7 +266,7 @@ export default function Dashboard() {
                         )}
                       </td>
                       <td className="px-6 py-3.5 text-right text-neutral-500 text-[13px] hidden lg:table-cell">
-                        {supplier.financial_exposure_eur > 0 ? `€${supplier.financial_exposure_eur.toLocaleString()}` : '—'}
+                        {supplier.financial_exposure_eur > 0 ? `EUR ${supplier.financial_exposure_eur.toLocaleString()}` : '—'}
                       </td>
                       <td className="px-4 py-3.5">
                         <ChevronRight className="h-4 w-4 text-neutral-700 group-hover:text-neutral-400 transition-colors" />
