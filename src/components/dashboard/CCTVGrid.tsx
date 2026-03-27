@@ -209,10 +209,17 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
     let completedCount = 0;
     const foundContradictions: Contradiction[] = [];
 
-    // === TIER 1: Run 8 agents (first 2 real via TinyFish, remaining 6 simulated) ===
-    const batchSize = 2;
+    // === TIER 1: First agent REAL TinyFish, rest simulated slowly ===
 
-    // Helper to process contradiction detection for any Tier 1 agent result
+    // Clean contradiction detection helper
+    const cleanPairs: Record<string, { claim: string; evidence: string }> = {
+      website: { claim: 'ISO 14001 Certified - Zero Violations on Record', evidence: 'ISO 14001:2015 certificate EXPIRED December 2025. Company website still displays certification badge.' },
+      regulatory: { claim: 'No environmental violations', evidence: 'Environmental fine EUR 40,000 issued March 2026 for illegal water discharge into Rhine river (UBA)' },
+      certs: { claim: 'ISO 14001 Environmental Management Certified', evidence: 'Certificate #DE-2022-14001-0847 expired December 2025. No renewal application filed.' },
+      compliance: { claim: 'CSRD-compliant sustainability reporting', evidence: 'Scope 3 emissions disclosure missing entirely. Double materiality assessment incomplete. ESRS E1 non-compliant.' },
+      news: { claim: 'Committed to 100% renewable energy by 2030', evidence: 'Reuters reports coal supply contract signed Q4 2025, contradicting published sustainability commitments.' },
+    };
+
     const processTier1Result = (taskId: string, agentTask: TinyFishAgentTask, resultText: string, meta: typeof agentMeta[string]) => {
       const hasIssues = resultText.includes('MISMATCH') ||
         resultText.toLowerCase().includes('fine') ||
@@ -221,17 +228,8 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
         resultText.toLowerCase().includes('expired') ||
         resultText.toLowerCase().includes('found:');
 
-      // Detect contradictions from Tier 1 results -use clean wording
       if (resultText.includes('MISMATCH') || resultText.includes('FOUND:')) {
-        const cleanPairs: Record<string, { claim: string; evidence: string }> = {
-          website: { claim: 'ISO 14001 Certified - Zero Violations on Record', evidence: 'ISO 14001:2015 certificate EXPIRED December 2025. Company website still displays certification badge.' },
-          regulatory: { claim: 'No environmental violations', evidence: 'Environmental fine EUR 40,000 issued March 2026 for illegal water discharge into Rhine river (UBA)' },
-          certs: { claim: 'ISO 14001 Environmental Management Certified', evidence: 'Certificate #DE-2022-14001-0847 expired December 2025. No renewal application filed.' },
-          compliance: { claim: 'CSRD-compliant sustainability reporting', evidence: 'Scope 3 emissions disclosure missing entirely. Double materiality assessment incomplete. ESRS E1 non-compliant.' },
-          news: { claim: 'Committed to 100% renewable energy by 2030', evidence: 'Reuters reports coal supply contract signed Q4 2025, contradicting published sustainability commitments.' },
-        };
         const pair = cleanPairs[taskId] || { claim: resultText.split('. ')[0], evidence: resultText.split('. ')[1] || resultText };
-
         const c: Contradiction = {
           id: `c-${taskId}-${Date.now()}`,
           agent: meta.name,
@@ -245,120 +243,118 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
         };
         foundContradictions.push(c);
         setContradictions((prev) => [...prev, c]);
-
         addTimelineEntry({ agent: meta.name, message: `CONTRADICTION DETECTED: ${pair.evidence.substring(0, 80)}`, type: 'contradiction' });
       }
-
       return hasIssues;
     };
 
-    for (let batch = 0; batch < tier1Tasks.length; batch += batchSize) {
-      const batchTasks = tier1Tasks.slice(batch, batch + batchSize);
+    // Simulate a single agent slowly with visible step-by-step progress
+    const simulateAgent = async (agentTask: TinyFishAgentTask) => {
+      const taskId = agentTask.id;
+      const taskStart = Date.now();
+      const meta = agentMeta[taskId];
 
-      if (batch === 0) {
-        // === Batch 0: Run first 2 hero agents through real TinyFish ===
-        await Promise.all(batchTasks.map(async (agentTask: TinyFishAgentTask) => {
-          const taskId = agentTask.id;
-          const taskStart = Date.now();
-          const meta = agentMeta[taskId];
+      updateTask(taskId, { status: 'running', progress: 10, url: agentTask.url, steps: [], screenshots: [], currentUrl: agentTask.url });
+      addTimelineEntry({ agent: meta.name, message: `Navigating to target`, type: 'action', url: agentTask.url });
 
-          updateTask(taskId, { status: 'running', progress: 10, url: agentTask.url, steps: [], screenshots: [], currentUrl: agentTask.url });
-          addTimelineEntry({ agent: meta.name, message: `Navigating to target`, type: 'action', url: agentTask.url });
-
-          let stepCount = 0;
-          const result = await runTinyFishAgent(agentTask, (event: TinyFishSSEEvent) => {
-            stepCount++;
-            const progress = Math.min(10 + (stepCount * 15), 90);
-
-            if (event.type === 'step') {
-              setTasks((prev) => prev.map((t) =>
-                t.id === taskId ? {
-                  ...t,
-                  progress,
-                  steps: [...(t.steps || []), event.data],
-                  screenshots: event.screenshot ? [...(t.screenshots || []), event.screenshot] : (t.screenshots || []),
-                  currentUrl: event.url || t.currentUrl,
-                } : t
-              ));
-              addTimelineEntry({ agent: meta.name, message: event.data, type: 'step', url: event.url });
-            }
-          });
-
-          const taskElapsed = Date.now() - taskStart;
-          const resultText = (result.result || '').toString();
-          const hasIssues = processTier1Result(taskId, agentTask, resultText, meta);
-
-          updateTask(taskId, {
-            status: result.error ? 'error' : hasIssues ? 'warning' : 'success',
-            progress: 100,
-            result: result.error || resultText || 'Complete',
-            duration: taskElapsed,
-            screenshots: result.screenshots || [],
-          });
-
-          completedCount++;
-          setAgentsComplete(completedCount);
-
-          addTimelineEntry({
-            agent: meta.name,
-            message: hasIssues
-              ? `Issues found: ${resultText.substring(0, 60)}...`
-              : 'Scan complete - no issues',
-            type: hasIssues ? 'warning' : 'success',
-          });
-        }));
-      } else {
-        // === Batch > 0: Simulate remaining 6 agents with demo steps/results ===
-        await Promise.all(batchTasks.map(async (agentTask: TinyFishAgentTask) => {
-          const taskId = agentTask.id;
-          const taskStart = Date.now();
-          const meta = agentMeta[taskId];
-
-          updateTask(taskId, { status: 'running', progress: 10, url: agentTask.url, steps: [], screenshots: [], currentUrl: agentTask.url });
-          addTimelineEntry({ agent: meta.name, message: `Navigating to target`, type: 'action', url: agentTask.url });
-
-          const demoSteps = getDemoStepsForTask(taskId, agentTask.url);
-          const totalDelay = 3000 + Math.random() * 1000; // 3-4 seconds
-          const stepDelay = totalDelay / demoSteps.length;
-
-          for (let i = 0; i < demoSteps.length; i++) {
-            await new Promise((r) => setTimeout(r, stepDelay));
-            const progress = Math.min(10 + ((i + 1) / demoSteps.length) * 80, 90);
-            setTasks((prev) => prev.map((t) =>
-              t.id === taskId ? {
-                ...t,
-                progress,
-                steps: [...(t.steps || []), demoSteps[i]],
-                currentUrl: agentTask.url,
-              } : t
-            ));
-            addTimelineEntry({ agent: meta.name, message: demoSteps[i], type: 'step', url: agentTask.url });
-          }
-
-          const resultText = getDemoResultForTask(taskId);
-          const taskElapsed = Date.now() - taskStart;
-          const hasIssues = processTier1Result(taskId, agentTask, resultText, meta);
-
-          updateTask(taskId, {
-            status: hasIssues ? 'warning' : 'success',
-            progress: 100,
-            result: resultText,
-            duration: taskElapsed,
-            screenshots: [],
-          });
-
-          completedCount++;
-          setAgentsComplete(completedCount);
-
-          addTimelineEntry({
-            agent: meta.name,
-            message: hasIssues
-              ? `Issues found: ${resultText.substring(0, 60)}...`
-              : 'Scan complete - no issues',
-            type: hasIssues ? 'warning' : 'success',
-          });
-        }));
+      const demoSteps = getDemoStepsForTask(taskId, agentTask.url);
+      // Each step takes 600-1000ms = total 5-8 seconds per agent
+      for (let i = 0; i < demoSteps.length; i++) {
+        await new Promise((r) => setTimeout(r, 600 + Math.random() * 400));
+        const progress = Math.min(10 + ((i + 1) / demoSteps.length) * 80, 90);
+        setTasks((prev) => prev.map((t) =>
+          t.id === taskId ? {
+            ...t,
+            progress,
+            steps: [...(t.steps || []), demoSteps[i]],
+            currentUrl: agentTask.url,
+          } : t
+        ));
+        addTimelineEntry({ agent: meta.name, message: demoSteps[i], type: 'step', url: agentTask.url });
       }
+
+      const resultText = getDemoResultForTask(taskId);
+      const taskElapsed = Date.now() - taskStart;
+      const hasIssues = processTier1Result(taskId, agentTask, resultText, meta);
+
+      updateTask(taskId, {
+        status: hasIssues ? 'warning' : 'success',
+        progress: 100,
+        result: resultText,
+        duration: taskElapsed,
+        screenshots: [],
+      });
+      completedCount++;
+      setAgentsComplete(completedCount);
+      addTimelineEntry({
+        agent: meta.name,
+        message: hasIssues ? `Issues found: ${resultText.substring(0, 60)}...` : 'Scan complete - no issues',
+        type: hasIssues ? 'warning' : 'success',
+      });
+    };
+
+    // --- AGENT 1: Real TinyFish (Claim Extractor) ---
+    const firstAgent = tier1Tasks[0];
+    {
+      const taskId = firstAgent.id;
+      const taskStart = Date.now();
+      const meta = agentMeta[taskId];
+
+      updateTask(taskId, { status: 'running', progress: 10, url: firstAgent.url, steps: [], screenshots: [], currentUrl: firstAgent.url });
+      addTimelineEntry({ agent: meta.name, message: `Navigating to target`, type: 'action', url: firstAgent.url });
+
+      let stepCount = 0;
+      const result = await runTinyFishAgent(firstAgent, (event: TinyFishSSEEvent) => {
+        stepCount++;
+        const progress = Math.min(10 + (stepCount * 12), 90);
+        if (event.type === 'step') {
+          setTasks((prev) => prev.map((t) =>
+            t.id === taskId ? {
+              ...t,
+              progress,
+              steps: [...(t.steps || []), event.data],
+              screenshots: event.screenshot ? [...(t.screenshots || []), event.screenshot] : (t.screenshots || []),
+              currentUrl: event.url || t.currentUrl,
+            } : t
+          ));
+          addTimelineEntry({ agent: meta.name, message: event.data, type: 'step', url: event.url });
+        }
+      });
+
+      const taskElapsed = Date.now() - taskStart;
+      const resultText = (result.result || '').toString();
+      const hasIssues = processTier1Result(taskId, firstAgent, resultText, meta);
+
+      updateTask(taskId, {
+        status: result.error ? 'error' : hasIssues ? 'warning' : 'success',
+        progress: 100,
+        result: result.error || resultText || 'Complete',
+        duration: taskElapsed,
+        screenshots: result.screenshots || [],
+      });
+      completedCount++;
+      setAgentsComplete(completedCount);
+      addTimelineEntry({
+        agent: meta.name,
+        message: hasIssues ? `Issues found: ${resultText.substring(0, 60)}...` : 'Scan complete - no issues',
+        type: hasIssues ? 'warning' : 'success',
+      });
+    }
+
+    // --- AGENTS 2-4: Simulate one at a time (sequential, slow) ---
+    for (let i = 1; i < 4; i++) {
+      if (tier1Tasks[i]) {
+        // Small gap between agents starting (feels like queuing)
+        await new Promise((r) => setTimeout(r, 800 + Math.random() * 400));
+        await simulateAgent(tier1Tasks[i]);
+      }
+    }
+
+    // --- AGENTS 5-8: Simulate remaining in parallel pairs (background feel) ---
+    for (let i = 4; i < tier1Tasks.length; i += 2) {
+      await new Promise((r) => setTimeout(r, 500 + Math.random() * 300));
+      const batch = tier1Tasks.slice(i, i + 2).filter(Boolean);
+      await Promise.all(batch.map(simulateAgent));
     }
 
     // === HYBRID GUARANTEE: Inject contradiction if real agents didn't find one ===
@@ -440,9 +436,9 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
           isWarn = hasViolations && (taskId === 'classifier' || taskId === 'greenwash');
         }
       } else {
-        await new Promise((r) => setTimeout(r, 400 + Math.random() * 400));
+        await new Promise((r) => setTimeout(r, 1500 + Math.random() * 1000));
         updateTask(taskId, { progress: 70, steps: ['Ingesting Tier 1 scan results...', 'Cross-referencing claims vs evidence...'] });
-        await new Promise((r) => setTimeout(r, 300 + Math.random() * 300));
+        await new Promise((r) => setTimeout(r, 1200 + Math.random() * 800));
 
         const hasViolations = demo.violations.length > 0;
         const tier2Results: Record<string, string> = {
@@ -499,10 +495,10 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
       updateTask(taskId, { status: 'running', progress: 40, steps: ['Running Monte Carlo simulation...'] });
       addTimelineEntry({ agent: meta.name, message: 'Simulating response...', type: 'step' });
 
-      await new Promise((r) => setTimeout(r, 300 + Math.random() * 400));
+      await new Promise((r) => setTimeout(r, 1200 + Math.random() * 800));
       updateTask(taskId, { progress: 80, steps: ['Running Monte Carlo simulation...', 'Computing probability distributions...'] });
 
-      await new Promise((r) => setTimeout(r, 200 + Math.random() * 300));
+      await new Promise((r) => setTimeout(r, 1000 + Math.random() * 600));
 
       const pred = demo.simulation_output.predictions.find((p: { agent_type: string }) => p.agent_type === taskId);
       const isRisky = pred ? pred.probability > 0.4 : false;
