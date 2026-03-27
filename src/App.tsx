@@ -13,6 +13,7 @@ import Upload from '@/pages/Upload';
 import SupplierDetail from '@/pages/SupplierDetail';
 import Reports from '@/pages/Reports';
 import Alerts from '@/pages/Alerts';
+import Settings from '@/pages/Settings';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -51,10 +52,10 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950">
+      <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm text-slate-400">Loading...</p>
+          <div className="w-8 h-8 border-2 border-[#818cf8] border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-neutral-500">Loading...</p>
         </div>
       </div>
     );
@@ -94,6 +95,7 @@ function App() {
               <Route path="/supplier/:id" element={<SupplierDetail />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/alerts" element={<Alerts />} />
+              <Route path="/settings" element={<Settings />} />
             </Route>
 
             {/* Default redirect */}

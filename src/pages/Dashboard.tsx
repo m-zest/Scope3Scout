@@ -17,6 +17,7 @@ import { DEMO_MODE } from '@/lib/tinyfish';
 import { getDemoSuppliers, type DemoScanResult } from '@/data/demoSuppliers';
 import { useSuppliers } from '@/hooks/useSuppliers';
 import { cn } from '@/lib/utils';
+import { TinyFishGrid } from '@/components/dashboard/TinyFishGrid';
 
 /* ─── Risk + Status Badge Styles ─── */
 const riskBadge: Record<string, string> = {
@@ -123,11 +124,11 @@ export default function Dashboard() {
   const totalExposure = suppliers.reduce((sum, s) => sum + s.financial_exposure_eur, 0);
 
   const stats = [
-    { label: 'Total Suppliers', value: totalSuppliers.toString(), icon: Shield, trend: 'flat' as const, iconCls: 'text-cyan-400', sparkColor: '#22d3ee' },
+    { label: 'Total Suppliers', value: totalSuppliers.toString(), icon: Shield, trend: 'flat' as const, iconCls: 'text-[#818cf8]', sparkColor: '#818cf8' },
     { label: 'High / Critical', value: highRisk.toString(), icon: ShieldAlert, trend: highRisk > 0 ? 'up' as const : 'flat' as const, iconCls: 'text-red-400', sparkColor: '#f87171' },
     { label: 'Violations', value: totalViolations.toString(), icon: AlertTriangle, trend: totalViolations > 0 ? 'up' as const : 'flat' as const, iconCls: 'text-orange-400', sparkColor: '#fb923c' },
     { label: 'CSRD Compliant', value: `${csrdCompliant}/${totalSuppliers}`, icon: ShieldCheck, trend: csrdCompliant === totalSuppliers ? 'down' as const : 'up' as const, iconCls: 'text-emerald-400', sparkColor: '#34d399' },
-    { label: 'Exposure', value: totalExposure > 0 ? `€${(totalExposure / 1_000_000).toFixed(1)}M` : '€0', icon: Activity, trend: totalExposure > 0 ? 'up' as const : 'flat' as const, iconCls: 'text-purple-400', sparkColor: '#a78bfa' },
+    { label: 'Exposure', value: totalExposure > 0 ? `€${(totalExposure / 1_000_000).toFixed(1)}M` : '€0', icon: Activity, trend: totalExposure > 0 ? 'up' as const : 'flat' as const, iconCls: 'text-[#c084fc]', sparkColor: '#c084fc' },
   ];
 
   return (
@@ -136,11 +137,11 @@ export default function Dashboard() {
       {useDemo && (
         <motion.div
           variants={fadeUp}
-          className="flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-500/[0.06] border border-amber-500/[0.12] text-sm"
+          className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#818cf8]/[0.06] border border-[#818cf8]/[0.12] text-sm"
         >
-          <Info className="h-4 w-4 text-amber-400 shrink-0" />
-          <span className="text-amber-300/80">
-            <span className="font-semibold text-amber-300">Demo Mode</span> — showing sample data from 5 suppliers across EU supply chain
+          <Info className="h-4 w-4 text-[#818cf8] shrink-0" />
+          <span className="text-[#818cf8]/80">
+            <span className="font-semibold text-[#818cf8]">Demo Mode</span> — showing sample data from 5 suppliers across EU supply chain
           </span>
         </motion.div>
       )}
@@ -150,7 +151,7 @@ export default function Dashboard() {
         {stats.map((stat, i) => (
           <div
             key={stat.label}
-            className="relative bg-white/[0.02] border border-white/[0.05] backdrop-blur-md rounded-2xl p-5 hover:bg-white/[0.04] transition-all duration-300 overflow-hidden"
+            className="relative bg-white/[0.02] border border-white/[0.05] backdrop-blur-md rounded-2xl p-5 hover:bg-white/[0.04] transition-all duration-300 overflow-hidden group"
           >
             <MiniSpark data={sparkData.map((d) => d + i * 8)} color={stat.sparkColor} />
             <div className="relative">
@@ -163,6 +164,14 @@ export default function Dashboard() {
             </div>
           </div>
         ))}
+      </motion.div>
+
+      {/* TinyFish Agent Grid */}
+      <motion.div
+        variants={fadeUp}
+        className="rounded-2xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl p-6"
+      >
+        <TinyFishGrid />
       </motion.div>
 
       {/* Supplier Risk Table */}
