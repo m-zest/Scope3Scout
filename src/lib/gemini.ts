@@ -11,20 +11,6 @@ interface GeminiAnalysisResult {
   contradictions: string[];
 }
 
-// Rate limiter for Gemini calls
-const geminiRateState = { calls: 0, windowStart: 0 };
-
-function checkGeminiRateLimit(): boolean {
-  const now = Date.now();
-  if (now - geminiRateState.windowStart > 60_000) {
-    geminiRateState.calls = 0;
-    geminiRateState.windowStart = now;
-  }
-  if (geminiRateState.calls >= 8) return false;
-  geminiRateState.calls++;
-  return true;
-}
-
 export async function runGeminiAnalysis(
   taskType: 'classifier' | 'greenwash' | 'evidence' | 'sentiment',
   tier1Data: {
@@ -37,10 +23,6 @@ export async function runGeminiAnalysis(
   const apiKey = getGeminiKey();
   if (!apiKey) {
     return { analysis: '', confidence: 0, contradictions: [] };
-  }
-
-  if (!checkGeminiRateLimit()) {
-    return { analysis: 'Rate limit exceeded', confidence: 0, contradictions: [] };
   }
 
   const prompts: Record<string, string> = {

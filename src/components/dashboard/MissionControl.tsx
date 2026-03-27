@@ -98,7 +98,7 @@ export function MissionControl({
           {/* Center: Progress */}
           <div className="flex-1 max-w-sm mx-4 hidden md:block">
             <div className="flex items-center justify-between text-[10px] text-neutral-500 mb-1.5">
-              <span>{agentsComplete}/{totalAgents} Agents</span>
+              <span>{status === 'scanning' ? `${agentsComplete} Agent${agentsComplete !== 1 ? 's' : ''} Active` : status === 'complete' ? 'All Agents Complete' : 'Agents Ready'}</span>
               <span>{Math.round(progress)}%</span>
             </div>
             <div className="h-2 rounded-full bg-white/[0.06] overflow-hidden">
@@ -156,6 +156,22 @@ export function MissionControl({
             </div>
           </div>
         </div>
+
+        {/* Global insight line — high-risk alert */}
+        {contradictions > 0 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            className="mt-3 pt-3 border-t border-red-500/10"
+          >
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+              <p className="text-sm font-semibold text-red-400">
+                High Risk Supplier Detected — {contradictions} finding{contradictions > 1 ? 's' : ''} require immediate review
+              </p>
+            </div>
+          </motion.div>
+        )}
       </div>
     </motion.div>
   );
