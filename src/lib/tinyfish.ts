@@ -10,6 +10,22 @@ export function hasTinyFishKey(): boolean {
   return getTinyFishKey().length > 0;
 }
 
+// Simple rate limiter — max N calls per window (ms)
+const rateLimitState = { calls: 0, windowStart: 0 };
+const RATE_LIMIT_MAX = 10; // max 10 API calls
+const RATE_LIMIT_WINDOW = 60_000; // per 60 seconds
+
+function checkRateLimit(): boolean {
+  const now = Date.now();
+  if (now - rateLimitState.windowStart > RATE_LIMIT_WINDOW) {
+    rateLimitState.calls = 0;
+    rateLimitState.windowStart = now;
+  }
+  if (rateLimitState.calls >= RATE_LIMIT_MAX) return false;
+  rateLimitState.calls++;
+  return true;
+}
+
 export interface TinyFishAgentTask {
   id: string;
   url: string;
@@ -197,6 +213,12 @@ export async function runTinyFishAgent(
     const demoResult = getDemoResultForTask(task.id);
     onEvent?.({ type: 'done', data: demoResult, timestamp: Date.now() });
     return { result: demoResult, steps: demoSteps, screenshots };
+  }
+
+  // Rate limit check
+  if (!checkRateLimit()) {
+    onEvent?.({ type: 'error', data: 'Rate limit exceeded — max 10 requests per minute', timestamp: Date.now() });
+    return { result: '', steps: [], screenshots: [], error: 'Rate limit exceeded' };
   }
 
   // Real TinyFish SSE call
