@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -84,6 +84,13 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { data: dbSuppliers } = useSuppliers();
 
+  // Re-read localStorage on every render (captures uploads from other pages)
+  const [uploadedVersion, setUploadedVersion] = useState(0);
+  useEffect(() => {
+    // Bump version on mount to ensure fresh localStorage read
+    setUploadedVersion(Date.now());
+  }, []);
+
   const suppliers: DashboardSupplier[] = useMemo(() => {
     const demoList: DashboardSupplier[] = getDemoSuppliers().map((s: DemoScanResult & { id: string }) => ({
       id: s.id,
@@ -130,7 +137,8 @@ export default function Dashboard() {
     } catch { /* ignore parse errors */ }
 
     return [...uploadedList, ...realList, ...demoList];
-  }, [dbSuppliers]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dbSuppliers, uploadedVersion]);
 
   const totalSuppliers = suppliers.length;
   const highRisk = suppliers.filter((s) => s.risk_level === 'high' || s.risk_level === 'critical').length;
