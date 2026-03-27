@@ -94,8 +94,8 @@ export function ContradictionPanel({ contradictions }: ContradictionPanelProps) 
           )}
         </div>
 
-        {/* Contradiction cards */}
-        <div className="p-4 space-y-3">
+        {/* Contradiction cards — cleaner spacing */}
+        <div className="p-5 space-y-4">
           <AnimatePresence>
             {contradictions.map((c, i) => (
               <motion.div
@@ -104,14 +104,14 @@ export function ContradictionPanel({ contradictions }: ContradictionPanelProps) 
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ delay: i * 0.15, duration: 0.4 }}
                 className={cn(
-                  'rounded-xl border p-5 relative overflow-hidden',
+                  'rounded-xl border p-6 relative overflow-hidden',
                   c.severity === 'critical'
                     ? 'border-red-500/25 bg-red-500/[0.04]'
                     : 'border-amber-500/25 bg-amber-500/[0.04]'
                 )}
               >
                 {/* Severity + agent badge */}
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-5">
                   <div className="flex items-center gap-2">
                     <AlertTriangle className={cn('h-4 w-4', c.severity === 'critical' ? 'text-red-400' : 'text-amber-400')} />
                     <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
@@ -129,32 +129,32 @@ export function ContradictionPanel({ contradictions }: ContradictionPanelProps) 
                 </div>
 
                 {/* Claim vs Evidence — side by side */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="space-y-2">
                     <p className="text-[9px] font-bold uppercase tracking-wider text-neutral-600">Supplier Claim</p>
                     <div className="p-4 rounded-lg bg-white/[0.03] border border-white/[0.06]">
-                      <p className="text-sm text-neutral-300 leading-relaxed italic">
+                      <p className="text-[13px] text-neutral-300 leading-relaxed italic">
                         &ldquo;{c.claim}&rdquo;
                       </p>
                     </div>
                   </div>
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     <p className="text-[9px] font-bold uppercase tracking-wider text-red-400/60">Evidence Found</p>
                     <div className="p-4 rounded-lg bg-red-500/[0.06] border border-red-500/15">
-                      <p className="text-sm text-red-300 leading-relaxed font-medium">
+                      <p className="text-[13px] text-red-300 leading-relaxed font-medium">
                         {c.evidence}
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {/* Bottom metrics: Confidence + Exposure + Source */}
-                <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/[0.04] flex-wrap gap-3">
+                {/* Bottom metrics row — slightly reduced */}
+                <div className="flex items-center justify-between mt-5 pt-4 border-t border-white/[0.04] flex-wrap gap-4">
                   <div className="flex items-center gap-6">
                     <div>
-                      <p className="text-[8px] font-bold uppercase tracking-wider text-neutral-600">Confidence</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <div className="w-24 h-2 rounded-full bg-white/[0.06] overflow-hidden">
+                      <p className="text-[8px] font-bold uppercase tracking-wider text-neutral-600 mb-1">Confidence</p>
+                      <div className="flex items-center gap-2">
+                        <div className="w-20 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
                           <motion.div
                             initial={{ width: '0%' }}
                             animate={{ width: `${c.confidence * 100}%` }}
@@ -164,21 +164,21 @@ export function ContradictionPanel({ contradictions }: ContradictionPanelProps) 
                             )}
                           />
                         </div>
-                        <span className="text-sm font-mono font-bold text-white">
+                        <span className="text-[12px] font-mono font-bold text-white">
                           {Math.round(c.confidence * 100)}%
                         </span>
                       </div>
                     </div>
                     {c.financialExposure && c.financialExposure > 0 && (
                       <div>
-                        <p className="text-[8px] font-bold uppercase tracking-wider text-neutral-600">Exposure</p>
-                        <p className="text-sm font-bold text-red-400 mt-1">EUR {c.financialExposure.toLocaleString()}</p>
+                        <p className="text-[8px] font-bold uppercase tracking-wider text-neutral-600 mb-1">Exposure</p>
+                        <p className="text-[12px] font-bold text-red-400">EUR {c.financialExposure.toLocaleString()}</p>
                       </div>
                     )}
                     {c.timelineImpactDays && (
                       <div>
-                        <p className="text-[8px] font-bold uppercase tracking-wider text-neutral-600">Timeline</p>
-                        <p className="text-sm font-bold text-amber-400 mt-1">{c.timelineImpactDays}d</p>
+                        <p className="text-[8px] font-bold uppercase tracking-wider text-neutral-600 mb-1">Timeline</p>
+                        <p className="text-[12px] font-bold text-amber-400">{c.timelineImpactDays}d</p>
                       </div>
                     )}
                   </div>
