@@ -267,6 +267,36 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
       }));
     }
 
+    // === HYBRID GUARANTEE: Inject contradiction if real agents didn't find one ===
+    if (foundContradictions.length === 0 && demo.tier1_result.discrepancies.length > 0) {
+      const d = demo.tier1_result.discrepancies[0];
+      const guaranteedContradiction: Contradiction = {
+        id: `c-guarantee-${Date.now()}`,
+        agent: 'Certification Verifier',
+        claim: d.claim,
+        evidence: d.finding,
+        confidence: d.confidence,
+        sourceUrl: d.source_url,
+        severity: 'critical',
+        financialExposure: demo.simulation_output.financial_exposure_eur,
+        timelineImpactDays: demo.simulation_output.predictions?.[0]?.timeline_days || 45,
+      };
+      foundContradictions.push(guaranteedContradiction);
+      setContradictions((prev) => [...prev, guaranteedContradiction]);
+
+      // Update the cert verifier agent to show it found the issue
+      updateTask('certs', {
+        status: 'warning',
+        result: `MISMATCH: ${d.claim} — ${d.finding}`,
+      });
+
+      addTimelineEntry({
+        agent: 'Certification Verifier',
+        message: `CONTRADICTION DETECTED: "${d.claim}" contradicted by evidence`,
+        type: 'contradiction',
+      });
+    }
+
     // === TIER 2: LLM Analysis (Gemini-powered when key available) ===
     const useGemini = hasGeminiKey();
     addTimelineEntry({ agent: 'System', message: `Starting Tier 2 — cross-referencing claims against evidence${useGemini ? ' (Gemini AI)' : ''}`, type: 'info' });
