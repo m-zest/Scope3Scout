@@ -185,17 +185,10 @@ export async function runTinyFishAgent(
   task: TinyFishAgentTask,
   onEvent?: (event: TinyFishSSEEvent) => void,
 ): Promise<{ result: string; steps: string[]; screenshots: string[]; error?: string }> {
-  // Demo mode fallback
+  // Demo mode fallback with semantic per-agent steps
   if (DEMO_MODE || !hasTinyFishKey()) {
-    const delay = 1500 + Math.random() * 2000;
-    const demoSteps = [
-      `Agent started — navigating to target`,
-      `Navigating to ${shortenUrl(task.url)}`,
-      `Clicking search results...`,
-      `Extracting page content...`,
-      `Scrolling to find evidence...`,
-      `Analyzing extracted data...`,
-    ];
+    const delay = 2000 + Math.random() * 2000;
+    const demoSteps = getDemoStepsForTask(task.id, task.url);
     const screenshots: string[] = [];
     for (let i = 0; i < demoSteps.length; i++) {
       await new Promise((r) => setTimeout(r, delay / demoSteps.length));
@@ -296,6 +289,90 @@ export async function runTinyFishAgent(
     onEvent?.({ type: 'error', data: msg, timestamp: Date.now() });
     return { result: '', steps, screenshots, error: msg };
   }
+}
+
+// Semantic per-agent demo steps — each agent has specific, realistic actions
+function getDemoStepsForTask(taskId: string, url: string): string[] {
+  const host = shortenUrl(url);
+  const stepsMap: Record<string, string[]> = {
+    website: [
+      `Navigating to ${host}`,
+      'Found "About Us" page — clicking...',
+      'Extracting ESG claims from sustainability section...',
+      'Found claim: "ISO 14001 Certified since 2022"',
+      'Found claim: "Carbon neutral by 2030"',
+      'Found claim: "Zero waste policy across all facilities"',
+      'Comparing claims against known certifications...',
+      'Capturing page evidence...',
+    ],
+    regulatory: [
+      `Searching government enforcement databases...`,
+      `Navigating to ${host}`,
+      'Entering company name in search field...',
+      'Filtering results by environmental violations...',
+      'Found record: Environmental fine issued March 2026',
+      'Extracting fine details — EUR 40,000 for water discharge',
+      'Cross-referencing with EPA equivalent records...',
+      'Evidence captured from official registry',
+    ],
+    news: [
+      `Navigating to news.google.com...`,
+      'Entering search query with violation keywords...',
+      'Scanning headlines from last 12 months...',
+      'Found article: "SteelCorp fined for water pollution" — Reuters',
+      'Found article: "Coal contract contradicts green claims" — DW News',
+      'Extracting publication dates and sentiment...',
+      'Analyzing article sentiment — negative coverage detected',
+    ],
+    certs: [
+      `Navigating to ISO certification registry...`,
+      'Entering company name in verification search...',
+      'Found ISO 14001:2015 certificate #DE-2022-14001-0847',
+      'Checking certificate validity period...',
+      'ALERT: Certificate expired December 2025',
+      'Company website still claims "ISO 14001 Certified"',
+      'CLAIM-EVIDENCE MISMATCH DETECTED',
+    ],
+    linkedin: [
+      `Navigating to linkedin.com/company search...`,
+      'Locating company profile...',
+      'Scanning recent employee changes...',
+      'Checking C-suite and ESG department...',
+      'Found: Chief Sustainability Officer departed Feb 2026',
+      'ESG team reduced from 8 to 3 members',
+    ],
+    supply: [
+      `Searching supply chain databases...`,
+      'Mapping known sub-suppliers and contractors...',
+      'Found 4 sub-suppliers across 3 countries',
+      'Checking for high-risk regions...',
+      'WARNING: 2 suppliers in high-risk regions detected',
+      'Cross-referencing sub-supplier compliance status...',
+    ],
+    financial: [
+      `Searching financial databases...`,
+      'Extracting annual revenue and debt figures...',
+      'Found revenue: EUR 240M (2025)',
+      'Checking credit rating agencies...',
+      'Credit rating downgraded to BB- by S&P',
+      'Working capital negative for 2 consecutive quarters',
+    ],
+    compliance: [
+      `Searching for CSRD sustainability report...`,
+      'Found Q4 2025 sustainability report (PDF)...',
+      'Extracting disclosure data points...',
+      'Checking ESRS E1 Climate requirements...',
+      'ALERT: Scope 3 emissions disclosure missing entirely',
+      'Double materiality assessment incomplete',
+      'CSRD compliance gaps identified in 3 areas',
+    ],
+  };
+  return stepsMap[taskId] || [
+    `Navigating to ${host}`,
+    'Extracting page content...',
+    'Analyzing extracted data...',
+    'Processing results...',
+  ];
 }
 
 // Demo fallback results per agent type

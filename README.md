@@ -1,546 +1,199 @@
-# Scope3Scout 🌍
+# Scope3Scout
 
-> **"Find what your suppliers are hiding before regulators do."**
+**We don't trust supplier reports -- we verify them using autonomous web agents.**
 
 [![Status](https://img.shields.io/badge/status-active_development-brightgreen)]()
 [![Hackathon](https://img.shields.io/badge/TinyFish_Hackathon-2026-blue)]()
-[![License](https://img.shields.io/badge/license-Proprietary-red)]()
 [![Stack](https://img.shields.io/badge/stack-React_+_Supabase_+_TinyFish-purple)]()
 [![CSRD](https://img.shields.io/badge/regulation-EU_CSRD_2026-orange)]()
 
 ---
 
-## 🎬 Submission Links
+## What Is Scope3Scout?
 
-📺 **[Watch the 3-Minute Demo Video](#)** ← *Added on submission day*
-🐦 **[View Official X/Twitter Launch Post](#)** ← *Added on submission day*
-🌐 **[Live Demo](https://scope3scout.ai)**
+Scope3Scout is an autonomous ESG supply chain intelligence platform that monitors, verifies, and predicts risk across a company's entire supplier network. It deploys 16 AI agents that autonomously browse real websites, cross-reference supplier claims against evidence, detect contradictions, and predict regulatory consequences -- all in real-time.
 
----
-
-## 📌 What Is Scope3Scout?
-
-Scope3Scout is an **autonomous ESG supply chain intelligence platform** that automatically monitors, verifies, and predicts risk across a company's entire supplier network.
-
-Companies are now **legally required** to report the environmental and social conduct of their suppliers under the EU's **CSRD law** (Corporate Sustainability Reporting Directive) — with fines reaching **10% of annual turnover** for non-compliance.
-
-The problem: verifying 200+ suppliers manually takes **3-6 months** and **€100,000+** in analyst time. Suppliers lie. Certifications expire. Violations get buried in regional government databases nobody checks.
-
-**Scope3Scout does it in minutes. Automatically. Every week.**
+Companies are legally required under the EU's CSRD (Corporate Sustainability Reporting Directive) to verify the environmental and social conduct of their suppliers, with fines reaching up to 10% of annual turnover. Scope3Scout automates what currently takes compliance teams 3-6 months and EUR 100,000+ in analyst time.
 
 ---
 
-## 🎯 The Problem We Solve
+## Demo
 
-### What is Scope 3?
+Select a supplier. Click "Run Audit". Watch 16 autonomous agents scan real websites, extract claims, verify certifications, and detect contradictions -- live.
 
-Every company produces pollution from 3 sources:
-
-| Scope | What It Covers | Example |
-|-------|---------------|---------|
-| **Scope 1** | Your own direct emissions | Your factory, your cars |
-| **Scope 2** | Energy you purchase | Your electricity bill |
-| **Scope 3** | Your entire supply chain | Your suppliers' factories, trucks, workers |
-
-**Scope 3 = 70-90% of a company's total carbon footprint** — and companies are now legally responsible for it even though they don't directly control it.
-
-### The Regulatory Crisis
-
-| Regulation | Region | Deadline | Fine |
-|-----------|--------|----------|------|
-| **CSRD** | EU (50,000+ companies) | 2025-2027 | Up to 10% turnover |
-| **TCFD + SECR** | UK | Active now | FCA enforcement |
-| **SEC Climate Rules** | USA | 2026-2027 | SEC enforcement |
-| **ASRS** | Australia | 2025-2027 | Active |
-| **ISSB Standards** | Global | Rolling out | Country-specific |
-
-### The Current Pain
-
-```
-Company has 200 suppliers →
-Compliance team manually:
-  → Emails each supplier asking for ESG reports
-  → Googles their name for violations
-  → Checks government databases one by one
-  → Reads PDFs and annual reports
-  → Verifies certifications manually
-
-Result:
-  → Takes 3-6 months
-  → Costs €100,000+ in analyst time
-  → Still misses things
-  → Backward looking — no prediction
-  → Regulators still not satisfied
-```
-
-### What Suppliers Actually Do
-
-```
-Supplier claims: "ISO 14001 certified ✅"
-Reality:          Certificate expired 2 years ago
-
-Supplier claims: "Zero violations on record ✅"
-Reality:          €40,000 EPA fine issued last month
-
-Supplier claims: "Living wage employer ✅"
-Reality:          3 labour strikes reported this year
-
-= Companies get fined for their supplier's lies
-= Even if the company had no idea
-= CSRD makes YOU responsible
-```
+When a mismatch is found between what a supplier claims and what the evidence shows, the system surfaces a contradiction panel with financial exposure estimates and time-to-impact predictions.
 
 ---
 
-## ✅ What Scope3Scout Does
+## How It Works
+
+### Three-Tier Intelligence Pipeline
 
 ```
-BEFORE Scope3Scout:
-"We think our suppliers are compliant
-but we're not sure and it took us 6 months to check"
+TIER 1: Autonomous Web Agents (TinyFish API -- LIVE)
+  8 agents per supplier, running in parallel
+  - Claim Extractor ............ Scrapes supplier website for ESG claims
+  - Certification Verifier ..... Checks ISO registries for valid certificates
+  - Compliance Auditor ......... Searches government databases for fines
+  - News Scanner ............... Monitors news for controversies
+  - Workforce Monitor .......... Detects layoffs and key departures
+  - Supply Chain Mapper ........ Maps sub-supplier network and risks
+  - Financial Analyst .......... Assesses financial stability signals
+  - CSRD Validator ............. Cross-checks sustainability disclosures
 
-AFTER Scope3Scout:
-"We scan all 200 suppliers every week automatically.
-We caught 3 lying about certifications.
-Our simulation says Supplier X will cause a
-regulatory problem in Q2. We already switched.
-We are fully CSRD compliant."
+TIER 2: LLM Cross-Reference
+  4 agents analyzing Tier 1 output
+  - Violation Classifier ....... Categorizes and ranks violations
+  - Greenwash Detector ......... Finds claim-vs-evidence mismatches
+  - Evidence Extractor ......... Ranks and links evidence chains
+  - Sentiment Analyzer ......... Measures public perception risk
+
+TIER 3: Risk Prediction
+  4 agents simulating stakeholder response
+  - Regulator Predictor ........ Predicts enforcement probability
+  - Media Risk Predictor ....... Predicts press coverage likelihood
+  - Investor Risk Predictor .... Predicts ESG fund divestment
+  - NGO Response Predictor ..... Predicts advocacy group actions
 ```
+
+### Contradiction Detection
+
+The core value proposition: when Tier 1 extracts a supplier claim (e.g., "ISO 14001 Certified") and another agent finds contradicting evidence (e.g., certificate expired), the system automatically generates a contradiction alert with:
+
+- Supplier claim vs. evidence found (side by side)
+- Confidence score (0-100%)
+- Estimated financial exposure (EUR)
+- Time-to-impact prediction (days)
+- Source URL for verification
 
 ---
 
-## ⚰️ The API Graveyard — Why This Requires TinyFish
+## Tech Stack
 
-> TinyFish's own test: *"If your application can be built without a web agent navigating real websites — it's not a fit."*
-
-**Scope3Scout fails this test in the best possible way. It literally cannot exist without TinyFish.**
-
-Traditional compliance tools rely on APIs. The ESG data world does not have APIs:
-
-| Data Source | API Available? | Reality |
-|-------------|---------------|---------|
-| German Bundesanzeiger (Company Register) | ❌ | Complex form navigation required |
-| Hungarian OKIR (Environmental Registry) | ❌ | Multi-step portal, no API |
-| Romanian ANPM (Environmental Agency) | ❌ | Only accessible via browser |
-| Regional labour violation databases | ❌ | Scattered across 27 EU country portals |
-| ISO certification verification portals | ❌ | Actively blocks traditional scrapers |
-| Local news sites (labour strikes) | ❌ | Dynamic JavaScript rendering |
-| B-Corp certification registry | ❌ | Pagination + dynamic UI |
-| National court records (most EU countries) | ❌ | Behind login or complex navigation |
-
-**Every single critical data source has no API.**
-
-This is exactly why compliance teams currently pay humans to act as human APIs — manually navigating these fragmented, dynamic, localized systems. TinyFish agents do what no traditional software can: interact with these portals exactly like a human compliance analyst would, at 1000x the speed and 1/100th the cost.
-
-```
-Remove TinyFish → product does not exist
-Replace with regular scraper → blocked immediately
-Replace with LLM + search → stale cached data
-Replace with APIs → APIs don't exist
-
-= TinyFish is not an integration
-= TinyFish is the foundation
-```
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| Frontend | React 19, TypeScript, Vite | Application framework |
+| Styling | Tailwind CSS 3, Framer Motion | Dark glassmorphic UI with animations |
+| Auth | Supabase Auth | Email/password authentication |
+| Database | Supabase (PostgreSQL) | Supplier data, violations, scan results |
+| AI Scraping | TinyFish Web Agent API | Real-time browser automation via SSE |
+| LLM | Google Gemini, OpenAI | Tier 2 claim cross-referencing |
+| PDF Reports | jsPDF + AutoTable | CSRD-compliant report generation |
+| CSV Import | PapaParse | Bulk supplier upload |
+| 3D Visual | Spline | Landing page visualization |
+| Data Layer | TanStack React Query | Server state management |
+| Hosting | Vercel | Production deployment |
 
 ---
 
-## 🏗️ How It Works — Full Architecture
+## Application Pages
 
-### The Three-Tier Intelligence System
-
----
-
-#### 🔵 Tier 1 — Continuous Monitoring (All Suppliers, Weekly)
-
-**Powered by: TinyFish + Gemini Flash**
-
-For every supplier, TinyFish runs 5 parallel agents simultaneously:
-
-```
-Agent 1 → Supplier's own website
-          Extracts ESG claims, certifications,
-          sustainability commitments, policies
-
-Agent 2 → EU EPA + national environmental databases
-          Searches for fines, violations, penalties
-          ec.europa.eu/environment + national portals
-
-Agent 3 → Regional news monitoring
-          Last 90 days of coverage
-          Labour issues, environmental incidents,
-          court cases, controversies
-
-Agent 4 → Certification verification portals
-          ISO 14001, B-Corp, industry certs
-          Checks validity + expiry dates
-
-Agent 5 → LinkedIn company page
-          Recent layoffs (instability signal)
-          Key ESG officer departures
-          Hiring patterns
-```
-
-Gemini Flash cross-references claims vs findings.
-**Triggers Tier 2 if:** `flag_severity = "high"` or `"critical"`
-
----
-
-#### 🟡 Tier 2 — Deep Investigation (Flagged Suppliers Only)
-
-**Powered by: TinyFish + GPT-4o**
-
-```
-→ Court records and legal databases
-→ Additional news sources (5+ outlets)
-→ Full annual report extraction
-→ Competitor ESG comparison
-→ Government tender records
-```
-
-**Triggers Tier 3 if:** Any violation with `severity = "critical"`
-
----
-
-#### 🔴 Tier 3 — Predictive Simulation (Critical Violations Only)
-
-**Powered by: Our Proprietary Simulation Engine**
-
-This is our **core competitive moat**. Violation data is sent to our proprietary simulation engine which creates agents representing:
-
-```
-→ EU Regulatory Inspector
-→ ESG Investigative Journalist
-→ Institutional Investor
-→ NGO Watchdog
-→ Procurement Auditor
-→ Government Enforcement Officer
-```
-
-Each agent independently predicts reaction + timeline.
-
-**Sample output:**
-```json
-{
-  "risk_score": 91,
-  "risk_level": "critical",
-  "predictions": [
-    {
-      "agent_type": "regulator",
-      "prediction": "Enforcement review likely",
-      "probability": 0.91,
-      "timeline_days": 45
-    },
-    {
-      "agent_type": "media",
-      "prediction": "Regional news coverage imminent",
-      "probability": 0.67,
-      "timeline_days": 30
-    }
-  ],
-  "recommended_action": "Switch supplier within 30 days",
-  "csrd_compliant": false,
-  "financial_exposure_eur": 2300000
-}
-```
-
----
-
-### Data Contracts Between Tiers
-
-```
-Tier 1 → Tier 2:
-{
-  "supplier_id": "uuid",
-  "supplier_name": "string",
-  "supplier_website": "string",
-  "flag_severity": "none|low|medium|high|critical",
-  "discrepancies": [
-    {
-      "claim": "string",
-      "finding": "string",
-      "source_url": "string",
-      "confidence": 0.0-1.0
-    }
-  ],
-  "raw_sources": ["url1", "url2"]
-}
-
-Tier 2 → Tier 3:
-{
-  "supplier_id": "uuid",
-  "supplier_name": "string",
-  "country": "string",
-  "industry": "string",
-  "violations": [
-    {
-      "type": "environmental|labour|legal|financial",
-      "severity": "low|medium|high|critical",
-      "description": "string",
-      "date_found": "ISO date",
-      "source_url": "string",
-      "fine_amount_eur": number|null
-    }
-  ],
-  "trigger_reason": "string"
-}
-
-Tier 3 → Dashboard:
-{
-  "supplier_id": "uuid",
-  "risk_score": 0-100,
-  "risk_level": "low|medium|high|critical",
-  "predictions": [...],
-  "recommended_action": "string",
-  "csrd_compliant": boolean,
-  "financial_exposure_eur": number
-}
-```
-
----
-
-## 💻 Tech Stack
-
-### Frontend
-| Technology | Purpose |
-|-----------|---------|
-| **React 18** | UI framework |
-| **TypeScript 5.8** | Type safety |
-| **Tailwind CSS 3** | Styling |
-| **shadcn/ui** | UI components |
-| **Recharts** | Risk visualization |
-| **Framer Motion** | Animations |
-| **React Hook Form + Zod** | Form validation |
-| **TanStack React Query** | Data fetching |
-| **React Router DOM 6** | Routing |
-
-### Backend
-| Technology | Purpose |
-|-----------|---------|
-| **Supabase** | PostgreSQL + Auth + Realtime |
-| **Supabase Storage** | Document storage |
-| **Row Level Security** | Multi-tenant isolation |
-| **Supabase Edge Functions** | Scheduled weekly scans |
-
-### AI & Agent Layer
-| Technology | Purpose |
-|-----------|---------|
-| **TinyFish Web Agent API** | Parallel web scraping + navigation |
-| **Gemini Flash** | Tier 1 cross-referencing (fast + cheap) |
-| **GPT-4o** | Tier 2 deep analysis |
-| **Proprietary Simulation Engine** | Tier 3 predictive risk scoring |
-| **MiroFish Simulation Engine** | Tier 3 predictive risk scoring (self-hosted, used with permission) |
-
-
-
-### Reports & Import
-| Technology | Purpose |
-|-----------|---------|
-| **jsPDF + AutoTable** | PDF compliance reports |
-| **PapaParse** | CSV supplier list import |
-
----
-
-## 🔒 Enterprise Security & Trust
-
-Our target buyers are Chief Procurement Officers at large EU corporations. Security is non-negotiable.
-
-**Built on Parity AI's enterprise-grade security heritage:**
-
-| Feature | Implementation |
-|---------|---------------|
-| **Multi-tenant isolation** | RLS on all Supabase tables — Company A cannot see Company B's data |
-| **GDPR compliance** | EU supplier data stays within EU infrastructure |
-| **Zero-retention LLM** | Enterprise API endpoints with zero data-training retention |
-| **No credential storage** | TinyFish uses session-based access only — no passwords stored |
-| **Encrypted at rest** | All data encrypted in Supabase PostgreSQL |
-| **Full audit trail** | Every scan, finding, and action logged |
-| **Role-based access** | Admin/user/viewer roles per organization |
-
----
-
-## 🗄️ Database Schema
-
-```
-organizations       → Multi-tenant company data
-profiles            → User profiles linked to org
-user_roles          → Role-based access control
-suppliers           → Supplier registry per org
-scans               → Scan history + status
-tier1_results       → Raw TinyFish findings
-violations          → Confirmed violations per supplier
-discrepancies       → Claim vs reality gaps
-simulation_outputs  → Tier 3 prediction results
-alerts              → Real-time notifications
-reports             → Generated PDF history
-audit_logs          → Full activity trail
-```
-
----
-
-## 📱 Application Pages
-
-| Page | Route | What It Does |
+| Page | Route | Description |
 |------|-------|-------------|
-| **Upload** | `/upload` | CSV import or manual supplier add |
-| **Dashboard** | `/dashboard` | Risk overview across all suppliers |
-| **Supplier Detail** | `/supplier/:id` | Full violations + simulation predictions |
-| **Reports** | `/reports` | Generate + download CSRD PDF reports |
-| **Alerts** | `/alerts` | Real-time violation notifications |
-| **Settings** | `/settings` | API keys, scan frequency, team management |
+| Home | `/` | Landing page with value proposition |
+| Auth | `/auth` | Sign in / sign up |
+| Dashboard | `/dashboard` | Risk overview, CCTV agent grid, supplier table |
+| Supplier Detail | `/supplier/:id` | Full audit with live agent scan, violations, predictions |
+| Upload | `/upload` | CSV bulk import or manual supplier entry |
+| Reports | `/reports` | Generate and download CSRD-compliant PDF reports |
+| Alerts | `/alerts` | Real-time violation notifications with severity filters |
+| Settings | `/settings` | API key management, org settings, notification preferences |
 
 ---
 
-## 🌍 Market
+## Key Features
 
-### Primary — EU (Launch)
-```
-50,000+ large EU companies
-CSRD enforcement active NOW
-Fines: up to 10% annual turnover
-Current solution: Manual analysts costing €100k+/year
-Our solution: €24k/year, automated, continuous
-```
+**Live Agent Grid (CCTV View)**
+Watch 16 agents work in real-time. Each agent card shows: LIVE/DEMO badge, terminal-style logs of actions being taken, progress bar, and final findings. Hero agents (Claim Extractor, Certification Verifier, Compliance Auditor, News Scanner) are prominently displayed. Secondary agents collapse under "+ more agents" to reduce cognitive load.
 
-### Expansion
-```
-UK    → TCFD + SECR compliance
-USA   → SEC Climate Rules (2026)
-AUS   → ASRS (2025-2027)
-Global → ISSB Standards
-```
+**Mission Control Bar**
+Top-level status showing: current supplier being audited, LIVE/DEMO mode indicator, animated progress bar, elapsed time, and contradiction count. Animated gradient border during active scanning.
 
----
+**Contradiction Panel**
+The centerpiece. Animated red panel that slides in when mismatches are detected. Shows claim vs. evidence side-by-side, confidence bar, financial exposure in EUR, time-to-impact in days, and source link. Auto-scrolls into view with background dim effect.
 
-## 💰 Business Model
+**Timeline Feed**
+Real-time scrolling event log showing every agent action with timestamp, agent name, and color-coded message type (step, action, success, warning, contradiction).
 
-| Plan | Price | Suppliers |
-|------|-------|-----------|
-| **Starter** | €499/month | Up to 50 |
-| **Growth** | €1,999/month | Up to 200 |
-| **Enterprise** | €4,999/month | Unlimited + API |
+**Action Panel**
+Post-scan actions: auto-contact supplier, generate CSRD report (real PDF), download evidence (JSON), re-run scan. Includes audit summary with risk score, risk level, contradiction count, violation count, and CSRD compliance status.
 
-**vs Current Alternative:**
-```
-Consulting audit  → €100,000-500,000 (one time)
-Analyst team      → €100,000+/year
-Scope3Scout       → €24,000/year + continuous + predictive
-```
+**API Key Management**
+API keys (TinyFish, Gemini, OpenAI) are stored in localStorage via the Settings page. No Vercel environment variables needed for demo. Priority: localStorage > env var > empty (falls back to demo mode).
 
 ---
 
-## 🚀 13-Day Build Plan
+## Quick Start
 
+```bash
+git clone https://github.com/m-zest/Scope3Scout.git
+cd Scope3Scout
+npm install
+npm run dev
 ```
-Day 1-2:  Supabase schema + CSV upload UI
-Day 3-4:  TinyFish Tier 1 — one supplier end to end
-Day 5-6:  LLM cross-reference + discrepancy detection
-Day 7:    Tier 2 deep investigation
-Day 8:    Simulation engine API connection (Tier 3)
-Day 9:    Full risk dashboard
-Day 10:   PDF reports + alert system
-Day 11:   End to end testing with real suppliers
-Day 12:   Demo video recording
-Day 13:   Submit on HackerEarth + post on X
+
+Runs at `http://localhost:8080`.
+
+### Environment Variables
+
+```bash
+# Supabase (required for auth and real data persistence)
+VITE_SUPABASE_URL=
+VITE_SUPABASE_PUBLISHABLE_KEY=
+
+# TinyFish (optional -- can be entered via Settings page)
+VITE_TINYFISH_API_KEY=
+
+# LLM (optional -- for Tier 2 analysis)
+VITE_GEMINI_API_KEY=
+VITE_OPENAI_API_KEY=
 ```
+
+All API keys can also be entered through the Settings page at runtime. The app works in demo mode without any keys configured.
 
 ---
 
-## 🏆 Why We Win
+## Why TinyFish Is Essential
 
-**1. TinyFish is irreplaceable**
-200 suppliers in parallel. Behind dynamic pages. No APIs exist. Regional databases across 27 EU countries. Multiple languages. Cannot be replicated any other way.
+ESG compliance data lives behind dynamic web portals with no APIs:
 
-**2. Simulation engine is our moat**
-Proprietary — 100% owned. Predicts future risk not just current state. No competitor has this. Gets smarter with more data.
+| Source | API? | Reality |
+|--------|------|---------|
+| German Federal Environment Agency (UBA) | No | Complex form navigation |
+| Hungarian OKIR Environmental Registry | No | Multi-step portal |
+| Romanian ANPM Environmental Agency | No | Browser-only access |
+| ISO Certification Verification Portals | No | Blocks traditional scrapers |
+| Regional Labour Violation Databases | No | Scattered across 27 EU country portals |
+| Local News Sites | No | Dynamic JavaScript rendering |
 
-**3. Fits exact pattern of selected builders**
-NiteCapp, KYC Copilot, ContractSense, MarketLens all did: multi-source messy web → structured intelligence. Scope3Scout does the same for ESG supply chains.
-
-**4. Market urgency is undeniable**
-CSRD fines active now. Compliance teams panicking. Budget allocated. No automated solution exists.
-
-**5. Founder-market fit**
-Building from Europe, for European regulation. We understand the fragmentation of EU national databases — Germany's UBA, Hungary's OKIR, Romania's ANPM — giving us a massive execution advantage over US-centric tools.
+TinyFish agents interact with these portals exactly like a human compliance analyst would, at 1000x the speed. Remove TinyFish and the product cannot exist.
 
 ---
 
-## 👥 Team
+## Business Context
 
-**Mohammad Zeeshan** — Lead Developer & Architect
-- Built **Parity AI** — Enterprise AI Governance & Compliance Platform (live at parity-v2.vercel.app)
-- Built **proprietary simulation engine** — multi-agent predictive intelligence system
-- Deep expertise in compliance platforms, enterprise security, AI governance
+| Regulation | Region | Deadline | Penalty |
+|-----------|--------|----------|---------|
+| CSRD | EU (50,000+ companies) | 2025-2027 | Up to 10% turnover |
+| TCFD + SECR | UK | Active | FCA enforcement |
+| SEC Climate Rules | USA | 2026-2027 | SEC enforcement |
+| ASRS | Australia | 2025-2027 | Active |
+
+Current alternative: consulting firms charge EUR 100,000-500,000 for a one-time audit. Scope3Scout provides continuous, automated monitoring.
+
+---
+
+## Team
+
+**Mohammad Zeeshan** -- Lead Developer and Architect
+- Built Parity AI, an enterprise AI Governance and Compliance platform
+- Deep expertise in compliance platforms, enterprise security, and AI governance
 - Building from Europe with direct understanding of EU regulatory fragmentation
 - GitHub: [@m-zest](https://github.com/m-zest)
 
 ---
 
-## 🔑 Environment Variables
-
-```bash
-# Supabase
-VITE_SUPABASE_URL=
-VITE_SUPABASE_PUBLISHABLE_KEY=
-
-# TinyFish (used with permission)
-VITE_TINYFISH_API_KEY=
-
-# LLM
-VITE_GEMINI_API_KEY=
-VITE_OPENAI_API_KEY=
-
-# Proprietary Simulation Engine
-VITE_SIMULATION_ENGINE_URL=
-VITE_SIMULATION_ENGINE_KEY=
-
-VITE_SIMULATION_ENGINE_URL=  # MiroFish wrapper URL
-VITE_SIMULATION_ENGINE_KEY=  # Optional API key
-```
-
----
-
-## 📦 Quick Start
-
-```bash
-git clone https://github.com/m-zest/scope3scout.git
-cd scope3scout
-npm install
-cp .env.example .env
-npm run dev
-```
-
-Runs at `http://localhost:8080`
-
----
-
-## 🗺️ Roadmap
-
-### Hackathon MVP
-- [ ] Supabase schema + migrations
-- [ ] Supplier CSV upload
-- [ ] TinyFish Tier 1 parallel scanning
-- [ ] LLM cross-reference engine
-- [ ] TinyFish Tier 2 deep investigation
-- [ ] Simulation engine Tier 3 integration
-- [ ] Risk dashboard
-- [ ] PDF report generation
-- [ ] Alert system
-- [ ] Demo video + X post
-- [ ] MiroFish wrapper API built
-- [ ] MiroFish deployed on server
-- [ ] Scope3Scout connected to wrapper
-
-
-### v2 Post-Hackathon
-- [ ] Email + Slack integrations
-- [ ] UK, US, Australia database coverage
-- [ ] Enterprise API
-- [ ] White-label for consulting firms
-- [ ] Automated CSRD filing directly to regulators
-
----
-
-## ⚖️ Legal
+## Legal
 
 ```
 Copyright (c) 2026 Mohammad Zeeshan
@@ -548,22 +201,12 @@ All Rights Reserved
 
 Source available for evaluation purposes only.
 Commercial use requires written permission.
-Contact: hello@scope3scout.ai
 ```
 
-**TinyFish:** Used with explicit written permission for hackathon and commercial development.
+TinyFish API used with permission for hackathon and commercial development.
 
 ---
 
-## 🔗 Links
+Built for the TinyFish $2M Pre-Accelerator Hackathon -- March 2026
 
-- **Hackathon:** [TinyFish $2M Pre-Accelerator Hackathon](https://www.hackerearth.com/challenges/hackathon/the-tiny-fish-hackathon-2026/)
-- **TinyFish:** [tinyfish.ai](https://tinyfish.ai)
-- **CSRD:** [European Commission CSRD](https://finance.ec.europa.eu/capital-markets-union-and-financial-markets/company-reporting-and-auditing/company-reporting/corporate-sustainability-reporting_en)
-- **Demo Video:** *Coming March 29, 2026*
-- **X Post:** *Coming March 29, 2026*
-
----
-
-*Built for the TinyFish $2M Pre-Accelerator Hackathon — March 2026*
-*Scope3Scout — Find what your suppliers are hiding before regulators do.*
+*Scope3Scout -- We don't trust supplier reports. We verify them.*
