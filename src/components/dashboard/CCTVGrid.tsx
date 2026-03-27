@@ -123,6 +123,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
   const [showAllTier1, setShowAllTier1] = useState(false);
   const [dimBackground, setDimBackground] = useState(false);
   const [focusedAgentId, setFocusedAgentId] = useState<string | null>(null);
+  const [liveMode, setLiveMode] = useState(false); // DEMO by default, toggle to REAL
 
   const contradictionRef = useRef<HTMLDivElement>(null);
   const demoSuppliers = getDemoSuppliers();
@@ -209,9 +210,9 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
     let completedCount = 0;
     const foundContradictions: Contradiction[] = [];
 
-    // === TIER 1: First agent REAL TinyFish, rest simulated slowly ===
+    // === TIER 1 AGENTS ===
 
-    // Clean contradiction detection helper
+    // Contradiction detection helper with clean professional wording
     const cleanPairs: Record<string, { claim: string; evidence: string }> = {
       website: { claim: 'ISO 14001 Certified - Zero Violations on Record', evidence: 'ISO 14001:2015 certificate EXPIRED December 2025. Company website still displays certification badge.' },
       regulatory: { claim: 'No environmental violations', evidence: 'Environmental fine EUR 40,000 issued March 2026 for illegal water discharge into Rhine river (UBA)' },
@@ -248,7 +249,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
       return hasIssues;
     };
 
-    // Simulate a single agent slowly with visible step-by-step progress
+    // Simulate a single agent with visible step-by-step progress
     const simulateAgent = async (agentTask: TinyFishAgentTask) => {
       const taskId = agentTask.id;
       const taskStart = Date.now();
@@ -258,17 +259,11 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
       addTimelineEntry({ agent: meta.name, message: `Navigating to target`, type: 'action', url: agentTask.url });
 
       const demoSteps = getDemoStepsForTask(taskId, agentTask.url);
-      // Each step takes 600-1000ms = total 5-8 seconds per agent
       for (let i = 0; i < demoSteps.length; i++) {
         await new Promise((r) => setTimeout(r, 600 + Math.random() * 400));
         const progress = Math.min(10 + ((i + 1) / demoSteps.length) * 80, 90);
         setTasks((prev) => prev.map((t) =>
-          t.id === taskId ? {
-            ...t,
-            progress,
-            steps: [...(t.steps || []), demoSteps[i]],
-            currentUrl: agentTask.url,
-          } : t
+          t.id === taskId ? { ...t, progress, steps: [...(t.steps || []), demoSteps[i]], currentUrl: agentTask.url } : t
         ));
         addTimelineEntry({ agent: meta.name, message: demoSteps[i], type: 'step', url: agentTask.url });
       }
@@ -277,41 +272,30 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
       const taskElapsed = Date.now() - taskStart;
       const hasIssues = processTier1Result(taskId, agentTask, resultText, meta);
 
-      updateTask(taskId, {
-        status: hasIssues ? 'warning' : 'success',
-        progress: 100,
-        result: resultText,
-        duration: taskElapsed,
-        screenshots: [],
-      });
+      updateTask(taskId, { status: hasIssues ? 'warning' : 'success', progress: 100, result: resultText, duration: taskElapsed, screenshots: [] });
       completedCount++;
       setAgentsComplete(completedCount);
-      addTimelineEntry({
-        agent: meta.name,
-        message: hasIssues ? `Issues found: ${resultText.substring(0, 60)}...` : 'Scan complete - no issues',
-        type: hasIssues ? 'warning' : 'success',
-      });
+      addTimelineEntry({ agent: meta.name, message: hasIssues ? `Issues found: ${resultText.substring(0, 60)}...` : 'Scan complete - no issues', type: hasIssues ? 'warning' : 'success' });
     };
 
-    // --- AGENT 1: Real TinyFish (Claim Extractor) - finishes FIRST ---
-    const firstAgent = tier1Tasks[0];
-    {
-      const taskId = firstAgent.id;
+    // Run a real TinyFish agent with timeout fallback
+    const runRealAgent = async (agentTask: TinyFishAgentTask, timeoutMs: number = 60000) => {
+      const taskId = agentTask.id;
       const taskStart = Date.now();
       const meta = agentMeta[taskId];
 
-      updateTask(taskId, { status: 'running', progress: 10, url: firstAgent.url, steps: [], screenshots: [], currentUrl: firstAgent.url });
-      addTimelineEntry({ agent: meta.name, message: `Navigating to ${firstAgent.url}`, type: 'action', url: firstAgent.url });
+      updateTask(taskId, { status: 'running', progress: 10, url: agentTask.url, steps: [], screenshots: [], currentUrl: agentTask.url });
+      addTimelineEntry({ agent: meta.name, message: `Navigating to target (LIVE)`, type: 'action', url: agentTask.url });
 
+      // Race: real TinyFish vs timeout fallback
       let stepCount = 0;
-      const result = await runTinyFishAgent(firstAgent, (event: TinyFishSSEEvent) => {
+      const realPromise = runTinyFishAgent(agentTask, (event: TinyFishSSEEvent) => {
         stepCount++;
         const progress = Math.min(10 + (stepCount * 12), 90);
         if (event.type === 'step') {
           setTasks((prev) => prev.map((t) =>
             t.id === taskId ? {
-              ...t,
-              progress,
+              ...t, progress,
               steps: [...(t.steps || []), event.data],
               screenshots: event.screenshot ? [...(t.screenshots || []), event.screenshot] : (t.screenshots || []),
               currentUrl: event.url || t.currentUrl,
@@ -321,48 +305,57 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
         }
       });
 
-      const taskElapsed = Date.now() - taskStart;
-      let resultText = (result.result || '').toString();
-      // Clean JSON from result display
-      if (resultText.startsWith('{')) {
-        try {
-          const p = JSON.parse(resultText);
-          resultText = p.action || p.result || p.message || p.output || 'Scan complete';
-        } catch { /* keep as is */ }
-      }
-      const hasIssues = processTier1Result(taskId, firstAgent, resultText, meta);
+      const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs));
+      const result = await Promise.race([realPromise, timeoutPromise]);
 
-      updateTask(taskId, {
-        status: result.error ? 'error' : hasIssues ? 'warning' : 'success',
-        progress: 100,
-        result: result.error || resultText || 'Complete',
-        duration: taskElapsed,
-        screenshots: result.screenshots || [],
-      });
+      const taskElapsed = Date.now() - taskStart;
+
+      if (!result) {
+        // Timeout - use demo fallback
+        const fallbackResult = getDemoResultForTask(taskId);
+        addTimelineEntry({ agent: meta.name, message: 'Timeout - using cached analysis', type: 'step' });
+        const hasIssues = processTier1Result(taskId, agentTask, fallbackResult, meta);
+        updateTask(taskId, { status: hasIssues ? 'warning' : 'success', progress: 100, result: fallbackResult, duration: taskElapsed, screenshots: [] });
+      } else {
+        let resultText = (result.result || '').toString();
+        if (resultText.startsWith('{')) {
+          try { const p = JSON.parse(resultText); resultText = p.action || p.result || p.message || 'Scan complete'; } catch { /* keep */ }
+        }
+        const hasIssues = processTier1Result(taskId, agentTask, resultText, meta);
+        updateTask(taskId, {
+          status: result.error ? 'error' : hasIssues ? 'warning' : 'success',
+          progress: 100, result: result.error || resultText || 'Complete',
+          duration: taskElapsed, screenshots: result.screenshots || [],
+        });
+      }
+
       completedCount++;
       setAgentsComplete(completedCount);
-      addTimelineEntry({
-        agent: meta.name,
-        message: hasIssues ? `Issues found: ${resultText.substring(0, 60)}...` : 'Scan complete - no issues',
-        type: hasIssues ? 'warning' : 'success',
-      });
-    }
+    };
 
-    // --- AGENTS 2-4: Start AFTER Claim Extractor finishes (sequential, slow) ---
-    addTimelineEntry({ agent: 'System', message: 'Claim Extractor complete - deploying remaining agents', type: 'info' });
-
-    for (let i = 1; i < 4; i++) {
-      if (tier1Tasks[i]) {
-        await new Promise((r) => setTimeout(r, 800 + Math.random() * 400));
-        await simulateAgent(tier1Tasks[i]);
+    if (liveMode && isLive) {
+      // === REAL MODE: All agents use TinyFish with 60s timeout ===
+      addTimelineEntry({ agent: 'System', message: 'LIVE MODE - all agents using real TinyFish API', type: 'info' });
+      const batchSize = 2; // TinyFish allows 2 concurrent
+      for (let i = 0; i < tier1Tasks.length; i += batchSize) {
+        const batch = tier1Tasks.slice(i, i + batchSize);
+        await Promise.all(batch.map(t => runRealAgent(t, 60000)));
       }
-    }
-
-    // --- AGENTS 5-8: Background agents in parallel pairs ---
-    for (let i = 4; i < tier1Tasks.length; i += 2) {
-      await new Promise((r) => setTimeout(r, 500 + Math.random() * 300));
-      const batch = tier1Tasks.slice(i, i + 2).filter(Boolean);
-      await Promise.all(batch.map(simulateAgent));
+    } else {
+      // === DEMO MODE: All agents simulated (fast, reliable) ===
+      // Agents 1-4: sequential with gaps
+      for (let i = 0; i < 4; i++) {
+        if (tier1Tasks[i]) {
+          if (i > 0) await new Promise((r) => setTimeout(r, 800 + Math.random() * 400));
+          await simulateAgent(tier1Tasks[i]);
+        }
+      }
+      // Agents 5-8: parallel pairs
+      for (let i = 4; i < tier1Tasks.length; i += 2) {
+        await new Promise((r) => setTimeout(r, 500 + Math.random() * 300));
+        const batch = tier1Tasks.slice(i, i + 2).filter(Boolean);
+        await Promise.all(batch.map(simulateAgent));
+      }
     }
 
     // === HYBRID GUARANTEE: Inject contradiction if real agents didn't find one ===
@@ -591,6 +584,23 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
               <option key={s.id} value={s.supplier_name}>{s.supplier_name} -{s.country}</option>
             ))}
           </select>
+          {/* DEMO / REAL toggle */}
+          {isLive && (
+            <button
+              onClick={() => setLiveMode(!liveMode)}
+              disabled={scanning}
+              className={cn(
+                'flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all border',
+                liveMode
+                  ? 'bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20'
+                  : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20',
+                scanning && 'opacity-40 cursor-not-allowed'
+              )}
+            >
+              <span className={cn('w-2 h-2 rounded-full', liveMode ? 'bg-red-500 animate-pulse' : 'bg-emerald-500')} />
+              {liveMode ? 'LIVE API' : 'DEMO'}
+            </button>
+          )}
           <button
             onClick={() => activeSupplier && runScan(activeSupplier)}
             disabled={scanning || !activeSupplier}
