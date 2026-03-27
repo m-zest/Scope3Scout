@@ -34,6 +34,7 @@ import { MissionControl } from './MissionControl';
 import { TimelineFeed, type TimelineEntry } from './TimelineFeed';
 import { ContradictionPanel, type Contradiction } from './ContradictionPanel';
 import { ActionPanel } from './ActionPanel';
+import { runGeminiAnalysis, hasGeminiKey } from '@/lib/gemini';
 
 export type AgentStatus = 'idle' | 'queued' | 'running' | 'success' | 'warning' | 'error';
 
@@ -231,7 +232,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
             agent: meta.name,
             claim: claimLine.trim(),
             evidence: evidenceLine.trim(),
-            confidence: 0.85 + Math.random() * 0.12,
+            confidence: 0.91,
             sourceUrl: agentTask.url,
             severity: result.result.includes('MISMATCH') ? 'critical' : 'high',
             financialExposure: demo.simulation_output.financial_exposure_eur,
@@ -264,31 +265,66 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
       }));
     }
 
-    // === TIER 2: LLM Analysis ===
-    addTimelineEntry({ agent: 'System', message: 'Starting Tier 2 — cross-referencing claims against evidence', type: 'info' });
-    const tier2Ids = ['classifier', 'greenwash', 'evidence', 'sentiment'];
+    // === TIER 2: LLM Analysis (Gemini-powered when key available) ===
+    const useGemini = hasGeminiKey();
+    addTimelineEntry({ agent: 'System', message: `Starting Tier 2 — cross-referencing claims against evidence${useGemini ? ' (Gemini AI)' : ''}`, type: 'info' });
+    const tier2Ids: Array<'classifier' | 'greenwash' | 'evidence' | 'sentiment'> = ['classifier', 'greenwash', 'evidence', 'sentiment'];
+
+    // Build Tier 1 context for Gemini
+    const geminiContext = {
+      supplierName: demo.supplier_name,
+      claims: demo.tier1_result.discrepancies.map(d => d.claim),
+      violations: demo.violations.map(v => `${v.type}: ${v.description}`),
+      discrepancies: demo.tier1_result.discrepancies.map(d => ({ claim: d.claim, finding: d.finding })),
+    };
+
     for (const taskId of tier2Ids) {
       const meta = agentMeta[taskId];
-      updateTask(taskId, { status: 'running', progress: 30, steps: ['Ingesting Tier 1 scan results...'] });
-      addTimelineEntry({ agent: meta.name, message: 'Analyzing scraped data...', type: 'step' });
+      updateTask(taskId, { status: 'running', progress: 30, steps: [useGemini ? 'Sending to Gemini AI for analysis...' : 'Ingesting Tier 1 scan results...'] });
+      addTimelineEntry({ agent: meta.name, message: useGemini ? 'Querying Gemini AI...' : 'Analyzing scraped data...', type: 'step' });
 
-      await new Promise((r) => setTimeout(r, 400 + Math.random() * 400));
-      updateTask(taskId, { progress: 70, steps: ['Ingesting Tier 1 scan results...', 'Cross-referencing claims vs evidence...'] });
+      let taskResult: string;
+      let isWarn: boolean;
 
-      await new Promise((r) => setTimeout(r, 300 + Math.random() * 300));
+      if (useGemini) {
+        updateTask(taskId, { progress: 50, steps: ['Sending to Gemini AI for analysis...', 'Awaiting Gemini response...'] });
+        const geminiResult = await runGeminiAnalysis(taskId, geminiContext);
 
-      const hasViolations = demo.violations.length > 0;
-      const tier2Results: Record<string, string> = {
-        classifier: hasViolations ? `${demo.violations.length} violation(s) classified — ${demo.violations[0]?.severity} severity` : 'No violations to classify',
-        greenwash: demo.tier1_result.discrepancies.length > 0
-          ? `CLAIM-EVIDENCE MISMATCH: ${demo.tier1_result.discrepancies.length} greenwashing discrepancy found — "${demo.tier1_result.discrepancies[0].claim}" contradicted by evidence`
-          : 'No claim discrepancies detected',
-        evidence: hasViolations ? `${demo.violations.length} evidence chain(s) verified with source links` : 'No evidence to extract',
-        sentiment: hasViolations ? 'Negative sentiment detected in recent coverage — risk elevated' : 'Neutral/positive public sentiment',
-      };
+        if (geminiResult.analysis && !geminiResult.analysis.includes('error') && !geminiResult.analysis.includes('Rate limit')) {
+          taskResult = geminiResult.analysis.substring(0, 200);
+          isWarn = geminiResult.contradictions.length > 0 || demo.violations.length > 0;
+          updateTask(taskId, { progress: 80, steps: ['Sending to Gemini AI for analysis...', 'Awaiting Gemini response...', 'Processing Gemini analysis...'] });
+        } else {
+          // Fallback to demo results if Gemini fails
+          const hasViolations = demo.violations.length > 0;
+          const fallback: Record<string, string> = {
+            classifier: hasViolations ? `${demo.violations.length} violation(s) classified — ${demo.violations[0]?.severity} severity` : 'No violations to classify',
+            greenwash: demo.tier1_result.discrepancies.length > 0
+              ? `CLAIM-EVIDENCE MISMATCH: ${demo.tier1_result.discrepancies.length} greenwashing discrepancy found`
+              : 'No claim discrepancies detected',
+            evidence: hasViolations ? `${demo.violations.length} evidence chain(s) verified with source links` : 'No evidence to extract',
+            sentiment: hasViolations ? 'Negative sentiment detected in recent coverage — risk elevated' : 'Neutral/positive public sentiment',
+          };
+          taskResult = fallback[taskId];
+          isWarn = hasViolations && (taskId === 'classifier' || taskId === 'greenwash');
+        }
+      } else {
+        await new Promise((r) => setTimeout(r, 400 + Math.random() * 400));
+        updateTask(taskId, { progress: 70, steps: ['Ingesting Tier 1 scan results...', 'Cross-referencing claims vs evidence...'] });
+        await new Promise((r) => setTimeout(r, 300 + Math.random() * 300));
 
-      const isWarn = hasViolations && (taskId === 'classifier' || taskId === 'greenwash');
-      const taskResult = tier2Results[taskId];
+        const hasViolations = demo.violations.length > 0;
+        const tier2Results: Record<string, string> = {
+          classifier: hasViolations ? `${demo.violations.length} violation(s) classified — ${demo.violations[0]?.severity} severity` : 'No violations to classify',
+          greenwash: demo.tier1_result.discrepancies.length > 0
+            ? `CLAIM-EVIDENCE MISMATCH: ${demo.tier1_result.discrepancies.length} greenwashing discrepancy found — "${demo.tier1_result.discrepancies[0].claim}" contradicted by evidence`
+            : 'No claim discrepancies detected',
+          evidence: hasViolations ? `${demo.violations.length} evidence chain(s) verified with source links` : 'No evidence to extract',
+          sentiment: hasViolations ? 'Negative sentiment detected in recent coverage — risk elevated' : 'Neutral/positive public sentiment',
+        };
+        taskResult = tier2Results[taskId];
+        isWarn = hasViolations && (taskId === 'classifier' || taskId === 'greenwash');
+      }
 
       // Greenwash contradiction from Tier 2
       if (taskId === 'greenwash' && demo.tier1_result.discrepancies.length > 0) {
@@ -314,7 +350,9 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
         progress: 100,
         result: taskResult,
         duration: Math.round(700 + Math.random() * 300),
-        steps: ['Ingesting Tier 1 scan results...', 'Cross-referencing claims vs evidence...', 'Generating classification report...'],
+        steps: useGemini
+          ? ['Sending to Gemini AI for analysis...', 'Awaiting Gemini response...', 'Processing Gemini analysis...', 'Analysis complete']
+          : ['Ingesting Tier 1 scan results...', 'Cross-referencing claims vs evidence...', 'Generating classification report...'],
       });
 
       completedCount++;
