@@ -1,9 +1,12 @@
 # Scope3Scout
 
-**We don't trust supplier reports -- we verify them using autonomous web agents.**
+> ### Built for the [TinyFish $2M Pre-Accelerator Hackathon](https://www.tinyfish.ai/) - March 2026
+> TinyFish is building the future of autonomous web agents. Their Pre-Accelerator program invests $2M into startups using TinyFish's browser automation API to solve real-world problems. Scope3Scout uses TinyFish agents as its core intelligence layer - deploying autonomous browsers to verify supplier ESG claims against real government portals, news archives, and certification registries across 27 EU member states.
+
+**We don't trust supplier reports - we verify them using autonomous web agents.**
 
 [![Status](https://img.shields.io/badge/status-active_development-brightgreen)]()
-[![Hackathon](https://img.shields.io/badge/TinyFish_Hackathon-2026-blue)]()
+[![TinyFish Accelerator](https://img.shields.io/badge/TinyFish_$2M_Accelerator-March_2026-ff6b35)]()
 [![Stack](https://img.shields.io/badge/stack-React_+_Supabase_+_TinyFish-purple)]()
 [![CSRD](https://img.shields.io/badge/regulation-EU_CSRD_2026-orange)]()
 
@@ -11,7 +14,7 @@
 
 ## What Is Scope3Scout?
 
-Scope3Scout is an autonomous ESG supply chain intelligence platform that monitors, verifies, and predicts risk across a company's entire supplier network. It deploys 16 AI agents that autonomously browse real websites, cross-reference supplier claims against evidence, detect contradictions, and predict regulatory consequences -- all in real-time.
+Scope3Scout is an autonomous ESG supply chain intelligence platform that monitors, verifies, and predicts risk across a company's entire supplier network. It deploys 16 AI agents that autonomously browse real websites, cross-reference supplier claims against evidence, detect contradictions, and predict regulatory consequences -all in real-time.
 
 Companies are legally required under the EU's CSRD (Corporate Sustainability Reporting Directive) to verify the environmental and social conduct of their suppliers, with fines reaching up to 10% of annual turnover. Scope3Scout automates what currently takes compliance teams 3-6 months and EUR 100,000+ in analyst time.
 
@@ -19,7 +22,7 @@ Companies are legally required under the EU's CSRD (Corporate Sustainability Rep
 
 ## Demo
 
-Select a supplier. Click "Run Audit". Watch 16 autonomous agents scan real websites, extract claims, verify certifications, and detect contradictions -- live.
+Select a supplier. Click "Run Audit". Watch 16 autonomous agents scan real websites, extract claims, verify certifications, and detect contradictions -live.
 
 When a mismatch is found between what a supplier claims and what the evidence shows, the system surfaces a contradiction panel with financial exposure estimates and time-to-impact predictions.
 
@@ -30,7 +33,7 @@ When a mismatch is found between what a supplier claims and what the evidence sh
 ### Three-Tier Intelligence Pipeline
 
 ```
-TIER 1: Autonomous Web Agents (TinyFish API -- LIVE)
+TIER 1: Autonomous Web Agents (TinyFish API - LIVE)
   8 agents per supplier, running in parallel
   - Claim Extractor ............ Scrapes supplier website for ESG claims
   - Certification Verifier ..... Checks ISO registries for valid certificates
@@ -141,10 +144,10 @@ Runs at `http://localhost:8080`.
 VITE_SUPABASE_URL=
 VITE_SUPABASE_PUBLISHABLE_KEY=
 
-# TinyFish (optional -- can be entered via Settings page)
+# TinyFish (optional - can be entered via Settings page)
 VITE_TINYFISH_API_KEY=
 
-# LLM (optional -- for Tier 2 analysis)
+# LLM (optional - for Tier 2 analysis)
 VITE_GEMINI_API_KEY=
 VITE_OPENAI_API_KEY=
 ```
@@ -185,7 +188,7 @@ Current alternative: consulting firms charge EUR 100,000-500,000 for a one-time 
 
 ## Team
 
-**Mohammad Zeeshan** -- Lead Developer and Architect
+**Mohammad Zeeshan** -Lead Developer and Architect
 - Built Parity AI, an enterprise AI Governance and Compliance platform
 - Deep expertise in compliance platforms, enterprise security, and AI governance
 - Building from Europe with direct understanding of EU regulatory fragmentation
@@ -207,6 +210,6 @@ TinyFish API used with permission for hackathon and commercial development.
 
 ---
 
-Built for the TinyFish $2M Pre-Accelerator Hackathon -- March 2026
+Built for the [TinyFish $2M Pre-Accelerator Hackathon](https://www.tinyfish.ai/) - March 2026
 
-*Scope3Scout -- We don't trust supplier reports. We verify them.*
+*Scope3Scout - We don't trust supplier reports. We verify them.*
