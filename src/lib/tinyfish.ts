@@ -168,6 +168,18 @@ function parseTinyFishEvent(event: Record<string, unknown>): { text: string; scr
     }
   }
 
+  // Clean up JSON-like strings to human-readable text
+  if (text.startsWith('{') && text.includes('"action"')) {
+    try {
+      const parsed = JSON.parse(text);
+      const action = parsed.action || parsed.step || parsed.message || '';
+      const purpose = parsed.purpose || parsed.goal || parsed.description || '';
+      text = purpose ? `${action} - ${purpose}` : action || 'Processing...';
+      // Capitalize first letter
+      text = text.charAt(0).toUpperCase() + text.slice(1);
+    } catch { /* keep original text */ }
+  }
+
   return { text, screenshot, url };
 }
 
