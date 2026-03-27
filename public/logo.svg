@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <defs>
+    <linearGradient id="hex-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c026d3"/>
+      <stop offset="50%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+    <linearGradient id="hex-grad2" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ec4899"/>
+      <stop offset="50%" stop-color="#c084fc"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+    <linearGradient id="inner-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e879f9"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+  </defs>
+  <!-- Shadow hexagon (offset behind) -->
+  <polygon points="28,72 28,102 53,117 78,102 78,72 53,57" fill="#1a0a2e" opacity="0.5"/>
+  <!-- Main outer hexagon -->
+  <polygon points="42,18 12,35 12,70 42,87 72,70 72,35" fill="url(#hex-grad2)" stroke="url(#hex-grad)" stroke-width="2"/>
+  <!-- Inner hexagon ring -->
+  <polygon points="42,30 22,41 22,64 42,75 62,64 62,41" fill="none" stroke="url(#inner-grad)" stroke-width="2.5" opacity="0.8"/>
+  <!-- Center small hexagon -->
+  <polygon points="42,42 33,47 33,57 42,62 51,57 51,47" fill="url(#inner-grad)" opacity="0.9"/>
+  <!-- Tiny center dot hexagon -->
+  <polygon points="42,48 38,50 38,54 42,56 46,54 46,50" fill="white" opacity="0.6"/>
+  <!-- Top accent line -->
+  <line x1="52" y1="24" x2="68" y2="15" stroke="url(#inner-grad)" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+</svg>

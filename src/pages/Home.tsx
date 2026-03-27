@@ -16,6 +16,7 @@ import {
   FileText,
   MapPin,
 } from 'lucide-react';
+import { Logo } from '@/components/Logo';
 
 /* ─── Animation Variants ─── */
 const customEase: [number, number, number, number] = [0.25, 0.4, 0.25, 1];
@@ -185,9 +186,7 @@ export default function Home() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-black/60 backdrop-blur-2xl border-b border-white/[0.04]">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#818cf8] via-[#c084fc] to-[#e879f9] flex items-center justify-center shadow-[0_0_12px_rgba(129,140,248,0.4)]">
-              <Shield className="h-3.5 w-3.5 text-white" />
-            </div>
+            <Logo size={28} />
             <span className="font-heading font-semibold text-[15px] tracking-tight bg-gradient-to-r from-white to-neutral-400 bg-clip-text text-transparent">Scope3Scout</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-[13px] text-neutral-500">
@@ -722,9 +721,7 @@ export default function Home() {
       <footer className="relative z-10 border-t border-white/[0.04] py-12 px-6">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#818cf8] via-[#c084fc] to-[#e879f9] flex items-center justify-center shadow-[0_0_12px_rgba(129,140,248,0.3)]">
-              <Shield className="h-3.5 w-3.5 text-white" />
-            </div>
+            <Logo size={28} />
             <span className="font-heading font-semibold text-neutral-400 text-sm tracking-tight">Scope3Scout</span>
           </div>
           <p className="text-[11px] text-neutral-700">ESG Supply Chain Intelligence. Built for EU compliance.</p>
