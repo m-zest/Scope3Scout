@@ -215,7 +215,7 @@ export default function Upload() {
         <motion.div variants={fadeUp} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#818cf8]/[0.06] border border-[#818cf8]/[0.12] text-sm">
           <Info className="h-4 w-4 text-[#818cf8] shrink-0" />
           <span className="text-[#818cf8]/80">
-            <span className="font-semibold text-[#818cf8]">Demo Mode</span> — uploads are simulated, no data is saved
+            <span className="font-semibold text-[#818cf8]">Demo Mode</span> -uploads are simulated, no data is saved
           </span>
         </motion.div>
       )}
@@ -437,7 +437,7 @@ TextilePro,textilepro.bd,Bangladesh,Textile`}
                 onClick={() => navigate('/dashboard')}
                 className="w-full flex items-center justify-center gap-2 py-2.5 mt-2 bg-white/[0.04] border border-white/[0.08] text-neutral-300 rounded-xl text-sm font-medium hover:bg-white/[0.06] transition-colors"
               >
-                Done — Go to Dashboard
+                Done -Go to Dashboard
                 <ArrowRight className="h-4 w-4" />
               </button>
             </div>

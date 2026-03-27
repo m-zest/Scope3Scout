@@ -85,13 +85,13 @@ const allAgentIds = [
   'regulator', 'media', 'investor', 'ngo',
 ];
 
-// Hero agent IDs — these get prominent display
+// Hero agent IDs -these get prominent display
 const heroAgentIds = ['website', 'certs', 'regulatory', 'news'];
 
 const tierLabels = [
-  { label: 'TIER 1 — Autonomous Web Agents', color: 'text-cyan-400', range: [0, 8] as const, live: true },
-  { label: 'TIER 2 — LLM Cross-Reference', color: 'text-fuchsia-400', range: [8, 12] as const, live: false },
-  { label: 'TIER 3 — Risk Prediction', color: 'text-red-400', range: [12, 16] as const, live: false },
+  { label: 'TIER 1 -Autonomous Web Agents', color: 'text-cyan-400', range: [0, 8] as const, live: true },
+  { label: 'TIER 2 -LLM Cross-Reference', color: 'text-fuchsia-400', range: [8, 12] as const, live: false },
+  { label: 'TIER 3 -Risk Prediction', color: 'text-red-400', range: [12, 16] as const, live: false },
 ];
 
 function initTasks(): AgentTask[] {
@@ -134,7 +134,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
     setTasks((prev) => prev.map((t) => t.id === taskId ? { ...t, ...updates } : t));
   }, []);
 
-  // Auto-scroll to contradiction when detected — dramatic pause for impact
+  // Auto-scroll to contradiction when detected -dramatic pause for impact
   useEffect(() => {
     if (contradictions.length > 0 && contradictionRef.current) {
       // 1.5s dramatic pause → feels like AI is "thinking" → then reveal
@@ -223,11 +223,11 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
           resultText.toLowerCase().includes('expired') ||
           resultText.toLowerCase().includes('found:');
 
-        // Detect contradictions from Tier 1 results — use clean wording
+        // Detect contradictions from Tier 1 results -use clean wording
         if (resultText.includes('MISMATCH') || resultText.includes('FOUND:')) {
           // Clean, professional claim/evidence pairs per agent
           const cleanPairs: Record<string, { claim: string; evidence: string }> = {
-            website: { claim: 'ISO 14001 Certified — Zero Violations on Record', evidence: 'ISO 14001:2015 certificate EXPIRED December 2025. Company website still displays certification badge.' },
+            website: { claim: 'ISO 14001 Certified - Zero Violations on Record', evidence: 'ISO 14001:2015 certificate EXPIRED December 2025. Company website still displays certification badge.' },
             regulatory: { claim: 'No environmental violations', evidence: 'Environmental fine EUR 40,000 issued March 2026 for illegal water discharge into Rhine river (UBA)' },
             certs: { claim: 'ISO 14001 Environmental Management Certified', evidence: 'Certificate #DE-2022-14001-0847 expired December 2025. No renewal application filed.' },
             compliance: { claim: 'CSRD-compliant sustainability reporting', evidence: 'Scope 3 emissions disclosure missing entirely. Double materiality assessment incomplete. ESRS E1 non-compliant.' },
@@ -267,7 +267,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
           agent: meta.name,
           message: hasIssues
             ? `Issues found: ${resultText.substring(0, 60)}...`
-            : 'Scan complete — no issues',
+            : 'Scan complete - no issues',
           type: hasIssues ? 'warning' : 'success',
         });
       }));
@@ -293,7 +293,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
       // Update the cert verifier agent to show it found the issue
       updateTask('certs', {
         status: 'warning',
-        result: `MISMATCH: ${d.claim} — ${d.finding}`,
+        result: `MISMATCH: ${d.claim} - ${d.finding}`,
       });
 
       addTimelineEntry({
@@ -305,7 +305,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
 
     // === TIER 2: LLM Analysis (Gemini-powered when key available) ===
     const useGemini = hasGeminiKey();
-    addTimelineEntry({ agent: 'System', message: `Starting Tier 2 — cross-referencing claims against evidence${useGemini ? ' (Gemini AI)' : ''}`, type: 'info' });
+    addTimelineEntry({ agent: 'System', message: `Starting Tier 2 -cross-referencing claims against evidence${useGemini ? ' (Gemini AI)' : ''}`, type: 'info' });
     const tier2Ids: Array<'classifier' | 'greenwash' | 'evidence' | 'sentiment'> = ['classifier', 'greenwash', 'evidence', 'sentiment'];
 
     // Build Tier 1 context for Gemini
@@ -336,12 +336,12 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
           // Fallback to demo results if Gemini fails
           const hasViolations = demo.violations.length > 0;
           const fallback: Record<string, string> = {
-            classifier: hasViolations ? `${demo.violations.length} violation(s) classified — ${demo.violations[0]?.severity} severity` : 'No violations to classify',
+            classifier: hasViolations ? `${demo.violations.length} violation(s) classified -${demo.violations[0]?.severity} severity` : 'No violations to classify',
             greenwash: demo.tier1_result.discrepancies.length > 0
               ? `CLAIM-EVIDENCE MISMATCH: ${demo.tier1_result.discrepancies.length} greenwashing discrepancy found`
               : 'No claim discrepancies detected',
             evidence: hasViolations ? `${demo.violations.length} evidence chain(s) verified with source links` : 'No evidence to extract',
-            sentiment: hasViolations ? 'Negative sentiment detected in recent coverage — risk elevated' : 'Neutral/positive public sentiment',
+            sentiment: hasViolations ? 'Negative sentiment detected in recent coverage -risk elevated' : 'Neutral/positive public sentiment',
           };
           taskResult = fallback[taskId];
           isWarn = hasViolations && (taskId === 'classifier' || taskId === 'greenwash');
@@ -353,12 +353,12 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
 
         const hasViolations = demo.violations.length > 0;
         const tier2Results: Record<string, string> = {
-          classifier: hasViolations ? `${demo.violations.length} violation(s) classified — ${demo.violations[0]?.severity} severity` : 'No violations to classify',
+          classifier: hasViolations ? `${demo.violations.length} violation(s) classified -${demo.violations[0]?.severity} severity` : 'No violations to classify',
           greenwash: demo.tier1_result.discrepancies.length > 0
-            ? `CLAIM-EVIDENCE MISMATCH: ${demo.tier1_result.discrepancies.length} greenwashing discrepancy found — "${demo.tier1_result.discrepancies[0].claim}" contradicted by evidence`
+            ? `CLAIM-EVIDENCE MISMATCH: ${demo.tier1_result.discrepancies.length} greenwashing discrepancy found -"${demo.tier1_result.discrepancies[0].claim}" contradicted by evidence`
             : 'No claim discrepancies detected',
           evidence: hasViolations ? `${demo.violations.length} evidence chain(s) verified with source links` : 'No evidence to extract',
-          sentiment: hasViolations ? 'Negative sentiment detected in recent coverage — risk elevated' : 'Neutral/positive public sentiment',
+          sentiment: hasViolations ? 'Negative sentiment detected in recent coverage -risk elevated' : 'Neutral/positive public sentiment',
         };
         taskResult = tier2Results[taskId];
         isWarn = hasViolations && (taskId === 'classifier' || taskId === 'greenwash');
@@ -399,7 +399,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
     }
 
     // === TIER 3: Risk Simulation ===
-    addTimelineEntry({ agent: 'System', message: 'Starting Tier 3 — predicting stakeholder responses', type: 'info' });
+    addTimelineEntry({ agent: 'System', message: 'Starting Tier 3 -predicting stakeholder responses', type: 'info' });
     const tier3Ids = ['regulator', 'media', 'investor', 'ngo'];
     for (const taskId of tier3Ids) {
       const meta = agentMeta[taskId];
@@ -414,8 +414,8 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
       const pred = demo.simulation_output.predictions.find((p) => p.agent_type === taskId);
       const isRisky = pred ? pred.probability > 0.4 : false;
       const taskResult = pred
-        ? `${Math.round(pred.probability * 100)}% probability — ${pred.timeline_days}d — ${pred.prediction}`
-        : 'Low risk — no action needed';
+        ? `${Math.round(pred.probability * 100)}% probability -${pred.timeline_days}d -${pred.prediction}`
+        : 'Low risk -no action needed';
 
       updateTask(taskId, {
         status: isRisky ? 'warning' : 'success',
@@ -441,7 +441,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
 
     addTimelineEntry({
       agent: 'System',
-      message: `Audit complete — ${foundContradictions.length} contradictions found in ${finalElapsed.toFixed(1)}s`,
+      message: `Audit complete -${foundContradictions.length} contradictions found in ${finalElapsed.toFixed(1)}s`,
       type: foundContradictions.length > 0 ? 'warning' : 'success',
     });
 
@@ -491,7 +491,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
           >
             <option value="">Select supplier to audit...</option>
             {suppliers.map((s) => (
-              <option key={s.id} value={s.supplier_name}>{s.supplier_name} — {s.country}</option>
+              <option key={s.id} value={s.supplier_name}>{s.supplier_name} -{s.country}</option>
             ))}
           </select>
           <button
@@ -535,7 +535,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
         {/* Left: Agent Grid */}
         <div className="space-y-5">
 
-          {/* Focus Mode — Single agent big view (click to dismiss) */}
+          {/* Focus Mode -Single agent big view (click to dismiss) */}
           <AnimatePresence>
             {focusedAgent && (
               <motion.div
@@ -564,7 +564,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
             )}
           </AnimatePresence>
 
-          {/* 4 Hero Agents — Clean 2x2 Grid */}
+          {/* 4 Hero Agents -Clean 2x2 Grid */}
           {!focusedAgent && (
             <div>
               <p className={cn('text-[10px] font-bold uppercase tracking-[0.15em] mb-3 flex items-center gap-2', tierLabels[0].color)}>
@@ -577,7 +577,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
                 )}
                 {scanning && (
                   <span className="text-[9px] text-cyan-400/70 font-normal normal-case tracking-normal ml-1">
-                    — {heroAgents.filter(t => t.status === 'running').length > 0 ? `${heroAgents.filter(t => t.status === 'running').length} active` : 'processing'}
+                    -{heroAgents.filter(t => t.status === 'running').length > 0 ? `${heroAgents.filter(t => t.status === 'running').length} active` : 'processing'}
                   </span>
                 )}
               </p>
@@ -602,7 +602,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
             </div>
           )}
 
-          {/* Background agents compact summary — only when they're processing */}
+          {/* Background agents compact summary -only when they're processing */}
           {(scanning || scanComplete) && !focusedAgent && backgroundComplete > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -674,7 +674,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
         )}
       </div>
 
-      {/* Headline Insight — instant risk summary */}
+      {/* Headline Insight -instant risk summary */}
       {contradictions.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: -10, scale: 0.98 }}
@@ -689,7 +689,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
               className="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.6)]"
             />
             <p className="font-heading text-lg md:text-xl font-bold tracking-tight text-red-400">
-              Supplier is NON-COMPLIANT — Immediate Risk Detected
+              Supplier is NON-COMPLIANT - Immediate Risk Detected
             </p>
           </div>
           <p className="text-sm text-red-400/60 mt-1 ml-6">
@@ -698,7 +698,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
         </motion.div>
       )}
 
-      {/* Hero Mismatch — THE screenshot moment */}
+      {/* Hero Mismatch -THE screenshot moment */}
       {contradictions.length > 0 && (() => {
         const hero = contradictions.find(c => c.severity === 'critical') || contradictions[0];
         return (
@@ -735,7 +735,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
         );
       })()}
 
-      {/* Contradiction Panel — detailed findings */}
+      {/* Contradiction Panel -detailed findings */}
       <div ref={contradictionRef} className="relative z-50">
         {contradictions.length > 0 && (
           <ContradictionPanel contradictions={contradictions} />
@@ -753,7 +753,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
         />
       )}
 
-      {/* Final Status — closes the story */}
+      {/* Final Status -closes the story */}
       {scanComplete && scanResult && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}

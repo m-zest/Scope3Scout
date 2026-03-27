@@ -211,7 +211,7 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* ═══ HERO SECTION — Spline 3D scene IS the hero ═══ */}
+      {/* ═══ HERO SECTION -Spline 3D scene IS the hero ═══ */}
       <div ref={heroRef} className="relative w-full h-screen flex flex-col items-center justify-center overflow-hidden pt-10 px-4">
         {/* 3D Background with Watermark Hide Hack */}
         <div className="absolute inset-0 w-full h-full z-0 pointer-events-none scale-[1.05] translate-y-4 [&_a]:!hidden">
@@ -261,7 +261,7 @@ export default function Home() {
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent z-[5] pointer-events-none" />
       </div>
 
-      {/* ═══ MAC WINDOW DASHBOARD — LARGE, SCROLL-DRIVEN ═══ */}
+      {/* ═══ MAC WINDOW DASHBOARD -LARGE, SCROLL-DRIVEN ═══ */}
       <section className="relative px-6 -mt-20 pb-32">
         <motion.div
           ref={macRef}
@@ -289,7 +289,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Dashboard content — realistic charts */}
+            {/* Dashboard content -realistic charts */}
             <div className="p-8 space-y-6 bg-[#0a0a0a]">
               {/* Stat cards with area charts */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -312,7 +312,7 @@ export default function Home() {
 
               {/* Two-column: Risk Table + Donut + Bar */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                {/* Risk Table — spans 2 cols */}
+                {/* Risk Table -spans 2 cols */}
                 <div className="lg:col-span-2 bg-white/[0.015] border border-white/[0.05] rounded-xl overflow-hidden">
                   <div className="px-5 py-3 border-b border-white/[0.04] flex items-center justify-between">
                     <span className="text-[12px] font-semibold text-neutral-400">Supplier Risk Table</span>
@@ -416,7 +416,7 @@ export default function Home() {
                 </span>
               </h2>
               <p className="text-neutral-500 mt-6 text-lg leading-relaxed max-w-md font-light">
-                Replace weeks of manual due diligence with AI agents that scan, verify, and simulate — continuously.
+                Replace weeks of manual due diligence with AI agents that scan, verify, and simulate -continuously.
               </p>
             </motion.div>
 
@@ -442,7 +442,7 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* ═══ FEATURES — THE FOUNDATION ═══ */}
+      {/* ═══ FEATURES -THE FOUNDATION ═══ */}
       <section id="features" className="relative py-36 px-6">
         <div className="absolute top-[20%] right-[10%] w-[700px] h-[600px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-700/20 via-purple-900/5 to-transparent blur-3xl opacity-50 pointer-events-none" />
         <div className="absolute bottom-[10%] left-[20%] w-[500px] h-[400px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-600/15 via-cyan-900/5 to-transparent blur-3xl opacity-40 pointer-events-none" />
@@ -495,7 +495,7 @@ export default function Home() {
                     <p><span className="text-cyan-400">agent[1]</span> Scanning website claims...</p>
                     <p><span className="text-blue-400">agent[2]</span> Querying EU fines database...</p>
                     <p><span className="text-purple-400">agent[3]</span> Searching Reuters archive...</p>
-                    <p className="text-red-400 font-semibold mt-2">! DISCREPANCY: Claims ISO 14001 — fined €40,000</p>
+                    <p className="text-red-400 font-semibold mt-2">! DISCREPANCY: Claims ISO 14001 -fined €40,000</p>
                   </div>
                 </div>
               </GlassCard>
@@ -558,7 +558,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══ AI-POWERED ACTIONS — NEW FEATURES ═══ */}
+      {/* ═══ AI-POWERED ACTIONS -NEW FEATURES ═══ */}
       <section className="relative py-36 px-6">
         <div className="absolute top-[30%] left-[15%] w-[600px] h-[500px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-700/15 via-red-900/5 to-transparent blur-3xl opacity-40 pointer-events-none" />
 
@@ -581,7 +581,7 @@ export default function Home() {
               </span>
             </motion.h2>
             <motion.p variants={fadeUp} className="text-neutral-500 mt-6 max-w-lg mx-auto text-lg font-light">
-              AI doesn't just find problems — it generates reports, drafts supplier notifications, and recommends compliance actions autonomously.
+              AI doesn't just find problems -it generates reports, drafts supplier notifications, and recommends compliance actions autonomously.
             </motion.p>
           </motion.div>
 
@@ -600,7 +600,7 @@ export default function Home() {
                 </div>
                 <h3 className="font-heading text-xl font-semibold mb-3 tracking-tight">AI Executive Reports</h3>
                 <p className="text-neutral-500 text-sm leading-relaxed mb-6 font-light">
-                  Gemini AI generates CSRD-compliant executive summaries with key findings, recommended actions, and regulatory risk assessment — in under 5 seconds.
+                  Gemini AI generates CSRD-compliant executive summaries with key findings, recommended actions, and regulatory risk assessment -in under 5 seconds.
                 </p>
                 <div className="space-y-2">
                   {['Executive Summary', 'Key Findings', 'Recommended Actions', 'Regulatory Risk'].map((s) => (
@@ -621,7 +621,7 @@ export default function Home() {
                 </div>
                 <h3 className="font-heading text-xl font-semibold mb-3 tracking-tight">Hero Mismatch Detection</h3>
                 <p className="text-neutral-500 text-sm leading-relaxed mb-6 font-light">
-                  The most critical claim-evidence mismatch is elevated into a prominent display — with confidence score, financial exposure, and regulatory timeline.
+                  The most critical claim-evidence mismatch is elevated into a prominent display -with confidence score, financial exposure, and regulatory timeline.
                 </p>
                 <div className="p-4 bg-red-500/[0.04] border border-red-500/[0.1] rounded-xl">
                   <p className="text-[10px] text-red-400/60 uppercase tracking-wider font-bold mb-1">Primary Violation</p>
@@ -639,7 +639,7 @@ export default function Home() {
                 </div>
                 <h3 className="font-heading text-xl font-semibold mb-3 tracking-tight">Automated Compliance Actions</h3>
                 <p className="text-neutral-500 text-sm leading-relaxed mb-6 font-light">
-                  AI drafts supplier notification letters, attaches evidence, and prepares compliance requests — ready to send with one click.
+                  AI drafts supplier notification letters, attaches evidence, and prepares compliance requests -ready to send with one click.
                 </p>
                 <div className="space-y-2 text-xs text-neutral-500">
                   <div className="flex items-center gap-2 text-amber-400">
@@ -658,7 +658,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══ SIMULATION ENGINE — BENTO ═══ */}
+      {/* ═══ SIMULATION ENGINE -BENTO ═══ */}
       <section id="simulation" className="relative py-36 px-6">
         <div className="absolute top-[15%] left-[25%] w-[700px] h-[600px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-fuchsia-700/20 via-fuchsia-900/5 to-transparent blur-3xl opacity-50 pointer-events-none" />
         <div className="absolute bottom-[15%] right-[15%] w-[500px] h-[500px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-700/15 via-blue-900/5 to-transparent blur-3xl opacity-40 pointer-events-none" />
@@ -694,7 +694,7 @@ export default function Home() {
                   </div>
                   <h3 className="font-heading text-2xl font-semibold mb-3 tracking-tight">MiroFish Simulation Engine</h3>
                   <p className="text-neutral-500 text-base leading-relaxed max-w-2xl mb-10 font-light">
-                    Creates 6 AI personas — Regulator, Media, Investor, NGO, Competitor, and Legal — to predict how a violation plays out over 90 days. Each agent independently scores risk probability and timeline.
+                    Creates 6 AI personas -Regulator, Media, Investor, NGO, Competitor, and Legal -to predict how a violation plays out over 90 days. Each agent independently scores risk probability and timeline.
                   </p>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {[
@@ -769,7 +769,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══ CTA — DEEP GLOW ═══ */}
+      {/* ═══ CTA -DEEP GLOW ═══ */}
       <section id="compliance" className="relative py-44 px-6">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[700px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-600/25 via-indigo-800/10 to-transparent blur-3xl opacity-70 pointer-events-none" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-600/20 via-purple-900/5 to-transparent blur-[100px] opacity-60 pointer-events-none" />

@@ -157,7 +157,7 @@ export function MissionControl({
           </div>
         </div>
 
-        {/* Global insight line — high-risk alert */}
+        {/* Global insight line -high-risk alert */}
         {contradictions > 0 && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
@@ -167,7 +167,7 @@ export function MissionControl({
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
               <p className="text-sm font-semibold text-red-400">
-                High Risk Supplier Detected — {contradictions} finding{contradictions > 1 ? 's' : ''} require immediate review
+                High Risk Supplier Detected -{contradictions} finding{contradictions > 1 ? 's' : ''} require immediate review
               </p>
             </div>
           </motion.div>

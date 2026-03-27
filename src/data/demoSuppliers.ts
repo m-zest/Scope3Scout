@@ -32,14 +32,14 @@ export const DEMO_SCAN_RESULTS: Record<string, DemoScanResult> = {
       flag_severity: "critical",
       discrepancies: [
         {
-          claim: "ISO 14001 certified — zero violations on record",
+          claim: "ISO 14001 certified -zero violations on record",
           finding: "EPA fine €40,000 issued March 2026 for illegal water discharge",
           source_url: "https://umweltbundesamt.de/steelcorp-fine-2026",
           confidence: 0.94,
         },
         {
           claim: "Renewable energy commitment since 2023",
-          finding: "Coal plant contract signed Q4 2025 — contradicts sustainability report",
+          finding: "Coal plant contract signed Q4 2025 -contradicts sustainability report",
           source_url: "https://reuters.com/steelcorp-coal-2025",
           confidence: 0.87,
         },
@@ -50,7 +50,7 @@ export const DEMO_SCAN_RESULTS: Record<string, DemoScanResult> = {
         id: "v1",
         type: "environmental",
         severity: "critical",
-        description: "Illegal water discharge into Rhine river — untreated industrial wastewater detected",
+        description: "Illegal water discharge into Rhine river -untreated industrial wastewater detected",
         source_url: "https://umweltbundesamt.de/steelcorp-fine-2026",
         source_name: "German Federal Environment Agency (UBA)",
         source_excerpt: "SteelCorp GmbH fined €40,000 for illegal discharge of untreated wastewater into the Rhine river near Düsseldorf facility",
@@ -116,7 +116,7 @@ export const DEMO_SCAN_RESULTS: Record<string, DemoScanResult> = {
       flag_severity: "high",
       discrepancies: [
         {
-          claim: "Living wage employer — Fair Trade certified",
+          claim: "Living wage employer -Fair Trade certified",
           finding: "2 labour strike reports in 2025 over unpaid wages",
           source_url: "https://thedailystar.net/textilpro-strike-2025",
           confidence: 0.81,
@@ -128,7 +128,7 @@ export const DEMO_SCAN_RESULTS: Record<string, DemoScanResult> = {
         id: "v3",
         type: "labour",
         severity: "high",
-        description: "Workers strike over unpaid wages — reported twice in 2025, affecting 400+ workers",
+        description: "Workers strike over unpaid wages -reported twice in 2025, affecting 400+ workers",
         source_url: "https://thedailystar.net/textilpro-strike-2025",
         source_name: "The Daily Star Bangladesh",
         source_excerpt: "Workers at TextilePro staged a two-day strike demanding unpaid wages from October and November 2025",
@@ -257,7 +257,7 @@ export const DEMO_SCAN_RESULTS: Record<string, DemoScanResult> = {
       predictions: [
         {
           agent_type: "regulator",
-          prediction: "Fully compliant — no risk signals detected across all data sources",
+          prediction: "Fully compliant -no risk signals detected across all data sources",
           probability: 0.05,
           timeline_days: 365,
         },

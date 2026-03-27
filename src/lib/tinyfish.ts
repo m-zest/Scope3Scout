@@ -51,20 +51,20 @@ export function buildAgentTasks(supplier: SupplierInput): TinyFishAgentTask[] {
     tasks.push({
       id: 'website',
       url: supplier.website,
-      goal: `You are an autonomous compliance audit agent. Act step-by-step like a human browsing. Extract all ESG claims, sustainability commitments, certifications (ISO 14001, etc), and environmental policies from this company website for "${name}". List each claim with a direct quote. Always describe your action before executing it. When evidence is found include: claim, evidence, source URL, confidence. If mismatch is found output: "CLAIM–EVIDENCE MISMATCH". Always capture a screenshot when a result or contradiction is found.`,
+      goal: `You are an autonomous compliance audit agent. Act step-by-step like a human browsing. Extract all ESG claims, sustainability commitments, certifications (ISO 14001, etc), and environmental policies from this company website for "${name}". List each claim with a direct quote. Always describe your action before executing it. When evidence is found include: claim, evidence, source URL, confidence. If mismatch is found output: "CLAIM-EVIDENCE MISMATCH". Always capture a screenshot when a result or contradiction is found.`,
     });
   } else {
     tasks.push({
       id: 'website',
       url: `https://www.google.com/search?q=${encodeURIComponent(name + ' company website ESG sustainability')}`,
-      goal: `You are an autonomous compliance audit agent. Find the official website of "${name}" and extract any ESG claims, certifications, or sustainability commitments they make. Click buttons, fill search fields, and navigate pages. Do not stop at the first page — explore until evidence is found. Always capture a screenshot when a result or contradiction is found.`,
+      goal: `You are an autonomous compliance audit agent. Find the official website of "${name}" and extract any ESG claims, certifications, or sustainability commitments they make. Click buttons, fill search fields, and navigate pages. Do not stop at the first page -explore until evidence is found. Always capture a screenshot when a result or contradiction is found.`,
     });
   }
 
   tasks.push({
     id: 'regulatory',
     url: `https://www.google.com/search?q=${encodeURIComponent(name + ' environmental fine penalty violation ' + country)}`,
-    goal: `You are an autonomous compliance audit agent. Search for any environmental fines, penalties, regulatory violations, or sanctions related to "${name}" in ${country}. Find government enforcement actions, court records, or EPA-equivalent penalties. Return specific amounts and dates. When evidence is found include: claim, evidence, source URL, confidence. If mismatch is found output: "CLAIM–EVIDENCE MISMATCH". Always capture a screenshot when a result is found.`,
+    goal: `You are an autonomous compliance audit agent. Search for any environmental fines, penalties, regulatory violations, or sanctions related to "${name}" in ${country}. Find government enforcement actions, court records, or EPA-equivalent penalties. Return specific amounts and dates. When evidence is found include: claim, evidence, source URL, confidence. If mismatch is found output: "CLAIM-EVIDENCE MISMATCH". Always capture a screenshot when a result is found.`,
   });
 
   tasks.push({
@@ -76,7 +76,7 @@ export function buildAgentTasks(supplier: SupplierInput): TinyFishAgentTask[] {
   tasks.push({
     id: 'certs',
     url: `https://www.google.com/search?q=${encodeURIComponent(name + ' ISO 14001 certification verification')}`,
-    goal: `You are an autonomous compliance audit agent. Verify if "${name}" holds valid ISO 14001, ISO 45001, or other environmental/safety certifications. Check if certifications are current, expired, or suspended. Return certificate numbers and validity dates if found. If mismatch is found output: "CLAIM–EVIDENCE MISMATCH". Always capture a screenshot when a result is found.`,
+    goal: `You are an autonomous compliance audit agent. Verify if "${name}" holds valid ISO 14001, ISO 45001, or other environmental/safety certifications. Check if certifications are current, expired, or suspended. Return certificate numbers and validity dates if found. If mismatch is found output: "CLAIM-EVIDENCE MISMATCH". Always capture a screenshot when a result is found.`,
   });
 
   tasks.push({
@@ -100,7 +100,7 @@ export function buildAgentTasks(supplier: SupplierInput): TinyFishAgentTask[] {
   tasks.push({
     id: 'compliance',
     url: `https://www.google.com/search?q=${encodeURIComponent(name + ' CSRD sustainability report ESG disclosure ' + country)}`,
-    goal: `You are an autonomous compliance audit agent. Check if "${name}" has published a CSRD-compliant sustainability report. Verify their ESG disclosures against EU CSRD requirements. Flag any gaps in reporting or potential greenwashing. If mismatch is found output: "CLAIM–EVIDENCE MISMATCH". Always capture a screenshot when a result is found.`,
+    goal: `You are an autonomous compliance audit agent. Check if "${name}" has published a CSRD-compliant sustainability report. Verify their ESG disclosures against EU CSRD requirements. Flag any gaps in reporting or potential greenwashing. If mismatch is found output: "CLAIM-EVIDENCE MISMATCH". Always capture a screenshot when a result is found.`,
   });
 
   return tasks;
@@ -116,7 +116,7 @@ function parseTinyFishEvent(event: Record<string, unknown>): { text: string; scr
 
   switch (type) {
     case 'STREAMING_URL':
-      text = `Agent started — streaming live`;
+      text = `Agent started -streaming live`;
       break;
     case 'PROGRESS':
     case 'STEP': {
@@ -180,7 +180,7 @@ function shortenUrl(url: string): string {
   }
 }
 
-// Run a single TinyFish agent via SSE — returns parsed events in real-time via callback
+// Run a single TinyFish agent via SSE -returns parsed events in real-time via callback
 export async function runTinyFishAgent(
   task: TinyFishAgentTask,
   onEvent?: (event: TinyFishSSEEvent) => void,
@@ -293,13 +293,13 @@ export async function runTinyFishAgent(
   }
 }
 
-// Semantic per-agent demo steps — each agent has specific, realistic actions
+// Semantic per-agent demo steps -each agent has specific, realistic actions
 function getDemoStepsForTask(taskId: string, url: string): string[] {
   const host = shortenUrl(url);
   const stepsMap: Record<string, string[]> = {
     website: [
       `Navigating to ${host}`,
-      'Found "About Us" page — clicking...',
+      'Found "About Us" page -clicking...',
       'Extracting ESG claims from sustainability section...',
       'Found claim: "ISO 14001 Certified since 2022"',
       'Found claim: "Carbon neutral by 2030"',
@@ -313,7 +313,7 @@ function getDemoStepsForTask(taskId: string, url: string): string[] {
       'Entering company name in search field...',
       'Filtering results by environmental violations...',
       'Found record: Environmental fine issued March 2026',
-      'Extracting fine details — EUR 40,000 for water discharge',
+      'Extracting fine details -EUR 40,000 for water discharge',
       'Cross-referencing with EPA equivalent records...',
       'Evidence captured from official registry',
     ],
@@ -321,10 +321,10 @@ function getDemoStepsForTask(taskId: string, url: string): string[] {
       `Navigating to news.google.com...`,
       'Entering search query with violation keywords...',
       'Scanning headlines from last 12 months...',
-      'Found article: "SteelCorp fined for water pollution" — Reuters',
-      'Found article: "Coal contract contradicts green claims" — DW News',
+      'Found article: "SteelCorp fined for water pollution" -Reuters',
+      'Found article: "Coal contract contradicts green claims" -DW News',
       'Extracting publication dates and sentiment...',
-      'Analyzing article sentiment — negative coverage detected',
+      'Analyzing article sentiment -negative coverage detected',
     ],
     certs: [
       `Navigating to ISO certification registry...`,
@@ -380,16 +380,16 @@ function getDemoStepsForTask(taskId: string, url: string): string[] {
 // Demo fallback results per agent type
 function getDemoResultForTask(taskId: string): string {
   const results: Record<string, string> = {
-    website: 'Found 3 ESG claims: ISO 14001 certified, carbon neutral by 2030, zero waste policy. CLAIM–EVIDENCE MISMATCH: ISO certificate expired Dec 2025.',
+    website: 'Found 3 ESG claims: ISO 14001 certified, carbon neutral by 2030, zero waste policy. CLAIM-EVIDENCE MISMATCH: ISO certificate expired Dec 2025.',
     regulatory: 'FOUND: Environmental fine €40,000 issued March 2026 for illegal water discharge into Rhine river. Source: German Federal Environment Agency (UBA).',
     news: 'Found 2 relevant articles: (1) "SteelCorp fined for water pollution" - Reuters, Mar 2026. (2) "Coal contract contradicts green claims" - DW News, Jan 2026.',
-    certs: 'CLAIM–EVIDENCE MISMATCH: ISO 14001:2015 certificate EXPIRED Dec 2025. Company still claims "ISO 14001 certified" on website. Certificate #DE-2022-14001-0847.',
+    certs: 'CLAIM-EVIDENCE MISMATCH: ISO 14001:2015 certificate EXPIRED Dec 2025. Company still claims "ISO 14001 certified" on website. Certificate #DE-2022-14001-0847.',
     linkedin: 'Red flag: Chief Sustainability Officer departed Feb 2026. No replacement hired. ESG team reduced from 8 to 3 members.',
     supply: 'Mapped 4 sub-suppliers across 3 countries. WARNING: 2 suppliers in high-risk regions (Bangladesh, Myanmar). Sub-supplier TierB-Chem flagged for chemical violations.',
     financial: 'Revenue: €240M (2025). Debt-to-equity: 1.8 (elevated). Credit rating downgraded to BB- by S&P. Working capital negative for 2 quarters.',
-    compliance: 'CLAIM–EVIDENCE MISMATCH: CSRD report published Q4 2025 but Scope 3 emissions disclosure missing entirely. Double materiality assessment incomplete. ESRS E1 non-compliant.',
+    compliance: 'CLAIM-EVIDENCE MISMATCH: CSRD report published Q4 2025 but Scope 3 emissions disclosure missing entirely. Double materiality assessment incomplete. ESRS E1 non-compliant.',
   };
-  return results[taskId] || 'Analysis complete — no issues detected';
+  return results[taskId] || 'Analysis complete -no issues detected';
 }
 
 // Legacy exports for compatibility
