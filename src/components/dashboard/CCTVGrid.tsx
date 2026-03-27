@@ -293,9 +293,11 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
       });
     };
 
-    // --- AGENT 1: Real TinyFish (Claim Extractor) ---
-    const firstAgent = tier1Tasks[0];
-    {
+    // --- Run REAL TinyFish agent + simulated agents IN PARALLEL ---
+    // Agent 1 talks to real API while others simulate alongside it
+
+    const realAgentPromise = (async () => {
+      const firstAgent = tier1Tasks[0];
       const taskId = firstAgent.id;
       const taskStart = Date.now();
       const meta = agentMeta[taskId];
@@ -339,23 +341,28 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
         message: hasIssues ? `Issues found: ${resultText.substring(0, 60)}...` : 'Scan complete - no issues',
         type: hasIssues ? 'warning' : 'success',
       });
-    }
+    })();
 
-    // --- AGENTS 2-4: Simulate one at a time (sequential, slow) ---
-    for (let i = 1; i < 4; i++) {
-      if (tier1Tasks[i]) {
-        // Small gap between agents starting (feels like queuing)
-        await new Promise((r) => setTimeout(r, 800 + Math.random() * 400));
-        await simulateAgent(tier1Tasks[i]);
+    // Simulated agents run alongside real one (start after 2s delay)
+    const simulatedAgentsPromise = (async () => {
+      // Agents 2-4: sequential with gaps (start 2s after real agent)
+      await new Promise((r) => setTimeout(r, 2000));
+      for (let i = 1; i < 4; i++) {
+        if (tier1Tasks[i]) {
+          await new Promise((r) => setTimeout(r, 600 + Math.random() * 400));
+          await simulateAgent(tier1Tasks[i]);
+        }
       }
-    }
+      // Agents 5-8: parallel pairs
+      for (let i = 4; i < tier1Tasks.length; i += 2) {
+        await new Promise((r) => setTimeout(r, 400 + Math.random() * 300));
+        const batch = tier1Tasks.slice(i, i + 2).filter(Boolean);
+        await Promise.all(batch.map(simulateAgent));
+      }
+    })();
 
-    // --- AGENTS 5-8: Simulate remaining in parallel pairs (background feel) ---
-    for (let i = 4; i < tier1Tasks.length; i += 2) {
-      await new Promise((r) => setTimeout(r, 500 + Math.random() * 300));
-      const batch = tier1Tasks.slice(i, i + 2).filter(Boolean);
-      await Promise.all(batch.map(simulateAgent));
-    }
+    // Wait for BOTH real agent and simulated agents to complete
+    await Promise.all([realAgentPromise, simulatedAgentsPromise]);
 
     // === HYBRID GUARANTEE: Inject contradiction if real agents didn't find one ===
     // Wait until 25 seconds from scan start before checking
