@@ -13,6 +13,7 @@ import Upload from '@/pages/Upload';
 import SupplierDetail from '@/pages/SupplierDetail';
 import Reports from '@/pages/Reports';
 import Alerts from '@/pages/Alerts';
+import Settings from '@/pages/Settings';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -94,6 +95,7 @@ function App() {
               <Route path="/supplier/:id" element={<SupplierDetail />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/alerts" element={<Alerts />} />
+              <Route path="/settings" element={<Settings />} />
             </Route>
 
             {/* Default redirect */}
