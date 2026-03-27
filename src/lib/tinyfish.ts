@@ -294,7 +294,7 @@ export async function runTinyFishAgent(
 }
 
 // Semantic per-agent demo steps -each agent has specific, realistic actions
-function getDemoStepsForTask(taskId: string, url: string): string[] {
+export function getDemoStepsForTask(taskId: string, url: string): string[] {
   const host = shortenUrl(url);
   const stepsMap: Record<string, string[]> = {
     website: [
@@ -378,7 +378,7 @@ function getDemoStepsForTask(taskId: string, url: string): string[] {
 }
 
 // Demo fallback results per agent type
-function getDemoResultForTask(taskId: string): string {
+export function getDemoResultForTask(taskId: string): string {
   const results: Record<string, string> = {
     website: 'Found 3 ESG claims: ISO 14001 certified, carbon neutral by 2030, zero waste policy. CLAIM-EVIDENCE MISMATCH: ISO certificate expired Dec 2025.',
     regulatory: 'FOUND: Environmental fine €40,000 issued March 2026 for illegal water discharge into Rhine river. Source: German Federal Environment Agency (UBA).',

@@ -26,6 +26,8 @@ import {
   buildAgentTasks,
   runTinyFishAgent,
   hasTinyFishKey,
+  getDemoStepsForTask,
+  getDemoResultForTask,
   type TinyFishSSEEvent,
   type TinyFishAgentTask,
 } from '@/lib/tinyfish';
@@ -182,98 +184,164 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
     let completedCount = 0;
     const foundContradictions: Contradiction[] = [];
 
-    // === TIER 1: Run 8 agents via TinyFish (parallel batches of 2) ===
+    // === TIER 1: Run 8 agents (first 2 real via TinyFish, remaining 6 simulated) ===
     const batchSize = 2;
+
+    // Helper to process contradiction detection for any Tier 1 agent result
+    const processTier1Result = (taskId: string, agentTask: TinyFishAgentTask, resultText: string, meta: typeof agentMeta[string]) => {
+      const hasIssues = resultText.includes('MISMATCH') ||
+        resultText.toLowerCase().includes('fine') ||
+        resultText.toLowerCase().includes('violation') ||
+        resultText.toLowerCase().includes('penalty') ||
+        resultText.toLowerCase().includes('expired') ||
+        resultText.toLowerCase().includes('found:');
+
+      // Detect contradictions from Tier 1 results -use clean wording
+      if (resultText.includes('MISMATCH') || resultText.includes('FOUND:')) {
+        const cleanPairs: Record<string, { claim: string; evidence: string }> = {
+          website: { claim: 'ISO 14001 Certified - Zero Violations on Record', evidence: 'ISO 14001:2015 certificate EXPIRED December 2025. Company website still displays certification badge.' },
+          regulatory: { claim: 'No environmental violations', evidence: 'Environmental fine EUR 40,000 issued March 2026 for illegal water discharge into Rhine river (UBA)' },
+          certs: { claim: 'ISO 14001 Environmental Management Certified', evidence: 'Certificate #DE-2022-14001-0847 expired December 2025. No renewal application filed.' },
+          compliance: { claim: 'CSRD-compliant sustainability reporting', evidence: 'Scope 3 emissions disclosure missing entirely. Double materiality assessment incomplete. ESRS E1 non-compliant.' },
+          news: { claim: 'Committed to 100% renewable energy by 2030', evidence: 'Reuters reports coal supply contract signed Q4 2025, contradicting published sustainability commitments.' },
+        };
+        const pair = cleanPairs[taskId] || { claim: resultText.split('. ')[0], evidence: resultText.split('. ')[1] || resultText };
+
+        const c: Contradiction = {
+          id: `c-${taskId}-${Date.now()}`,
+          agent: meta.name,
+          claim: pair.claim,
+          evidence: pair.evidence,
+          confidence: 0.91,
+          sourceUrl: agentTask.url,
+          severity: resultText.includes('MISMATCH') ? 'critical' : 'high',
+          financialExposure: demo.simulation_output.financial_exposure_eur,
+          timelineImpactDays: demo.simulation_output.predictions?.[0]?.timeline_days || 45,
+        };
+        foundContradictions.push(c);
+        setContradictions((prev) => [...prev, c]);
+
+        addTimelineEntry({ agent: meta.name, message: `CONTRADICTION DETECTED: ${pair.evidence.substring(0, 80)}`, type: 'contradiction' });
+      }
+
+      return hasIssues;
+    };
+
     for (let batch = 0; batch < tier1Tasks.length; batch += batchSize) {
       const batchTasks = tier1Tasks.slice(batch, batch + batchSize);
 
-      await Promise.all(batchTasks.map(async (agentTask: TinyFishAgentTask) => {
-        const taskId = agentTask.id;
-        const taskStart = Date.now();
-        const meta = agentMeta[taskId];
+      if (batch === 0) {
+        // === Batch 0: Run first 2 hero agents through real TinyFish ===
+        await Promise.all(batchTasks.map(async (agentTask: TinyFishAgentTask) => {
+          const taskId = agentTask.id;
+          const taskStart = Date.now();
+          const meta = agentMeta[taskId];
 
-        updateTask(taskId, { status: 'running', progress: 10, url: agentTask.url, steps: [], screenshots: [], currentUrl: agentTask.url });
-        addTimelineEntry({ agent: meta.name, message: `Navigating to target`, type: 'action', url: agentTask.url });
+          updateTask(taskId, { status: 'running', progress: 10, url: agentTask.url, steps: [], screenshots: [], currentUrl: agentTask.url });
+          addTimelineEntry({ agent: meta.name, message: `Navigating to target`, type: 'action', url: agentTask.url });
 
-        let stepCount = 0;
-        const result = await runTinyFishAgent(agentTask, (event: TinyFishSSEEvent) => {
-          stepCount++;
-          const progress = Math.min(10 + (stepCount * 15), 90);
+          let stepCount = 0;
+          const result = await runTinyFishAgent(agentTask, (event: TinyFishSSEEvent) => {
+            stepCount++;
+            const progress = Math.min(10 + (stepCount * 15), 90);
 
-          if (event.type === 'step') {
+            if (event.type === 'step') {
+              setTasks((prev) => prev.map((t) =>
+                t.id === taskId ? {
+                  ...t,
+                  progress,
+                  steps: [...(t.steps || []), event.data],
+                  screenshots: event.screenshot ? [...(t.screenshots || []), event.screenshot] : (t.screenshots || []),
+                  currentUrl: event.url || t.currentUrl,
+                } : t
+              ));
+              addTimelineEntry({ agent: meta.name, message: event.data, type: 'step', url: event.url });
+            }
+          });
+
+          const taskElapsed = Date.now() - taskStart;
+          const resultText = (result.result || '').toString();
+          const hasIssues = processTier1Result(taskId, agentTask, resultText, meta);
+
+          updateTask(taskId, {
+            status: result.error ? 'error' : hasIssues ? 'warning' : 'success',
+            progress: 100,
+            result: result.error || resultText || 'Complete',
+            duration: taskElapsed,
+            screenshots: result.screenshots || [],
+          });
+
+          completedCount++;
+          setAgentsComplete(completedCount);
+
+          addTimelineEntry({
+            agent: meta.name,
+            message: hasIssues
+              ? `Issues found: ${resultText.substring(0, 60)}...`
+              : 'Scan complete - no issues',
+            type: hasIssues ? 'warning' : 'success',
+          });
+        }));
+      } else {
+        // === Batch > 0: Simulate remaining 6 agents with demo steps/results ===
+        await Promise.all(batchTasks.map(async (agentTask: TinyFishAgentTask) => {
+          const taskId = agentTask.id;
+          const taskStart = Date.now();
+          const meta = agentMeta[taskId];
+
+          updateTask(taskId, { status: 'running', progress: 10, url: agentTask.url, steps: [], screenshots: [], currentUrl: agentTask.url });
+          addTimelineEntry({ agent: meta.name, message: `Navigating to target`, type: 'action', url: agentTask.url });
+
+          const demoSteps = getDemoStepsForTask(taskId, agentTask.url);
+          const totalDelay = 3000 + Math.random() * 1000; // 3-4 seconds
+          const stepDelay = totalDelay / demoSteps.length;
+
+          for (let i = 0; i < demoSteps.length; i++) {
+            await new Promise((r) => setTimeout(r, stepDelay));
+            const progress = Math.min(10 + ((i + 1) / demoSteps.length) * 80, 90);
             setTasks((prev) => prev.map((t) =>
               t.id === taskId ? {
                 ...t,
                 progress,
-                steps: [...(t.steps || []), event.data],
-                screenshots: event.screenshot ? [...(t.screenshots || []), event.screenshot] : (t.screenshots || []),
-                currentUrl: event.url || t.currentUrl,
+                steps: [...(t.steps || []), demoSteps[i]],
+                currentUrl: agentTask.url,
               } : t
             ));
-            addTimelineEntry({ agent: meta.name, message: event.data, type: 'step', url: event.url });
+            addTimelineEntry({ agent: meta.name, message: demoSteps[i], type: 'step', url: agentTask.url });
           }
-        });
 
-        const taskElapsed = Date.now() - taskStart;
-        const resultText = (result.result || '').toString();
-        const hasIssues = resultText.includes('MISMATCH') ||
-          resultText.toLowerCase().includes('fine') ||
-          resultText.toLowerCase().includes('violation') ||
-          resultText.toLowerCase().includes('penalty') ||
-          resultText.toLowerCase().includes('expired') ||
-          resultText.toLowerCase().includes('found:');
+          const resultText = getDemoResultForTask(taskId);
+          const taskElapsed = Date.now() - taskStart;
+          const hasIssues = processTier1Result(taskId, agentTask, resultText, meta);
 
-        // Detect contradictions from Tier 1 results -use clean wording
-        if (resultText.includes('MISMATCH') || resultText.includes('FOUND:')) {
-          // Clean, professional claim/evidence pairs per agent
-          const cleanPairs: Record<string, { claim: string; evidence: string }> = {
-            website: { claim: 'ISO 14001 Certified - Zero Violations on Record', evidence: 'ISO 14001:2015 certificate EXPIRED December 2025. Company website still displays certification badge.' },
-            regulatory: { claim: 'No environmental violations', evidence: 'Environmental fine EUR 40,000 issued March 2026 for illegal water discharge into Rhine river (UBA)' },
-            certs: { claim: 'ISO 14001 Environmental Management Certified', evidence: 'Certificate #DE-2022-14001-0847 expired December 2025. No renewal application filed.' },
-            compliance: { claim: 'CSRD-compliant sustainability reporting', evidence: 'Scope 3 emissions disclosure missing entirely. Double materiality assessment incomplete. ESRS E1 non-compliant.' },
-            news: { claim: 'Committed to 100% renewable energy by 2030', evidence: 'Reuters reports coal supply contract signed Q4 2025, contradicting published sustainability commitments.' },
-          };
-          const pair = cleanPairs[taskId] || { claim: resultText.split('. ')[0], evidence: resultText.split('. ')[1] || resultText };
+          updateTask(taskId, {
+            status: hasIssues ? 'warning' : 'success',
+            progress: 100,
+            result: resultText,
+            duration: taskElapsed,
+            screenshots: [],
+          });
 
-          const c: Contradiction = {
-            id: `c-${taskId}-${Date.now()}`,
+          completedCount++;
+          setAgentsComplete(completedCount);
+
+          addTimelineEntry({
             agent: meta.name,
-            claim: pair.claim,
-            evidence: pair.evidence,
-            confidence: 0.91,
-            sourceUrl: agentTask.url,
-            severity: resultText.includes('MISMATCH') ? 'critical' : 'high',
-            financialExposure: demo.simulation_output.financial_exposure_eur,
-            timelineImpactDays: demo.simulation_output.predictions?.[0]?.timeline_days || 45,
-          };
-          foundContradictions.push(c);
-          setContradictions((prev) => [...prev, c]);
-
-          addTimelineEntry({ agent: meta.name, message: `CONTRADICTION DETECTED: ${pair.evidence.substring(0, 80)}`, type: 'contradiction' });
-        }
-
-        updateTask(taskId, {
-          status: result.error ? 'error' : hasIssues ? 'warning' : 'success',
-          progress: 100,
-          result: result.error || resultText || 'Complete',
-          duration: taskElapsed,
-          screenshots: result.screenshots || [],
-        });
-
-        completedCount++;
-        setAgentsComplete(completedCount);
-
-        addTimelineEntry({
-          agent: meta.name,
-          message: hasIssues
-            ? `Issues found: ${resultText.substring(0, 60)}...`
-            : 'Scan complete - no issues',
-          type: hasIssues ? 'warning' : 'success',
-        });
-      }));
+            message: hasIssues
+              ? `Issues found: ${resultText.substring(0, 60)}...`
+              : 'Scan complete - no issues',
+            type: hasIssues ? 'warning' : 'success',
+          });
+        }));
+      }
     }
 
     // === HYBRID GUARANTEE: Inject contradiction if real agents didn't find one ===
+    // Wait until 25 seconds from scan start before checking
+    const elapsedSoFar = (Date.now() - startTime) / 1000;
+    const remainingDelay = Math.max(0, 25 - elapsedSoFar) * 1000;
+    await new Promise(r => setTimeout(r, remainingDelay));
+
     if (foundContradictions.length === 0 && demo.tier1_result.discrepancies.length > 0) {
       const d = demo.tier1_result.discrepancies[0];
       const guaranteedContradiction: Contradiction = {

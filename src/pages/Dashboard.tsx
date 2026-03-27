@@ -165,6 +165,143 @@ export default function Dashboard() {
         ))}
       </motion.div>
 
+      {/* Charts Row */}
+      <motion.div variants={fadeUp} className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Risk Distribution Donut Chart */}
+        <div className="bg-white/[0.02] border border-white/[0.05] backdrop-blur-md rounded-2xl p-5">
+          <h3 className="text-xs font-medium uppercase tracking-wider text-neutral-500 mb-4">Risk Distribution</h3>
+          {(() => {
+            const riskCounts = {
+              critical: suppliers.filter((s) => s.risk_level === 'critical').length,
+              high: suppliers.filter((s) => s.risk_level === 'high').length,
+              medium: suppliers.filter((s) => s.risk_level === 'medium').length,
+              low: suppliers.filter((s) => s.risk_level === 'low').length,
+            };
+            const total = riskCounts.critical + riskCounts.high + riskCounts.medium + riskCounts.low || 1;
+            const slices = [
+              { label: 'Critical', count: riskCounts.critical, color: '#ef4444' },
+              { label: 'High', count: riskCounts.high, color: '#f97316' },
+              { label: 'Medium', count: riskCounts.medium, color: '#eab308' },
+              { label: 'Low', count: riskCounts.low, color: '#10b981' },
+            ];
+            let cumulative = 0;
+            const radius = 50;
+            const cx = 60;
+            const cy = 60;
+            const innerRadius = 30;
+            return (
+              <div className="flex items-center gap-4">
+                <svg width="120" height="120" viewBox="0 0 120 120">
+                  {slices.map((slice) => {
+                    if (slice.count === 0) return null;
+                    const startAngle = (cumulative / total) * 2 * Math.PI - Math.PI / 2;
+                    cumulative += slice.count;
+                    const endAngle = (cumulative / total) * 2 * Math.PI - Math.PI / 2;
+                    const largeArc = slice.count / total > 0.5 ? 1 : 0;
+                    const x1 = cx + radius * Math.cos(startAngle);
+                    const y1 = cy + radius * Math.sin(startAngle);
+                    const x2 = cx + radius * Math.cos(endAngle);
+                    const y2 = cy + radius * Math.sin(endAngle);
+                    const ix1 = cx + innerRadius * Math.cos(startAngle);
+                    const iy1 = cy + innerRadius * Math.sin(startAngle);
+                    const ix2 = cx + innerRadius * Math.cos(endAngle);
+                    const iy2 = cy + innerRadius * Math.sin(endAngle);
+                    const d = slice.count === total
+                      ? `M ${cx + radius} ${cy} A ${radius} ${radius} 0 1 1 ${cx + radius - 0.01} ${cy} M ${cx + innerRadius} ${cy} A ${innerRadius} ${innerRadius} 0 1 0 ${cx + innerRadius - 0.01} ${cy}`
+                      : `M ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} L ${ix2} ${iy2} A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${ix1} ${iy1} Z`;
+                    return <path key={slice.label} d={d} fill={slice.color} opacity={0.8} />;
+                  })}
+                  <text x={cx} y={cy - 4} textAnchor="middle" className="text-lg font-bold" fill="white" fontSize="18">{total}</text>
+                  <text x={cx} y={cy + 12} textAnchor="middle" fill="#737373" fontSize="9">suppliers</text>
+                </svg>
+                <div className="space-y-2">
+                  {slices.map((slice) => (
+                    <div key={slice.label} className="flex items-center gap-2">
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: slice.color, opacity: 0.8 }} />
+                      <span className="text-xs text-neutral-400">{slice.label}</span>
+                      <span className="text-xs font-semibold text-neutral-300 ml-auto">{slice.count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+
+        {/* Violations by Type Horizontal Bar Chart */}
+        <div className="bg-white/[0.02] border border-white/[0.05] backdrop-blur-md rounded-2xl p-5">
+          <h3 className="text-xs font-medium uppercase tracking-wider text-neutral-500 mb-4">Violations by Type</h3>
+          {(() => {
+            const demoData = getDemoSuppliers();
+            const allViolations = demoData.flatMap((s) => s.violations);
+            const categories = [
+              { label: 'Environmental', key: 'environmental', color: '#10b981' },
+              { label: 'Labour', key: 'labour', color: '#f97316' },
+              { label: 'Legal', key: 'legal', color: '#ef4444' },
+              { label: 'Financial', key: 'financial', color: '#8b5cf6' },
+            ];
+            const counts = categories.map((c) => ({
+              ...c,
+              count: allViolations.filter((v) => v.type === c.key).length,
+            }));
+            const maxCount = Math.max(...counts.map((c) => c.count), 1);
+            return (
+              <div className="space-y-3 mt-2">
+                {counts.map((cat) => (
+                  <div key={cat.key}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs text-neutral-400">{cat.label}</span>
+                      <span className="text-xs font-semibold text-neutral-300">{cat.count}</span>
+                    </div>
+                    <div className="w-full h-2 rounded-full bg-white/[0.04] overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{ width: `${(cat.count / maxCount) * 100}%`, backgroundColor: cat.color, opacity: 0.8, minWidth: cat.count > 0 ? '8px' : '0' }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+        </div>
+
+        {/* Financial Exposure by Supplier Bar Chart */}
+        <div className="bg-white/[0.02] border border-white/[0.05] backdrop-blur-md rounded-2xl p-5">
+          <h3 className="text-xs font-medium uppercase tracking-wider text-neutral-500 mb-4">Financial Exposure by Supplier</h3>
+          {(() => {
+            const top3 = [...suppliers]
+              .filter((s) => s.financial_exposure_eur > 0)
+              .sort((a, b) => b.financial_exposure_eur - a.financial_exposure_eur)
+              .slice(0, 3);
+            const maxExposure = Math.max(...top3.map((s) => s.financial_exposure_eur), 1);
+            const barColors = ['#818cf8', '#c084fc', '#e879f9'];
+            return (
+              <div className="space-y-3 mt-2">
+                {top3.length === 0 ? (
+                  <p className="text-xs text-neutral-600 text-center py-4">No exposure data</p>
+                ) : (
+                  top3.map((supplier, i) => (
+                    <div key={supplier.id}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-neutral-400 truncate max-w-[140px]">{supplier.name}</span>
+                        <span className="text-xs font-semibold text-neutral-300">EUR {(supplier.financial_exposure_eur / 1_000_000).toFixed(1)}M</span>
+                      </div>
+                      <div className="w-full h-2 rounded-full bg-white/[0.04] overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{ width: `${(supplier.financial_exposure_eur / maxExposure) * 100}%`, backgroundColor: barColors[i], opacity: 0.8 }}
+                        />
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            );
+          })()}
+        </div>
+      </motion.div>
+
       {/* CCTV Agent Grid -Main feature */}
       <motion.div variants={fadeUp}>
         <CCTVGrid />
