@@ -24,7 +24,7 @@ export const DEMO_SCAN_RESULTS: Record<string, DemoScanResult> = {
     supplier_name: "SteelCorp GmbH",
     country: "Germany",
     industry: "Steel Manufacturing",
-    website: "https://steelcorp-gmbh.de",
+    website: "https://www.google.com/search?q=SteelCorp+GmbH+Germany+steel+ESG",
     risk_score: 83,
     risk_level: "critical",
     status: "flagged",
