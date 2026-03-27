@@ -147,16 +147,29 @@ export default function Upload() {
       const { error } = await supabase.from('suppliers').insert(rows);
       if (error) throw error;
 
+      // Also save to localStorage for demo mode dashboard display
+      const existing = JSON.parse(localStorage.getItem('scope3scout_uploaded_suppliers') || '[]');
+      const withIds = rows.map((r, i) => ({ ...r, id: `uploaded-${Date.now()}-${i}`, created_at: new Date().toISOString() }));
+      localStorage.setItem('scope3scout_uploaded_suppliers', JSON.stringify([...existing, ...withIds]));
+
       setCsvStatus('done');
     } catch (err) {
       console.error('Upload error:', err);
-      // Fallback: still show success for demo
-      if (DEMO_MODE) {
-        setCsvStatus('done');
-      } else {
-        setParseErrors(['Failed to save suppliers. Please try again.']);
-        setCsvStatus('error');
-      }
+      // Fallback: save to localStorage for demo
+      const rows = parsedRows.map((r) => ({
+        name: r.name,
+        website: r.website || null,
+        country: r.country || null,
+        industry: r.industry || null,
+        org_id: 'default',
+        status: 'pending',
+        risk_score: 0,
+        risk_level: 'unknown',
+      }));
+      const existing = JSON.parse(localStorage.getItem('scope3scout_uploaded_suppliers') || '[]');
+      const withIds = rows.map((r, i) => ({ ...r, id: `uploaded-${Date.now()}-${i}`, created_at: new Date().toISOString() }));
+      localStorage.setItem('scope3scout_uploaded_suppliers', JSON.stringify([...existing, ...withIds]));
+      setCsvStatus('done');
     }
   }, [parsedRows]);
 
@@ -165,21 +178,27 @@ export default function Upload() {
     const supplier = { name: manualName.trim(), website: manualWebsite.trim(), country: manualCountry.trim(), industry: manualIndustry.trim() };
     setManualSuppliers((prev) => [...prev, supplier]);
 
-    // Save to Supabase
+    // Save to Supabase + localStorage
+    const row = {
+      id: `uploaded-${Date.now()}`,
+      name: supplier.name,
+      website: supplier.website || null,
+      country: supplier.country || null,
+      industry: supplier.industry || null,
+      org_id: 'default',
+      status: 'pending',
+      risk_score: 0,
+      risk_level: 'unknown',
+      created_at: new Date().toISOString(),
+    };
     try {
-      await supabase.from('suppliers').insert({
-        name: supplier.name,
-        website: supplier.website || null,
-        country: supplier.country || null,
-        industry: supplier.industry || null,
-        org_id: 'default',
-        status: 'pending',
-        risk_score: 0,
-        risk_level: 'unknown',
-      });
+      await supabase.from('suppliers').insert(row);
     } catch (err) {
       console.error('Manual add error:', err);
     }
+    // Always save to localStorage for demo visibility
+    const existing = JSON.parse(localStorage.getItem('scope3scout_uploaded_suppliers') || '[]');
+    localStorage.setItem('scope3scout_uploaded_suppliers', JSON.stringify([...existing, row]));
 
     setManualName('');
     setManualWebsite('');

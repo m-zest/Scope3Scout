@@ -111,7 +111,25 @@ export default function Dashboard() {
       financial_exposure_eur: 0,
     }));
 
-    return [...realList, ...demoList];
+    // Read uploaded suppliers from localStorage (demo mode persistence)
+    let uploadedList: DashboardSupplier[] = [];
+    try {
+      const stored = JSON.parse(localStorage.getItem('scope3scout_uploaded_suppliers') || '[]');
+      uploadedList = stored.map((s: Record<string, string | number>) => ({
+        id: s.id || `uploaded-${Math.random()}`,
+        name: s.name || 'Unknown',
+        country: (s.country as string) || 'Unknown',
+        industry: (s.industry as string) || 'Unknown',
+        risk_score: Number(s.risk_score) || 0,
+        risk_level: (s.risk_level as string) || 'unknown',
+        status: (s.status as string) || 'pending',
+        violations_count: 0,
+        csrd_compliant: false,
+        financial_exposure_eur: 0,
+      }));
+    } catch { /* ignore parse errors */ }
+
+    return [...uploadedList, ...realList, ...demoList];
   }, [dbSuppliers]);
 
   const totalSuppliers = suppliers.length;
@@ -140,7 +158,7 @@ export default function Dashboard() {
           {dbSuppliers && dbSuppliers.length > 0 ? (
             <><span className="font-semibold text-[#818cf8]">{dbSuppliers.length} real supplier{dbSuppliers.length !== 1 ? 's' : ''}</span> + 5 demo suppliers shown</>
           ) : (
-            <><span className="font-semibold text-[#818cf8]">Demo Data</span> -5 sample suppliers. Upload your own to see them here</>
+            <><span className="font-semibold text-[#818cf8]">Demo Data</span> - 5 sample suppliers. Upload your own to see them here</>
           )}
         </span>
       </motion.div>
