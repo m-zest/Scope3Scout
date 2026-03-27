@@ -155,8 +155,11 @@ export function ActionPanel({
         supplier_id: scanResult.id,
         simulated_at: new Date().toISOString(),
       };
-      generateSupplierReport(supplierObj, violations, simulation);
-    } catch { /* fallback */ }
+      const doc = generateSupplierReport(supplierObj, violations, simulation);
+      doc.save(`${supplierName.replace(/\s+/g, '_')}_CSRD_Report.pdf`);
+    } catch (err) {
+      console.error('PDF generation failed:', err);
+    }
     setGenerating(null);
   };
 

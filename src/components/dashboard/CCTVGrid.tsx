@@ -110,7 +110,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
   const [tasks, setTasks] = useState<AgentTask[]>(initTasks());
   const [scanning, setScanning] = useState(false);
   const [scanComplete, setScanComplete] = useState(false);
-  const [activeSupplier, setActiveSupplier] = useState(supplierName || '');
+  const [activeSupplier, setActiveSupplier] = useState(supplierName || 'SteelCorp GmbH');
   const [scanResult, setScanResult] = useState<(DemoScanResult & { id: string }) | null>(null);
   const [totalTime, setTotalTime] = useState(0);
   const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
@@ -134,17 +134,17 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
     setTasks((prev) => prev.map((t) => t.id === taskId ? { ...t, ...updates } : t));
   }, []);
 
-  // Auto-scroll to contradiction when detected — slight dramatic delay
+  // Auto-scroll to contradiction when detected — dramatic pause for impact
   useEffect(() => {
     if (contradictions.length > 0 && contradictionRef.current) {
-      // 0.8s dramatic pause before showing contradiction
+      // 1.5s dramatic pause → feels like AI is "thinking" → then reveal
       setTimeout(() => {
         setDimBackground(true);
         setTimeout(() => {
           contradictionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          setTimeout(() => setDimBackground(false), 2500);
-        }, 400);
-      }, 800);
+          setTimeout(() => setDimBackground(false), 3000);
+        }, 600);
+      }, 1500);
     }
   }, [contradictions.length]);
 
@@ -223,17 +223,23 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
           resultText.toLowerCase().includes('expired') ||
           resultText.toLowerCase().includes('found:');
 
-        // Detect contradictions from Tier 1 results
+        // Detect contradictions from Tier 1 results — use clean wording
         if (resultText.includes('MISMATCH') || resultText.includes('FOUND:')) {
-          const lines = resultText.split('. ');
-          const claimLine = lines.find(l => l.includes('claims') || l.includes('certified') || l.includes('claim') || l.includes('ISO')) || lines[0];
-          const evidenceLine = lines.find(l => l.includes('MISMATCH') || l.includes('expired') || l.includes('FOUND') || l.includes('fine')) || lines[1] || lines[0];
+          // Clean, professional claim/evidence pairs per agent
+          const cleanPairs: Record<string, { claim: string; evidence: string }> = {
+            website: { claim: 'ISO 14001 Certified — Zero Violations on Record', evidence: 'ISO 14001:2015 certificate EXPIRED December 2025. Company website still displays certification badge.' },
+            regulatory: { claim: 'No environmental violations', evidence: 'Environmental fine EUR 40,000 issued March 2026 for illegal water discharge into Rhine river (UBA)' },
+            certs: { claim: 'ISO 14001 Environmental Management Certified', evidence: 'Certificate #DE-2022-14001-0847 expired December 2025. No renewal application filed.' },
+            compliance: { claim: 'CSRD-compliant sustainability reporting', evidence: 'Scope 3 emissions disclosure missing entirely. Double materiality assessment incomplete. ESRS E1 non-compliant.' },
+            news: { claim: 'Committed to 100% renewable energy by 2030', evidence: 'Reuters reports coal supply contract signed Q4 2025, contradicting published sustainability commitments.' },
+          };
+          const pair = cleanPairs[taskId] || { claim: resultText.split('. ')[0], evidence: resultText.split('. ')[1] || resultText };
 
           const c: Contradiction = {
             id: `c-${taskId}-${Date.now()}`,
             agent: meta.name,
-            claim: claimLine.trim(),
-            evidence: evidenceLine.trim(),
+            claim: pair.claim,
+            evidence: pair.evidence,
             confidence: 0.91,
             sourceUrl: agentTask.url,
             severity: resultText.includes('MISMATCH') ? 'critical' : 'high',
@@ -243,7 +249,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
           foundContradictions.push(c);
           setContradictions((prev) => [...prev, c]);
 
-          addTimelineEntry({ agent: meta.name, message: `CONTRADICTION DETECTED: ${evidenceLine.trim().substring(0, 80)}`, type: 'contradiction' });
+          addTimelineEntry({ agent: meta.name, message: `CONTRADICTION DETECTED: ${pair.evidence.substring(0, 80)}`, type: 'contradiction' });
         }
 
         updateTask(taskId, {

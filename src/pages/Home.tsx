@@ -558,6 +558,106 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ═══ AI-POWERED ACTIONS — NEW FEATURES ═══ */}
+      <section className="relative py-36 px-6">
+        <div className="absolute top-[30%] left-[15%] w-[600px] h-[500px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-700/15 via-red-900/5 to-transparent blur-3xl opacity-40 pointer-events-none" />
+
+        <div className="relative z-10 max-w-6xl mx-auto">
+          <motion.div
+            className="text-center mb-24"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-100px' }}
+            variants={stagger}
+          >
+            <motion.p variants={fadeUp} className="text-[11px] font-semibold uppercase tracking-[0.3em] text-neutral-600 mb-5">
+              Detect + Explain + Act
+            </motion.p>
+            <motion.h2 variants={fadeUp} className="font-heading text-4xl md:text-[3.5rem] font-light tracking-tight leading-tight">
+              From violation to
+              <br />
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-red-400 via-amber-400 to-emerald-400">
+                action in seconds.
+              </span>
+            </motion.h2>
+            <motion.p variants={fadeUp} className="text-neutral-500 mt-6 max-w-lg mx-auto text-lg font-light">
+              AI doesn't just find problems — it generates reports, drafts supplier notifications, and recommends compliance actions autonomously.
+            </motion.p>
+          </motion.div>
+
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-3 gap-4"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-100px' }}
+            variants={staggerFast}
+          >
+            {/* AI Report Generation */}
+            <motion.div variants={fadeUpSlow}>
+              <GlassCard className="p-8 h-full group">
+                <div className="w-12 h-12 rounded-xl bg-[#818cf8]/[0.08] border border-[#818cf8]/[0.15] flex items-center justify-center mb-6 group-hover:bg-[#818cf8]/[0.12] transition-colors duration-500">
+                  <FileText className="h-5 w-5 text-[#818cf8]" />
+                </div>
+                <h3 className="font-heading text-xl font-semibold mb-3 tracking-tight">AI Executive Reports</h3>
+                <p className="text-neutral-500 text-sm leading-relaxed mb-6 font-light">
+                  Gemini AI generates CSRD-compliant executive summaries with key findings, recommended actions, and regulatory risk assessment — in under 5 seconds.
+                </p>
+                <div className="space-y-2">
+                  {['Executive Summary', 'Key Findings', 'Recommended Actions', 'Regulatory Risk'].map((s) => (
+                    <div key={s} className="flex items-center gap-2 text-xs text-neutral-500">
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#818cf8]" />
+                      {s}
+                    </div>
+                  ))}
+                </div>
+              </GlassCard>
+            </motion.div>
+
+            {/* Hero Contradiction */}
+            <motion.div variants={fadeUpSlow}>
+              <GlassCard className="p-8 h-full group">
+                <div className="w-12 h-12 rounded-xl bg-red-400/[0.08] border border-red-400/[0.15] flex items-center justify-center mb-6 group-hover:bg-red-400/[0.12] transition-colors duration-500">
+                  <Eye className="h-5 w-5 text-red-400" />
+                </div>
+                <h3 className="font-heading text-xl font-semibold mb-3 tracking-tight">Hero Mismatch Detection</h3>
+                <p className="text-neutral-500 text-sm leading-relaxed mb-6 font-light">
+                  The most critical claim-evidence mismatch is elevated into a prominent display — with confidence score, financial exposure, and regulatory timeline.
+                </p>
+                <div className="p-4 bg-red-500/[0.04] border border-red-500/[0.1] rounded-xl">
+                  <p className="text-[10px] text-red-400/60 uppercase tracking-wider font-bold mb-1">Primary Violation</p>
+                  <p className="text-xs text-neutral-400 italic">&ldquo;ISO 14001 Certified&rdquo;</p>
+                  <p className="text-xs text-red-400 font-bold mt-1">Certificate EXPIRED Dec 2025</p>
+                </div>
+              </GlassCard>
+            </motion.div>
+
+            {/* AI Compliance Actions */}
+            <motion.div variants={fadeUpSlow}>
+              <GlassCard className="p-8 h-full group">
+                <div className="w-12 h-12 rounded-xl bg-amber-400/[0.08] border border-amber-400/[0.15] flex items-center justify-center mb-6 group-hover:bg-amber-400/[0.12] transition-colors duration-500">
+                  <Cpu className="h-5 w-5 text-amber-400" />
+                </div>
+                <h3 className="font-heading text-xl font-semibold mb-3 tracking-tight">Automated Compliance Actions</h3>
+                <p className="text-neutral-500 text-sm leading-relaxed mb-6 font-light">
+                  AI drafts supplier notification letters, attaches evidence, and prepares compliance requests — ready to send with one click.
+                </p>
+                <div className="space-y-2 text-xs text-neutral-500">
+                  <div className="flex items-center gap-2 text-amber-400">
+                    <span className="font-mono text-[10px]">01</span> Draft supplier notification
+                  </div>
+                  <div className="flex items-center gap-2 text-amber-400/70">
+                    <span className="font-mono text-[10px]">02</span> Attach evidence chain
+                  </div>
+                  <div className="flex items-center gap-2 text-amber-400/50">
+                    <span className="font-mono text-[10px]">03</span> Send compliance request
+                  </div>
+                </div>
+              </GlassCard>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* ═══ SIMULATION ENGINE — BENTO ═══ */}
       <section id="simulation" className="relative py-36 px-6">
         <div className="absolute top-[15%] left-[25%] w-[700px] h-[600px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-fuchsia-700/20 via-fuchsia-900/5 to-transparent blur-3xl opacity-50 pointer-events-none" />
