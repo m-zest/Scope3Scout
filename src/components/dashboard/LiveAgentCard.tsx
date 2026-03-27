@@ -21,6 +21,7 @@ interface LiveAgentCardProps {
   isLive: boolean;
   onClick?: () => void;
   isExpanded?: boolean;
+  isHero?: boolean;
 }
 
 export function LiveAgentCard({
@@ -39,6 +40,7 @@ export function LiveAgentCard({
   isLive,
   onClick,
   isExpanded,
+  isHero,
 }: LiveAgentCardProps) {
   const latestScreenshot = screenshots.at(-1);
   const latestLog = steps.at(-1);
@@ -50,13 +52,13 @@ export function LiveAgentCard({
         className={cn(
           'relative rounded-xl border overflow-hidden cursor-pointer transition-all duration-300',
           status === 'running'
-            ? cn('border-cyan-500/30 bg-black/80 shadow-[0_0_25px_rgba(6,182,212,0.1)]')
+            ? 'border-cyan-500/30 bg-black/80 shadow-[0_0_25px_rgba(6,182,212,0.1)]'
             : status === 'queued'
               ? 'bg-white/[0.01] border-white/[0.05] opacity-60'
               : status === 'idle'
                 ? 'bg-white/[0.01] border-white/[0.05] hover:bg-white/[0.03]'
                 : hasContradiction
-                  ? 'bg-red-500/[0.04] border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.08)]'
+                  ? 'bg-red-500/[0.05] border-red-500/25 shadow-[0_0_25px_rgba(239,68,68,0.1)]'
                   : status === 'warning'
                     ? 'bg-amber-500/[0.04] border-amber-500/15'
                     : status === 'error'
@@ -67,7 +69,7 @@ export function LiveAgentCard({
         animate={status === 'running' ? { scale: [1, 1.005, 1] } : {}}
         transition={{ repeat: Infinity, duration: 2 }}
       >
-        {/* Top bar — LIVE indicator + agent name */}
+        {/* Top bar */}
         <div className={cn(
           'flex items-center justify-between px-3 py-2 border-b',
           status === 'running' ? 'border-cyan-500/10 bg-cyan-500/[0.03]'
@@ -78,7 +80,7 @@ export function LiveAgentCard({
             <div className={cn('w-5 h-5 rounded flex items-center justify-center shrink-0', bgColor)}>
               <Icon className={cn('h-3 w-3', color)} />
             </div>
-            <span className="text-[11px] font-semibold text-white truncate">{name}</span>
+            <span className={cn('font-semibold text-white truncate', isHero ? 'text-xs' : 'text-[11px]')}>{name}</span>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
             {status === 'running' && isLive && (
@@ -109,16 +111,15 @@ export function LiveAgentCard({
           </div>
         </div>
 
-        {/* Screenshot area / content area */}
-        <div className="relative min-h-[80px]">
+        {/* Content area */}
+        <div className={cn('relative', isHero ? 'min-h-[100px]' : 'min-h-[80px]')}>
           {latestScreenshot ? (
             <div className="relative">
               <img
                 src={latestScreenshot}
                 alt="Agent screenshot"
-                className="w-full h-24 object-cover opacity-80"
+                className={cn('w-full object-cover opacity-80', isHero ? 'h-28' : 'h-24')}
               />
-              {/* Overlay with latest log */}
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/80 to-transparent p-2">
                 <p className="text-[9px] font-mono text-green-400 leading-tight truncate">
                   {'>'} {latestLog || 'Processing...'}
@@ -126,13 +127,13 @@ export function LiveAgentCard({
               </div>
             </div>
           ) : (
-            <div className="p-3 space-y-1.5">
+            <div className={cn('p-3 space-y-1.5', isHero && 'p-4')}>
               {status === 'running' ? (
                 <>
                   {/* Terminal-style live logs */}
-                  <div className="space-y-0.5 max-h-[60px] overflow-hidden">
-                    {steps.slice(-3).map((step, i) => (
-                      <p key={i} className="text-[9px] font-mono text-green-400/80 leading-tight truncate">
+                  <div className={cn('space-y-0.5 overflow-hidden', isHero ? 'max-h-[80px]' : 'max-h-[60px]')}>
+                    {steps.slice(isHero ? -4 : -3).map((step, i) => (
+                      <p key={i} className={cn('font-mono text-green-400/80 leading-tight truncate', isHero ? 'text-[10px]' : 'text-[9px]')}>
                         <span className="text-green-600">{'>'}</span> {step}
                       </p>
                     ))}
@@ -142,7 +143,6 @@ export function LiveAgentCard({
                       </p>
                     )}
                   </div>
-                  {/* Current URL */}
                   {currentUrl && (
                     <p className="text-[8px] font-mono text-neutral-600 truncate">
                       {currentUrl}
@@ -150,19 +150,20 @@ export function LiveAgentCard({
                   )}
                 </>
               ) : status === 'queued' ? (
-                <div className="flex items-center justify-center h-[50px]">
+                <div className={cn('flex items-center justify-center', isHero ? 'h-[70px]' : 'h-[50px]')}>
                   <p className="text-[10px] text-neutral-600">Queued...</p>
                 </div>
               ) : status === 'idle' ? (
-                <div className="flex flex-col items-center justify-center h-[50px] gap-1">
-                  <Icon className={cn('h-4 w-4', color, 'opacity-30')} />
-                  <p className="text-[9px] text-neutral-700">{description}</p>
+                <div className={cn('flex flex-col items-center justify-center gap-1', isHero ? 'h-[70px]' : 'h-[50px]')}>
+                  <Icon className={cn('opacity-30', color, isHero ? 'h-5 w-5' : 'h-4 w-4')} />
+                  <p className={cn('text-neutral-700', isHero ? 'text-[10px]' : 'text-[9px]')}>{description}</p>
                 </div>
               ) : (
-                /* Completed state */
+                /* Completed */
                 <div className="space-y-1">
                   <p className={cn(
-                    'text-[10px] font-medium leading-tight line-clamp-3',
+                    'font-medium leading-tight',
+                    isHero ? 'text-[11px] line-clamp-4' : 'text-[10px] line-clamp-3',
                     hasContradiction ? 'text-red-400' :
                     status === 'warning' ? 'text-amber-400' :
                     status === 'error' ? 'text-red-400' : 'text-emerald-400/80'
@@ -178,7 +179,7 @@ export function LiveAgentCard({
           )}
         </div>
 
-        {/* Progress bar at bottom */}
+        {/* Progress bar */}
         {(status === 'running' || status === 'queued') && (
           <div className="h-0.5 bg-white/[0.04]">
             <motion.div
@@ -196,7 +197,7 @@ export function LiveAgentCard({
         )}
       </motion.div>
 
-      {/* Expanded detail panel */}
+      {/* Expanded detail */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
