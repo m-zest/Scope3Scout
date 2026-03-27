@@ -126,21 +126,31 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
 
   const contradictionRef = useRef<HTMLDivElement>(null);
   const demoSuppliers = getDemoSuppliers();
-  // Include uploaded suppliers from localStorage in dropdown
-  const uploadedSuppliers = (() => {
+  // Include uploaded suppliers from localStorage, deduplicated by name
+  const suppliers = (() => {
+    const demoNames = new Set(demoSuppliers.map(s => s.supplier_name));
     try {
       const stored = JSON.parse(localStorage.getItem('scope3scout_uploaded_suppliers') || '[]');
-      return stored.map((s: Record<string, string>) => ({
-        ...demoSuppliers[0], // Use SteelCorp as template for scan data
-        id: s.id || `uploaded-${Math.random()}`,
-        supplier_name: s.name || 'Unknown',
-        country: s.country || 'Unknown',
-        industry: s.industry || 'Unknown',
-        website: s.website || demoSuppliers[0].website,
-      }));
-    } catch { return []; }
+      const unique = stored
+        .filter((s: Record<string, string>) => s.name && !demoNames.has(s.name))
+        .map((s: Record<string, string>) => ({
+          ...demoSuppliers[0],
+          id: s.id || `uploaded-${Math.random()}`,
+          supplier_name: s.name,
+          country: s.country || 'Unknown',
+          industry: s.industry || 'Unknown',
+          website: s.website || demoSuppliers[0].website,
+        }));
+      // Deduplicate by name
+      const seen = new Set<string>();
+      const deduped = unique.filter((s: { supplier_name: string }) => {
+        if (seen.has(s.supplier_name)) return false;
+        seen.add(s.supplier_name);
+        return true;
+      });
+      return [...demoSuppliers, ...deduped];
+    } catch { return demoSuppliers; }
   })();
-  const suppliers = [...demoSuppliers, ...uploadedSuppliers];
   const isLive = hasTinyFishKey();
 
   const addTimelineEntry = useCallback((entry: Omit<TimelineEntry, 'id' | 'timestamp'>) => {

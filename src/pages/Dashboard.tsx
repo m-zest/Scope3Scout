@@ -136,7 +136,14 @@ export default function Dashboard() {
       }));
     } catch { /* ignore parse errors */ }
 
-    return [...uploadedList, ...realList, ...demoList];
+    // Deduplicate by name (uploaded may duplicate demo suppliers from sample CSV)
+    const all = [...uploadedList, ...realList, ...demoList];
+    const seen = new Set<string>();
+    return all.filter(s => {
+      if (seen.has(s.name)) return false;
+      seen.add(s.name);
+      return true;
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dbSuppliers, uploadedVersion]);
 
