@@ -113,15 +113,12 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
   const [activeSupplier, setActiveSupplier] = useState(supplierName || '');
   const [scanResult, setScanResult] = useState<(DemoScanResult & { id: string }) | null>(null);
   const [totalTime, setTotalTime] = useState(0);
-  const [expandedTask, setExpandedTask] = useState<string | null>(null);
   const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
   const [contradictions, setContradictions] = useState<Contradiction[]>([]);
   const [agentsComplete, setAgentsComplete] = useState(0);
   const [scanStatus, setScanStatus] = useState<'idle' | 'scanning' | 'complete' | 'error'>('idle');
   const [elapsed, setElapsed] = useState(0);
   const [showAllTier1, setShowAllTier1] = useState(false);
-  const [showAllTier2, setShowAllTier2] = useState(false);
-  const [showAllTier3, setShowAllTier3] = useState(false);
   const [dimBackground, setDimBackground] = useState(false);
   const [focusedAgentId, setFocusedAgentId] = useState<string | null>(null);
 
@@ -156,7 +153,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
     setScanComplete(false);
     setScanResult(null);
     setActiveSupplier(targetSupplier);
-    setExpandedTask(null);
+    setFocusedAgentId(null);
     setTimeline([]);
     setContradictions([]);
     setAgentsComplete(0);
@@ -413,10 +410,6 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
 
     onScanComplete?.(demo);
   }, [suppliers, updateTask, addTimelineEntry, onScanComplete]);
-
-  const toggleExpand = (taskId: string) => {
-    setExpandedTask(expandedTask === taskId ? null : taskId);
-  };
 
   // Only 4 visible hero agents for clean, focused demo
   const heroAgents = tasks.filter((t) => heroAgentIds.includes(t.id));
