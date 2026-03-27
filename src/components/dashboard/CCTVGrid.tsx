@@ -692,7 +692,44 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
         </motion.div>
       )}
 
-      {/* Contradiction Panel — the winning moment */}
+      {/* Hero Mismatch — THE screenshot moment */}
+      {contradictions.length > 0 && (() => {
+        const hero = contradictions.find(c => c.severity === 'critical') || contradictions[0];
+        return (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="rounded-2xl border-2 border-red-500/40 bg-gradient-to-b from-red-500/[0.1] via-red-500/[0.04] to-black/60 backdrop-blur-2xl p-8 text-center shadow-[0_0_80px_rgba(239,68,68,0.15)]"
+          >
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-red-400/50 mb-4">Primary Violation</p>
+            <div className="max-w-lg mx-auto">
+              <p className="text-lg md:text-xl text-neutral-300 font-light leading-relaxed">
+                &ldquo;{hero.claim}&rdquo;
+              </p>
+              <div className="flex items-center justify-center gap-3 my-4">
+                <div className="h-px flex-1 bg-red-500/20" />
+                <span className="text-red-400 font-bold text-lg">vs</span>
+                <div className="h-px flex-1 bg-red-500/20" />
+              </div>
+              <p className="text-xl md:text-2xl text-red-400 font-heading font-bold leading-snug">
+                {hero.evidence}
+              </p>
+            </div>
+            <div className="flex items-center justify-center gap-6 mt-6 pt-4 border-t border-red-500/10">
+              <span className="text-sm font-mono font-bold text-white">{Math.round(hero.confidence * 100)}% confidence</span>
+              {hero.financialExposure && hero.financialExposure > 0 && (
+                <span className="text-sm font-bold text-red-300">EUR {hero.financialExposure.toLocaleString()} exposure</span>
+              )}
+              {hero.timelineImpactDays && (
+                <span className="text-sm font-bold text-amber-300">{hero.timelineImpactDays}d to impact</span>
+              )}
+            </div>
+          </motion.div>
+        );
+      })()}
+
+      {/* Contradiction Panel — detailed findings */}
       <div ref={contradictionRef} className="relative z-50">
         {contradictions.length > 0 && (
           <ContradictionPanel contradictions={contradictions} />
