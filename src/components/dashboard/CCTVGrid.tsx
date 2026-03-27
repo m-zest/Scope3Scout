@@ -278,8 +278,8 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
       addTimelineEntry({ agent: meta.name, message: hasIssues ? `Issues found: ${resultText.substring(0, 60)}...` : 'Scan complete - no issues', type: hasIssues ? 'warning' : 'success' });
     };
 
-    // Run a real TinyFish agent with timeout fallback
-    const runRealAgent = async (agentTask: TinyFishAgentTask, timeoutMs: number = 30000) => {
+    // Run a real TinyFish agent - no timeout, waits for real results
+    const runRealAgent = async (agentTask: TinyFishAgentTask) => {
       const taskId = agentTask.id;
       const taskStart = Date.now();
       const meta = agentMeta[taskId];
@@ -287,11 +287,10 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
       updateTask(taskId, { status: 'running', progress: 10, url: agentTask.url, steps: [], screenshots: [], currentUrl: agentTask.url });
       addTimelineEntry({ agent: meta.name, message: `Navigating to target (LIVE)`, type: 'action', url: agentTask.url });
 
-      // Race: real TinyFish vs timeout fallback
       let stepCount = 0;
-      const realPromise = runTinyFishAgent(agentTask, (event: TinyFishSSEEvent) => {
+      const result = await runTinyFishAgent(agentTask, (event: TinyFishSSEEvent) => {
         stepCount++;
-        const progress = Math.min(10 + (stepCount * 12), 90);
+        const progress = Math.min(10 + (stepCount * 8), 90);
         if (event.type === 'step') {
           setTasks((prev) => prev.map((t) =>
             t.id === taskId ? {
@@ -305,29 +304,18 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
         }
       });
 
-      const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs));
-      const result = await Promise.race([realPromise, timeoutPromise]);
-
       const taskElapsed = Date.now() - taskStart;
-
-      if (!result) {
-        // Timeout - use demo fallback
-        const fallbackResult = getDemoResultForTask(taskId);
-        addTimelineEntry({ agent: meta.name, message: 'Timeout - using cached analysis', type: 'step' });
-        const hasIssues = processTier1Result(taskId, agentTask, fallbackResult, meta);
-        updateTask(taskId, { status: hasIssues ? 'warning' : 'success', progress: 100, result: fallbackResult, duration: taskElapsed, screenshots: [] });
-      } else {
-        let resultText = (result.result || '').toString();
-        if (resultText.startsWith('{')) {
-          try { const p = JSON.parse(resultText); resultText = p.action || p.result || p.message || 'Scan complete'; } catch { /* keep */ }
-        }
-        const hasIssues = processTier1Result(taskId, agentTask, resultText, meta);
-        updateTask(taskId, {
-          status: result.error ? 'error' : hasIssues ? 'warning' : 'success',
-          progress: 100, result: result.error || resultText || 'Complete',
-          duration: taskElapsed, screenshots: result.screenshots || [],
-        });
+      let resultText = (result.result || '').toString();
+      // Clean JSON results to readable text
+      if (resultText.startsWith('{')) {
+        try { const p = JSON.parse(resultText); resultText = p.action || p.result || p.message || p.output || p.purpose || 'Scan complete'; } catch { /* keep */ }
       }
+      const hasIssues = processTier1Result(taskId, agentTask, resultText, meta);
+      updateTask(taskId, {
+        status: result.error ? 'error' : hasIssues ? 'warning' : 'success',
+        progress: 100, result: result.error || resultText || 'Complete',
+        duration: taskElapsed, screenshots: result.screenshots || [],
+      });
 
       completedCount++;
       setAgentsComplete(completedCount);
@@ -339,7 +327,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
       const batchSize = 2; // TinyFish allows 2 concurrent
       for (let i = 0; i < tier1Tasks.length; i += batchSize) {
         const batch = tier1Tasks.slice(i, i + batchSize);
-        await Promise.all(batch.map(t => runRealAgent(t, 30000)));
+        await Promise.all(batch.map(t => runRealAgent(t)));
       }
     } else {
       // === DEMO MODE: All agents simulated (fast, reliable) ===
