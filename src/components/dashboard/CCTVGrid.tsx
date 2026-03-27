@@ -215,16 +215,17 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
         });
 
         const taskElapsed = Date.now() - taskStart;
-        const hasIssues = result.result.includes('MISMATCH') ||
-          result.result.toLowerCase().includes('fine') ||
-          result.result.toLowerCase().includes('violation') ||
-          result.result.toLowerCase().includes('penalty') ||
-          result.result.toLowerCase().includes('expired') ||
-          result.result.toLowerCase().includes('found:');
+        const resultText = (result.result || '').toString();
+        const hasIssues = resultText.includes('MISMATCH') ||
+          resultText.toLowerCase().includes('fine') ||
+          resultText.toLowerCase().includes('violation') ||
+          resultText.toLowerCase().includes('penalty') ||
+          resultText.toLowerCase().includes('expired') ||
+          resultText.toLowerCase().includes('found:');
 
         // Detect contradictions from Tier 1 results
-        if (result.result.includes('MISMATCH') || result.result.includes('FOUND:')) {
-          const lines = result.result.split('. ');
+        if (resultText.includes('MISMATCH') || resultText.includes('FOUND:')) {
+          const lines = resultText.split('. ');
           const claimLine = lines.find(l => l.includes('claims') || l.includes('certified') || l.includes('claim') || l.includes('ISO')) || lines[0];
           const evidenceLine = lines.find(l => l.includes('MISMATCH') || l.includes('expired') || l.includes('FOUND') || l.includes('fine')) || lines[1] || lines[0];
 
@@ -235,7 +236,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
             evidence: evidenceLine.trim(),
             confidence: 0.91,
             sourceUrl: agentTask.url,
-            severity: result.result.includes('MISMATCH') ? 'critical' : 'high',
+            severity: resultText.includes('MISMATCH') ? 'critical' : 'high',
             financialExposure: demo.simulation_output.financial_exposure_eur,
             timelineImpactDays: demo.simulation_output.predictions?.[0]?.timeline_days || 45,
           };
@@ -248,7 +249,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
         updateTask(taskId, {
           status: result.error ? 'error' : hasIssues ? 'warning' : 'success',
           progress: 100,
-          result: result.error || result.result || 'Complete',
+          result: result.error || resultText || 'Complete',
           duration: taskElapsed,
           screenshots: result.screenshots || [],
         });
@@ -259,7 +260,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
         addTimelineEntry({
           agent: meta.name,
           message: hasIssues
-            ? `Issues found: ${(result.result || '').substring(0, 60)}...`
+            ? `Issues found: ${resultText.substring(0, 60)}...`
             : 'Scan complete — no issues',
           type: hasIssues ? 'warning' : 'success',
         });

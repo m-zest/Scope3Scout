@@ -256,7 +256,8 @@ export async function runTinyFishAgent(
             }
 
             if (parsed.type === 'RESULT' || parsed.type === 'COMPLETED' || parsed.type === 'FINAL_RESULT') {
-              finalResult = parsed.result || parsed.output || parsed.extracted_content || stepText;
+              const rawResult = parsed.result || parsed.output || parsed.extracted_content || stepText;
+              finalResult = typeof rawResult === 'string' ? rawResult : JSON.stringify(rawResult);
               onEvent?.({ type: 'result', data: finalResult, screenshot: screenshot ? (screenshot.startsWith('data:') ? screenshot : `data:image/jpeg;base64,${screenshot}`) : undefined, url, timestamp: Date.now() });
             } else if (parsed.type === 'ERROR' || parsed.type === 'FAILED') {
               const errMsg = parsed.error || parsed.message || stepText;
@@ -268,7 +269,8 @@ export async function runTinyFishAgent(
                 onEvent?.({ type: 'step', data: stepText, screenshot: screenshot ? (screenshot.startsWith('data:') ? screenshot : `data:image/jpeg;base64,${screenshot}`) : undefined, url, timestamp: Date.now() });
               }
               if (parsed.extracted_content || parsed.result || parsed.output) {
-                finalResult = parsed.extracted_content || parsed.result || parsed.output;
+                const raw = parsed.extracted_content || parsed.result || parsed.output;
+                finalResult = typeof raw === 'string' ? raw : JSON.stringify(raw);
               }
             }
           } catch {
