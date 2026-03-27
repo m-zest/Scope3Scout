@@ -15,6 +15,7 @@ import {
   Info,
 } from 'lucide-react';
 import { DEMO_MODE } from '@/lib/tinyfish';
+import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
 interface ParsedSupplier {
@@ -130,26 +131,56 @@ export default function Upload() {
 
   const handleConfirmUpload = useCallback(async () => {
     setCsvStatus('uploading');
-    if (DEMO_MODE) {
-      await new Promise((r) => setTimeout(r, 1500));
-      setCsvStatus('done');
-      return;
-    }
     try {
-      await new Promise((r) => setTimeout(r, 1500));
-      setCsvStatus('done');
-    } catch {
-      setParseErrors(['Failed to save suppliers. Please try again.']);
-      setCsvStatus('error');
-    }
-  }, []);
+      // Insert into Supabase
+      const rows = parsedRows.map((r) => ({
+        name: r.name,
+        website: r.website || null,
+        country: r.country || null,
+        industry: r.industry || null,
+        org_id: 'default',
+        status: 'pending',
+        risk_score: 0,
+        risk_level: 'unknown',
+      }));
 
-  const handleManualAdd = useCallback(() => {
+      const { error } = await supabase.from('suppliers').insert(rows);
+      if (error) throw error;
+
+      setCsvStatus('done');
+    } catch (err) {
+      console.error('Upload error:', err);
+      // Fallback: still show success for demo
+      if (DEMO_MODE) {
+        setCsvStatus('done');
+      } else {
+        setParseErrors(['Failed to save suppliers. Please try again.']);
+        setCsvStatus('error');
+      }
+    }
+  }, [parsedRows]);
+
+  const handleManualAdd = useCallback(async () => {
     if (!manualName.trim()) return;
-    setManualSuppliers((prev) => [
-      ...prev,
-      { name: manualName.trim(), website: manualWebsite.trim(), country: manualCountry.trim(), industry: manualIndustry.trim() },
-    ]);
+    const supplier = { name: manualName.trim(), website: manualWebsite.trim(), country: manualCountry.trim(), industry: manualIndustry.trim() };
+    setManualSuppliers((prev) => [...prev, supplier]);
+
+    // Save to Supabase
+    try {
+      await supabase.from('suppliers').insert({
+        name: supplier.name,
+        website: supplier.website || null,
+        country: supplier.country || null,
+        industry: supplier.industry || null,
+        org_id: 'default',
+        status: 'pending',
+        risk_score: 0,
+        risk_level: 'unknown',
+      });
+    } catch (err) {
+      console.error('Manual add error:', err);
+    }
+
     setManualName('');
     setManualWebsite('');
     setManualCountry('');

@@ -13,7 +13,7 @@ import {
   Minus,
   Info,
 } from 'lucide-react';
-import { DEMO_MODE } from '@/lib/tinyfish';
+// Demo suppliers always shown alongside real data
 import { getDemoSuppliers, type DemoScanResult } from '@/data/demoSuppliers';
 import { useSuppliers } from '@/hooks/useSuppliers';
 import { cn } from '@/lib/utils';
@@ -85,25 +85,23 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { data: dbSuppliers } = useSuppliers();
 
-  const useDemo = DEMO_MODE || (!dbSuppliers || dbSuppliers.length === 0);
-
   const suppliers: DashboardSupplier[] = useMemo(() => {
-    if (useDemo) {
-      return getDemoSuppliers().map((s: DemoScanResult & { id: string }) => ({
-        id: s.id,
-        name: s.supplier_name,
-        country: s.country,
-        industry: s.industry,
-        risk_score: s.risk_score,
-        risk_level: s.risk_level,
-        status: s.status,
-        violations_count: s.violations.length,
-        csrd_compliant: s.simulation_output.csrd_compliant,
-        financial_exposure_eur: s.simulation_output.financial_exposure_eur,
-      }));
-    }
+    // Always include demo suppliers for showcase
+    const demoList: DashboardSupplier[] = getDemoSuppliers().map((s: DemoScanResult & { id: string }) => ({
+      id: s.id,
+      name: s.supplier_name,
+      country: s.country,
+      industry: s.industry,
+      risk_score: s.risk_score,
+      risk_level: s.risk_level,
+      status: s.status,
+      violations_count: s.violations.length,
+      csrd_compliant: s.simulation_output.csrd_compliant,
+      financial_exposure_eur: s.simulation_output.financial_exposure_eur,
+    }));
 
-    return (dbSuppliers || []).map((s) => ({
+    // Add real suppliers from Supabase (if any)
+    const realList: DashboardSupplier[] = (dbSuppliers || []).map((s) => ({
       id: s.id,
       name: s.name,
       country: s.country || 'Unknown',
@@ -115,7 +113,9 @@ export default function Dashboard() {
       csrd_compliant: false,
       financial_exposure_eur: 0,
     }));
-  }, [useDemo, dbSuppliers]);
+
+    return [...realList, ...demoList];
+  }, [dbSuppliers]);
 
   const totalSuppliers = suppliers.length;
   const highRisk = suppliers.filter((s) => s.risk_level === 'high' || s.risk_level === 'critical').length;
@@ -133,18 +133,20 @@ export default function Dashboard() {
 
   return (
     <motion.div className="space-y-5 max-w-[1400px]" initial="hidden" animate="visible" variants={stagger}>
-      {/* Demo banner */}
-      {useDemo && (
-        <motion.div
-          variants={fadeUp}
-          className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#818cf8]/[0.06] border border-[#818cf8]/[0.12] text-sm"
-        >
-          <Info className="h-4 w-4 text-[#818cf8] shrink-0" />
-          <span className="text-[#818cf8]/80">
-            <span className="font-semibold text-[#818cf8]">Demo Mode</span> — showing sample data from 5 suppliers across EU supply chain
-          </span>
-        </motion.div>
-      )}
+      {/* Info banner */}
+      <motion.div
+        variants={fadeUp}
+        className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#818cf8]/[0.06] border border-[#818cf8]/[0.12] text-sm"
+      >
+        <Info className="h-4 w-4 text-[#818cf8] shrink-0" />
+        <span className="text-[#818cf8]/80">
+          {dbSuppliers && dbSuppliers.length > 0 ? (
+            <><span className="font-semibold text-[#818cf8]">{dbSuppliers.length} real supplier{dbSuppliers.length !== 1 ? 's' : ''}</span> + 5 demo suppliers shown</>
+          ) : (
+            <><span className="font-semibold text-[#818cf8]">Demo Data</span> — 5 sample suppliers. Upload your own to see them here</>
+          )}
+        </span>
+      </motion.div>
 
       {/* Stat cards */}
       <motion.div variants={fadeUp} className="grid grid-cols-2 lg:grid-cols-5 gap-3">
