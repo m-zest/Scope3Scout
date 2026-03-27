@@ -47,116 +47,53 @@ export function buildAgentTasks(supplier: SupplierInput): TinyFishAgentTask[] {
   const country = supplier.country || 'EU';
   const tasks: TinyFishAgentTask[] = [];
 
-  // Claim Extractor - interactive Google search with clicks and navigation
+  // Claim Extractor - simple clear goal for TinyFish
   tasks.push({
     id: 'website',
-    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' sustainability report ESG certifications ' + country)}`,
-    goal: `Do these steps in order for "${name}":
-1. Look at the Google search results on this page
-2. Click on the FIRST search result link that mentions "${name}" or sustainability
-3. On that page, scroll down and look for ESG claims, ISO certifications, or sustainability commitments
-4. Take a screenshot of any claims you find
-5. Go back to Google results
-6. Click on the SECOND result
-7. Extract any environmental policies, carbon targets, or certification mentions
-8. Take a screenshot
-9. Summarize ALL claims found as a numbered list
-If any claim seems contradicted by other information, write "CLAIM-EVIDENCE MISMATCH" followed by the details.`,
+    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' sustainability ESG certifications ' + country)}`,
+    goal: `Search for "${name}" ESG and sustainability information. Click the first relevant result. Extract any environmental claims, ISO certifications, carbon targets, or sustainability commitments. Take a screenshot. Return a summary of all claims found.`,
   });
 
-  // Regulatory - search for fines and click through results
   tasks.push({
     id: 'regulatory',
-    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' environmental fine penalty violation ' + country + ' 2024 2025 2026')}`,
-    goal: `Do these steps in order for "${name}":
-1. Read the Google search results on this page
-2. Click on the first result that mentions a fine, penalty, or violation
-3. On that page, find the specific fine amount, date, and reason
-4. Take a screenshot of the evidence
-5. Go back and click on another relevant result
-6. Extract any additional regulatory actions or sanctions
-7. Summarize findings with: company name, fine amount in EUR, date, reason, source URL
-If a fine or violation is found, start your summary with "FOUND:" followed by details.`,
+    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' fine penalty violation ' + country)}`,
+    goal: `Search for "${name}" environmental fines or regulatory violations. Click the first relevant result. Find fine amounts, dates, and reasons. Take a screenshot. If found, start summary with "FOUND:".`,
   });
 
-  // News Scanner - browse Google News for controversies
   tasks.push({
     id: 'news',
-    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' controversy OR scandal OR violation OR fine news ' + country)}&tbm=nws`,
-    goal: `Do these steps in order for "${name}":
-1. Read the news search results on this page
-2. Click on the first news article about "${name}"
-3. Read the article and extract: headline, date, key issue, source name
-4. Take a screenshot of the article
-5. Go back and click on a second news article
-6. Extract the same details
-7. Summarize all articles found with: title, source, date, and relevance to ESG compliance
-If negative news is found, include the severity (critical/high/medium).`,
+    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' ESG controversy scandal violation news')}&tbm=nws`,
+    goal: `Search for recent news about "${name}" related to ESG issues, violations, or controversies. Click the first article. Extract headline, date, and key issue. Take a screenshot. Summarize findings.`,
   });
 
-  // Certification Verifier - check ISO registries
   tasks.push({
     id: 'certs',
-    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' ISO 14001 certificate valid OR expired OR suspended')}`,
-    goal: `Do these steps in order for "${name}":
-1. Search results show ISO certification information
-2. Click on the first result about ISO certification for "${name}"
-3. Look for: certificate number, issue date, expiry date, certification body
-4. Take a screenshot of certificate details
-5. Check if the certification is VALID, EXPIRED, or SUSPENDED
-6. Go back and check a second source for verification
-7. If the company claims ISO 14001 but the certificate is expired, write "CLAIM-EVIDENCE MISMATCH: ISO 14001 certificate expired"
-Summarize: certification name, status (valid/expired), dates, certificate number if found.`,
+    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' ISO 14001 certification status')}`,
+    goal: `Search for "${name}" ISO 14001 certification status. Click the first result. Check if certificate is valid or expired. Take a screenshot. If expired but company claims certified, write "CLAIM-EVIDENCE MISMATCH".`,
   });
 
-  // LinkedIn - check workforce changes
   tasks.push({
     id: 'linkedin',
-    url: `https://www.google.com/search?q=${encodeURIComponent('site:linkedin.com "' + name + '" company')}`,
-    goal: `Do these steps for "${name}":
-1. Click on the LinkedIn company page result
-2. Look for recent posts, employee count changes, and key departures
-3. Check if any sustainability or compliance officers recently left
-4. Take a screenshot of the company page
-5. Summarize: employee count, recent changes, any red flags in leadership or ESG team.`,
+    url: `https://www.google.com/search?q=${encodeURIComponent('site:linkedin.com "' + name + '"')}`,
+    goal: `Find "${name}" LinkedIn company page. Click the result. Check employee count and recent leadership changes. Take a screenshot. Summarize key findings.`,
   });
 
-  // Supply Chain Mapper
   tasks.push({
     id: 'supply',
-    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' suppliers sub-suppliers supply chain partners ' + country)}`,
-    goal: `Do these steps for "${name}":
-1. Click on search results about "${name}" supply chain
-2. Find any named sub-suppliers, contractors, or partners
-3. Check if any suppliers are in high-risk regions
-4. Take screenshots of supply chain information
-5. Summarize: list of known suppliers, their countries, and any risk flags.`,
+    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' supply chain suppliers partners')}`,
+    goal: `Search for "${name}" supply chain information. Click the first result. Find sub-suppliers, partners, or high-risk dependencies. Take a screenshot. Summarize findings.`,
   });
 
-  // Financial Analyst
   tasks.push({
     id: 'financial',
-    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' annual report revenue financial statements ' + country)}`,
-    goal: `Do these steps for "${name}":
-1. Click on financial information results
-2. Find: revenue, debt levels, credit rating, profitability
-3. Check for any financial distress signals (losses, downgrades, defaults)
-4. Take a screenshot of financial data
-5. Summarize: revenue, debt-to-equity ratio, credit rating, any risk signals.`,
+    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' annual report revenue financial')}`,
+    goal: `Search for "${name}" financial information. Click the first result. Find revenue, debt, and credit rating. Take a screenshot. Summarize financial health.`,
   });
 
-  // CSRD Compliance Validator
   tasks.push({
     id: 'compliance',
-    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' CSRD sustainability report 2024 2025 ESG disclosure ' + country)}`,
-    goal: `Do these steps for "${name}":
-1. Click on results about their sustainability or CSRD report
-2. Check if a CSRD-compliant report exists and when it was published
-3. Look for: Scope 1/2/3 emissions, double materiality assessment, ESRS compliance
-4. Take a screenshot of the report or disclosure page
-5. Flag any gaps: missing emissions data, no double materiality, incomplete ESRS
-6. If claims on website contradict the report, write "CLAIM-EVIDENCE MISMATCH"
-Summarize: report exists (yes/no), year, key disclosures found, gaps identified.`,
+    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' CSRD sustainability report ESG disclosure')}`,
+    goal: `Search for "${name}" CSRD sustainability report. Click the first result. Check for Scope 1/2/3 emissions and ESRS compliance. Take a screenshot. Flag any gaps.`,
   });
 
   return tasks;
@@ -333,7 +270,11 @@ export async function runTinyFishAgent(
               onEvent?.({ type: 'error', data: errMsg, timestamp: Date.now() });
               return { result: '', steps, screenshots, error: errMsg };
             } else {
-              if (stepText) {
+              // Filter out noise events (heartbeat, started, complete, empty)
+              const skipPatterns = ['heartbeat', 'started', 'complete', 'processing...', 'ping'];
+              const isNoise = !stepText || skipPatterns.some(p => stepText.toLowerCase().trim() === p);
+
+              if (stepText && !isNoise) {
                 steps.push(stepText);
                 onEvent?.({ type: 'step', data: stepText, screenshot: screenshot ? (screenshot.startsWith('data:') ? screenshot : `data:image/jpeg;base64,${screenshot}`) : undefined, url, timestamp: Date.now() });
               }
