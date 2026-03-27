@@ -293,17 +293,15 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
       });
     };
 
-    // --- Run REAL TinyFish agent + simulated agents IN PARALLEL ---
-    // Agent 1 talks to real API while others simulate alongside it
-
-    const realAgentPromise = (async () => {
-      const firstAgent = tier1Tasks[0];
+    // --- AGENT 1: Real TinyFish (Claim Extractor) - finishes FIRST ---
+    const firstAgent = tier1Tasks[0];
+    {
       const taskId = firstAgent.id;
       const taskStart = Date.now();
       const meta = agentMeta[taskId];
 
       updateTask(taskId, { status: 'running', progress: 10, url: firstAgent.url, steps: [], screenshots: [], currentUrl: firstAgent.url });
-      addTimelineEntry({ agent: meta.name, message: `Navigating to target`, type: 'action', url: firstAgent.url });
+      addTimelineEntry({ agent: meta.name, message: `Navigating to ${firstAgent.url}`, type: 'action', url: firstAgent.url });
 
       let stepCount = 0;
       const result = await runTinyFishAgent(firstAgent, (event: TinyFishSSEEvent) => {
@@ -324,7 +322,14 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
       });
 
       const taskElapsed = Date.now() - taskStart;
-      const resultText = (result.result || '').toString();
+      let resultText = (result.result || '').toString();
+      // Clean JSON from result display
+      if (resultText.startsWith('{')) {
+        try {
+          const p = JSON.parse(resultText);
+          resultText = p.action || p.result || p.message || p.output || 'Scan complete';
+        } catch { /* keep as is */ }
+      }
       const hasIssues = processTier1Result(taskId, firstAgent, resultText, meta);
 
       updateTask(taskId, {
@@ -341,28 +346,24 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
         message: hasIssues ? `Issues found: ${resultText.substring(0, 60)}...` : 'Scan complete - no issues',
         type: hasIssues ? 'warning' : 'success',
       });
-    })();
+    }
 
-    // Simulated agents run alongside real one (start after 2s delay)
-    const simulatedAgentsPromise = (async () => {
-      // Agents 2-4: sequential with gaps (start 2s after real agent)
-      await new Promise((r) => setTimeout(r, 2000));
-      for (let i = 1; i < 4; i++) {
-        if (tier1Tasks[i]) {
-          await new Promise((r) => setTimeout(r, 600 + Math.random() * 400));
-          await simulateAgent(tier1Tasks[i]);
-        }
-      }
-      // Agents 5-8: parallel pairs
-      for (let i = 4; i < tier1Tasks.length; i += 2) {
-        await new Promise((r) => setTimeout(r, 400 + Math.random() * 300));
-        const batch = tier1Tasks.slice(i, i + 2).filter(Boolean);
-        await Promise.all(batch.map(simulateAgent));
-      }
-    })();
+    // --- AGENTS 2-4: Start AFTER Claim Extractor finishes (sequential, slow) ---
+    addTimelineEntry({ agent: 'System', message: 'Claim Extractor complete - deploying remaining agents', type: 'info' });
 
-    // Wait for BOTH real agent and simulated agents to complete
-    await Promise.all([realAgentPromise, simulatedAgentsPromise]);
+    for (let i = 1; i < 4; i++) {
+      if (tier1Tasks[i]) {
+        await new Promise((r) => setTimeout(r, 800 + Math.random() * 400));
+        await simulateAgent(tier1Tasks[i]);
+      }
+    }
+
+    // --- AGENTS 5-8: Background agents in parallel pairs ---
+    for (let i = 4; i < tier1Tasks.length; i += 2) {
+      await new Promise((r) => setTimeout(r, 500 + Math.random() * 300));
+      const batch = tier1Tasks.slice(i, i + 2).filter(Boolean);
+      await Promise.all(batch.map(simulateAgent));
+    }
 
     // === HYBRID GUARANTEE: Inject contradiction if real agents didn't find one ===
     // Wait until 25 seconds from scan start before checking
