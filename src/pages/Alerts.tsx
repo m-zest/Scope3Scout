@@ -12,7 +12,7 @@ import {
   Eye,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { DEMO_MODE } from '@/lib/tinyfish';
+// Demo alerts are always shown as default data
 
 const fadeUp = {
   hidden: { opacity: 0, y: 12 },
@@ -124,7 +124,7 @@ function timeAgo(dateStr: string) {
 
 export default function Alerts() {
   const navigate = useNavigate();
-  const [alerts, setAlerts] = useState<AlertItem[]>(DEMO_MODE ? DEMO_ALERTS : []);
+  const [alerts, setAlerts] = useState<AlertItem[]>(DEMO_ALERTS);
   const [filter, setFilter] = useState<'all' | 'unread' | 'critical' | 'high'>('all');
 
   const filtered = useMemo(() => {

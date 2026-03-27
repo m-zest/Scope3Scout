@@ -163,12 +163,8 @@ export function TinyFishGrid({ supplierName }: TinyFishGridProps) {
           const progress = Math.min(10 + (stepCount * 20), 90);
 
           if (event.type === 'step') {
-            updateTask(taskId, {
-              progress,
-              steps: undefined, // Will merge below
-            });
             setTasks((prev) => prev.map((t) =>
-              t.id === taskId ? { ...t, progress, steps: [...t.steps, event.data] } : t
+              t.id === taskId ? { ...t, progress, steps: [...(t.steps || []), event.data] } : t
             ));
           }
         });
