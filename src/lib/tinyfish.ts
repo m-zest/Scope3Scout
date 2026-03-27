@@ -2,12 +2,12 @@
 // Real API: https://agent.tinyfish.ai/v1/automation/run-sse (SSE streaming)
 
 import { getDemoScanResult, getDemoSuppliers, type DemoScanResult } from '@/data/demoSuppliers';
+import { getTinyFishKey } from '@/lib/keys';
 
-const TINYFISH_API_KEY = import.meta.env.VITE_TINYFISH_API_KEY || '';
 export const DEMO_MODE = import.meta.env.VITE_DEMO_MODE !== 'false';
 
 export function hasTinyFishKey(): boolean {
-  return TINYFISH_API_KEY.length > 0;
+  return getTinyFishKey().length > 0;
 }
 
 export interface TinyFishAgentTask {
@@ -181,7 +181,7 @@ export async function runTinyFishAgent(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-API-Key': TINYFISH_API_KEY,
+        'X-API-Key': getTinyFishKey(),
       },
       body: JSON.stringify({
         url: task.url,

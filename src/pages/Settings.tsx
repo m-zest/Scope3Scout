@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   User,
@@ -12,6 +12,13 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
+import {
+  getTinyFishKey, setTinyFishKey as saveTinyFishKey,
+  getGeminiKey, setGeminiKey as saveGeminiKey,
+  getOpenAIKey, setOpenAIKey as saveOpenAIKey,
+  getOrgName, setOrgName as saveOrgName,
+  getNotifPrefs, setNotifPrefs as saveNotifPrefs,
+} from '@/lib/keys';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 12 },
@@ -71,23 +78,32 @@ function InputField({ label, value, onChange, type = 'text', placeholder, disabl
 
 export default function Settings() {
   const [saved, setSaved] = useState(false);
-  const [orgName, setOrgName] = useState('My Organization');
-  const [tinyfishKey, setTinyfishKey] = useState(import.meta.env.VITE_TINYFISH_API_KEY || '');
-  const [geminiKey, setGeminiKey] = useState(import.meta.env.VITE_GEMINI_API_KEY || '');
-  const [openaiKey, setOpenaiKey] = useState(import.meta.env.VITE_OPENAI_API_KEY || '');
-  const [alertEmail, setAlertEmail] = useState(true);
-  const [alertCritical, setAlertCritical] = useState(true);
-  const [alertHigh, setAlertHigh] = useState(true);
-  const [alertMedium, setAlertMedium] = useState(false);
+  const [orgName, setOrgName] = useState(getOrgName());
+  const [tinyfishKey, setTinyfishKey] = useState(getTinyFishKey());
+  const [geminiKey, setGeminiKey] = useState(getGeminiKey());
+  const [openaiKey, setOpenaiKey] = useState(getOpenAIKey());
+
+  const notifPrefs = getNotifPrefs();
+  const [alertEmail, setAlertEmail] = useState(notifPrefs.email);
+  const [alertCritical, setAlertCritical] = useState(notifPrefs.critical);
+  const [alertHigh, setAlertHigh] = useState(notifPrefs.high);
+  const [alertMedium, setAlertMedium] = useState(notifPrefs.medium);
 
   const [userEmail, setUserEmail] = useState('');
-  useState(() => {
+  useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session?.user?.email) setUserEmail(data.session.user.email);
     });
-  });
+  }, []);
 
   const handleSave = () => {
+    // Persist all settings to localStorage
+    saveOrgName(orgName);
+    saveTinyFishKey(tinyfishKey);
+    saveGeminiKey(geminiKey);
+    saveOpenAIKey(openaiKey);
+    saveNotifPrefs({ email: alertEmail, critical: alertCritical, high: alertHigh, medium: alertMedium });
+
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
