@@ -185,9 +185,10 @@ export async function runTinyFishAgent(
   task: TinyFishAgentTask,
   onEvent?: (event: TinyFishSSEEvent) => void,
 ): Promise<{ result: string; steps: string[]; screenshots: string[]; error?: string }> {
-  // Demo mode fallback with semantic per-agent steps
-  if (DEMO_MODE || !hasTinyFishKey()) {
-    const delay = 2000 + Math.random() * 2000;
+  // Use real API if TinyFish key exists, regardless of DEMO_MODE
+  // Only fall back to demo if no key is configured
+  if (!hasTinyFishKey()) {
+    const delay = 8000 + Math.random() * 4000; // 8-12 seconds total per agent
     const demoSteps = getDemoStepsForTask(task.id, task.url);
     const screenshots: string[] = [];
     for (let i = 0; i < demoSteps.length; i++) {
