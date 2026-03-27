@@ -47,116 +47,53 @@ export function buildAgentTasks(supplier: SupplierInput): TinyFishAgentTask[] {
   const country = supplier.country || 'EU';
   const tasks: TinyFishAgentTask[] = [];
 
-  // Claim Extractor - interactive Google search with clicks and navigation
+  // Claim Extractor - simple clear goal for TinyFish
   tasks.push({
     id: 'website',
-    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' sustainability report ESG certifications ' + country)}`,
-    goal: `Do these steps in order for "${name}":
-1. Look at the Google search results on this page
-2. Click on the FIRST search result link that mentions "${name}" or sustainability
-3. On that page, scroll down and look for ESG claims, ISO certifications, or sustainability commitments
-4. Take a screenshot of any claims you find
-5. Go back to Google results
-6. Click on the SECOND result
-7. Extract any environmental policies, carbon targets, or certification mentions
-8. Take a screenshot
-9. Summarize ALL claims found as a numbered list
-If any claim seems contradicted by other information, write "CLAIM-EVIDENCE MISMATCH" followed by the details.`,
+    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' sustainability ESG certifications ' + country)}`,
+    goal: `Search for "${name}" ESG and sustainability information. Click the first relevant result. Extract any environmental claims, ISO certifications, carbon targets, or sustainability commitments. Take a screenshot. Return a summary of all claims found.`,
   });
 
-  // Regulatory - search for fines and click through results
   tasks.push({
     id: 'regulatory',
-    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' environmental fine penalty violation ' + country + ' 2024 2025 2026')}`,
-    goal: `Do these steps in order for "${name}":
-1. Read the Google search results on this page
-2. Click on the first result that mentions a fine, penalty, or violation
-3. On that page, find the specific fine amount, date, and reason
-4. Take a screenshot of the evidence
-5. Go back and click on another relevant result
-6. Extract any additional regulatory actions or sanctions
-7. Summarize findings with: company name, fine amount in EUR, date, reason, source URL
-If a fine or violation is found, start your summary with "FOUND:" followed by details.`,
+    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' fine penalty violation ' + country)}`,
+    goal: `Search for "${name}" environmental fines or regulatory violations. Click the first relevant result. Find fine amounts, dates, and reasons. Take a screenshot. If found, start summary with "FOUND:".`,
   });
 
-  // News Scanner - browse Google News for controversies
   tasks.push({
     id: 'news',
-    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' controversy OR scandal OR violation OR fine news ' + country)}&tbm=nws`,
-    goal: `Do these steps in order for "${name}":
-1. Read the news search results on this page
-2. Click on the first news article about "${name}"
-3. Read the article and extract: headline, date, key issue, source name
-4. Take a screenshot of the article
-5. Go back and click on a second news article
-6. Extract the same details
-7. Summarize all articles found with: title, source, date, and relevance to ESG compliance
-If negative news is found, include the severity (critical/high/medium).`,
+    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' ESG controversy scandal violation news')}&tbm=nws`,
+    goal: `Search for recent news about "${name}" related to ESG issues, violations, or controversies. Click the first article. Extract headline, date, and key issue. Take a screenshot. Summarize findings.`,
   });
 
-  // Certification Verifier - check ISO registries
   tasks.push({
     id: 'certs',
-    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' ISO 14001 certificate valid OR expired OR suspended')}`,
-    goal: `Do these steps in order for "${name}":
-1. Search results show ISO certification information
-2. Click on the first result about ISO certification for "${name}"
-3. Look for: certificate number, issue date, expiry date, certification body
-4. Take a screenshot of certificate details
-5. Check if the certification is VALID, EXPIRED, or SUSPENDED
-6. Go back and check a second source for verification
-7. If the company claims ISO 14001 but the certificate is expired, write "CLAIM-EVIDENCE MISMATCH: ISO 14001 certificate expired"
-Summarize: certification name, status (valid/expired), dates, certificate number if found.`,
+    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' ISO 14001 certification status')}`,
+    goal: `Search for "${name}" ISO 14001 certification status. Click the first result. Check if certificate is valid or expired. Take a screenshot. If expired but company claims certified, write "CLAIM-EVIDENCE MISMATCH".`,
   });
 
-  // LinkedIn - check workforce changes
   tasks.push({
     id: 'linkedin',
-    url: `https://www.google.com/search?q=${encodeURIComponent('site:linkedin.com "' + name + '" company')}`,
-    goal: `Do these steps for "${name}":
-1. Click on the LinkedIn company page result
-2. Look for recent posts, employee count changes, and key departures
-3. Check if any sustainability or compliance officers recently left
-4. Take a screenshot of the company page
-5. Summarize: employee count, recent changes, any red flags in leadership or ESG team.`,
+    url: `https://www.google.com/search?q=${encodeURIComponent('site:linkedin.com "' + name + '"')}`,
+    goal: `Find "${name}" LinkedIn company page. Click the result. Check employee count and recent leadership changes. Take a screenshot. Summarize key findings.`,
   });
 
-  // Supply Chain Mapper
   tasks.push({
     id: 'supply',
-    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' suppliers sub-suppliers supply chain partners ' + country)}`,
-    goal: `Do these steps for "${name}":
-1. Click on search results about "${name}" supply chain
-2. Find any named sub-suppliers, contractors, or partners
-3. Check if any suppliers are in high-risk regions
-4. Take screenshots of supply chain information
-5. Summarize: list of known suppliers, their countries, and any risk flags.`,
+    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' supply chain suppliers partners')}`,
+    goal: `Search for "${name}" supply chain information. Click the first result. Find sub-suppliers, partners, or high-risk dependencies. Take a screenshot. Summarize findings.`,
   });
 
-  // Financial Analyst
   tasks.push({
     id: 'financial',
-    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' annual report revenue financial statements ' + country)}`,
-    goal: `Do these steps for "${name}":
-1. Click on financial information results
-2. Find: revenue, debt levels, credit rating, profitability
-3. Check for any financial distress signals (losses, downgrades, defaults)
-4. Take a screenshot of financial data
-5. Summarize: revenue, debt-to-equity ratio, credit rating, any risk signals.`,
+    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' annual report revenue financial')}`,
+    goal: `Search for "${name}" financial information. Click the first result. Find revenue, debt, and credit rating. Take a screenshot. Summarize financial health.`,
   });
 
-  // CSRD Compliance Validator
   tasks.push({
     id: 'compliance',
-    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' CSRD sustainability report 2024 2025 ESG disclosure ' + country)}`,
-    goal: `Do these steps for "${name}":
-1. Click on results about their sustainability or CSRD report
-2. Check if a CSRD-compliant report exists and when it was published
-3. Look for: Scope 1/2/3 emissions, double materiality assessment, ESRS compliance
-4. Take a screenshot of the report or disclosure page
-5. Flag any gaps: missing emissions data, no double materiality, incomplete ESRS
-6. If claims on website contradict the report, write "CLAIM-EVIDENCE MISMATCH"
-Summarize: report exists (yes/no), year, key disclosures found, gaps identified.`,
+    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' CSRD sustainability report ESG disclosure')}`,
+    goal: `Search for "${name}" CSRD sustainability report. Click the first result. Check for Scope 1/2/3 emissions and ESRS compliance. Take a screenshot. Flag any gaps.`,
   });
 
   return tasks;
@@ -333,7 +270,11 @@ export async function runTinyFishAgent(
               onEvent?.({ type: 'error', data: errMsg, timestamp: Date.now() });
               return { result: '', steps, screenshots, error: errMsg };
             } else {
-              if (stepText) {
+              // Filter out noise events (heartbeat, started, complete, empty)
+              const skipPatterns = ['heartbeat', 'started', 'complete', 'processing...', 'ping'];
+              const isNoise = !stepText || skipPatterns.some(p => stepText.toLowerCase().trim() === p);
+
+              if (stepText && !isNoise) {
                 steps.push(stepText);
                 onEvent?.({ type: 'step', data: stepText, screenshot: screenshot ? (screenshot.startsWith('data:') ? screenshot : `data:image/jpeg;base64,${screenshot}`) : undefined, url, timestamp: Date.now() });
               }
@@ -368,74 +309,76 @@ export function getDemoStepsForTask(taskId: string, url: string): string[] {
   const stepsMap: Record<string, string[]> = {
     website: [
       `Navigating to ${host}`,
-      'Found "About Us" page -clicking...',
-      'Extracting ESG claims from sustainability section...',
-      'Found claim: "ISO 14001 Certified since 2022"',
-      'Found claim: "Carbon neutral by 2030"',
-      'Found claim: "Zero waste policy across all facilities"',
-      'Comparing claims against known certifications...',
-      'Capturing page evidence...',
+      'Clicking on company sustainability page...',
+      'Scrolling through ESG commitments section...',
+      'Found claim: "Climate-neutral production by 2045"',
+      'Found claim: "ISO 14001 Environmental Management certified"',
+      'Found claim: "100% renewable electricity target"',
+      'Taking screenshot of sustainability claims...',
+      'Extracting certification badges from page...',
     ],
     regulatory: [
-      `Searching government enforcement databases...`,
-      `Navigating to ${host}`,
-      'Entering company name in search field...',
-      'Filtering results by environmental violations...',
-      'Found record: Environmental fine issued March 2026',
-      'Extracting fine details -EUR 40,000 for water discharge',
-      'Cross-referencing with EPA equivalent records...',
-      'Evidence captured from official registry',
+      `Opening Google search for regulatory records...`,
+      `Clicking first result - government enforcement database...`,
+      'Entering company name in registry search field...',
+      'Filtering by environmental violations 2024-2026...',
+      'Found record: EU ETS emissions violation',
+      'Extracting fine details - EUR 45,000 for emissions overshoot',
+      'Clicking second result - Reuters regulatory report...',
+      'Taking screenshot of enforcement record...',
     ],
     news: [
-      `Navigating to news.google.com...`,
-      'Entering search query with violation keywords...',
-      'Scanning headlines from last 12 months...',
-      'Found article: "SteelCorp fined for water pollution" -Reuters',
-      'Found article: "Coal contract contradicts green claims" -DW News',
-      'Extracting publication dates and sentiment...',
-      'Analyzing article sentiment -negative coverage detected',
+      `Opening Google News search...`,
+      'Clicking first news article about ESG issues...',
+      'Reading article: "Steel giant faces green transition delays"',
+      'Taking screenshot of article...',
+      'Going back to search results...',
+      'Clicking second article: "Emissions targets missed"',
+      'Extracting publication date and key findings...',
+      'Negative sentiment detected across coverage',
     ],
     certs: [
-      `Navigating to ISO certification registry...`,
+      `Opening Google search for ISO certification status...`,
+      'Clicking on certification registry result...',
       'Entering company name in verification search...',
-      'Found ISO 14001:2015 certificate #DE-2022-14001-0847',
-      'Checking certificate validity period...',
-      'ALERT: Certificate expired December 2025',
-      'Company website still claims "ISO 14001 Certified"',
-      'CLAIM-EVIDENCE MISMATCH DETECTED',
+      'Found ISO 14001:2015 certificate record',
+      'Checking certificate validity dates...',
+      'ALERT: Certificate status shows issues',
+      'Taking screenshot of certificate details...',
+      'Comparing against website claims...',
     ],
     linkedin: [
-      `Navigating to linkedin.com/company search...`,
-      'Locating company profile...',
-      'Scanning recent employee changes...',
-      'Checking C-suite and ESG department...',
-      'Found: Chief Sustainability Officer departed Feb 2026',
-      'ESG team reduced from 8 to 3 members',
+      `Opening Google search for LinkedIn company profile...`,
+      'Clicking LinkedIn company page result...',
+      'Scanning employee count and recent changes...',
+      'Checking ESG and sustainability department...',
+      'Found: recent restructuring in sustainability team',
+      'Taking screenshot of company profile...',
     ],
     supply: [
-      `Searching supply chain databases...`,
+      `Opening Google search for supply chain information...`,
+      'Clicking on supply chain report result...',
       'Mapping known sub-suppliers and contractors...',
       'Found 4 sub-suppliers across 3 countries',
-      'Checking for high-risk regions...',
-      'WARNING: 2 suppliers in high-risk regions detected',
+      'Checking for high-risk region dependencies...',
       'Cross-referencing sub-supplier compliance status...',
     ],
     financial: [
-      `Searching financial databases...`,
+      `Opening Google search for financial reports...`,
+      'Clicking on annual report result...',
       'Extracting annual revenue and debt figures...',
-      'Found revenue: EUR 240M (2025)',
+      'Found revenue and financial metrics...',
       'Checking credit rating agencies...',
-      'Credit rating downgraded to BB- by S&P',
-      'Working capital negative for 2 consecutive quarters',
+      'Taking screenshot of financial summary...',
     ],
     compliance: [
-      `Searching for CSRD sustainability report...`,
-      'Found Q4 2025 sustainability report (PDF)...',
-      'Extracting disclosure data points...',
-      'Checking ESRS E1 Climate requirements...',
-      'ALERT: Scope 3 emissions disclosure missing entirely',
-      'Double materiality assessment incomplete',
-      'CSRD compliance gaps identified in 3 areas',
+      `Opening Google search for CSRD sustainability report...`,
+      'Clicking on sustainability report PDF link...',
+      'Extracting ESRS disclosure data points...',
+      'Checking ESRS E1 Climate change requirements...',
+      'Checking Scope 1, 2, 3 emissions disclosures...',
+      'Analyzing double materiality assessment...',
+      'Identifying CSRD compliance gaps...',
     ],
   };
   return stepsMap[taskId] || [
@@ -449,14 +392,14 @@ export function getDemoStepsForTask(taskId: string, url: string): string[] {
 // Demo fallback results per agent type
 export function getDemoResultForTask(taskId: string): string {
   const results: Record<string, string> = {
-    website: 'Found 3 ESG claims: ISO 14001 certified, carbon neutral by 2030, zero waste policy. CLAIM-EVIDENCE MISMATCH: ISO certificate expired Dec 2025.',
-    regulatory: 'FOUND: Environmental fine €40,000 issued March 2026 for illegal water discharge into Rhine river. Source: German Federal Environment Agency (UBA).',
-    news: 'Found 2 relevant articles: (1) "SteelCorp fined for water pollution" - Reuters, Mar 2026. (2) "Coal contract contradicts green claims" - DW News, Jan 2026.',
-    certs: 'CLAIM-EVIDENCE MISMATCH: ISO 14001:2015 certificate EXPIRED Dec 2025. Company still claims "ISO 14001 certified" on website. Certificate #DE-2022-14001-0847.',
-    linkedin: 'Red flag: Chief Sustainability Officer departed Feb 2026. No replacement hired. ESG team reduced from 8 to 3 members.',
-    supply: 'Mapped 4 sub-suppliers across 3 countries. WARNING: 2 suppliers in high-risk regions (Bangladesh, Myanmar). Sub-supplier TierB-Chem flagged for chemical violations.',
-    financial: 'Revenue: €240M (2025). Debt-to-equity: 1.8 (elevated). Credit rating downgraded to BB- by S&P. Working capital negative for 2 quarters.',
-    compliance: 'CLAIM-EVIDENCE MISMATCH: CSRD report published Q4 2025 but Scope 3 emissions disclosure missing entirely. Double materiality assessment incomplete. ESRS E1 non-compliant.',
+    website: 'Found 3 ESG claims: "Climate-neutral steel by 2045", "ISO 14001 certified", "Green hydrogen transition underway". CLAIM-EVIDENCE MISMATCH: hydrogen plant delayed to 2028, contradicts 2026 timeline on website.',
+    regulatory: 'FOUND: EU ETS emissions violation - exceeded carbon allowances at Duisburg plant. Fine EUR 45,000 issued. Source: EU Emissions Trading System Registry.',
+    news: 'Found 2 relevant articles: (1) "Green steel transition faces delays" - Reuters, 2025. (2) "Emissions targets missed at major steel plant" - Financial Times, 2025.',
+    certs: 'CLAIM-EVIDENCE MISMATCH: ISO 14001:2015 certification under review following emissions violations. Company website still displays "ISO 14001 Certified" badge.',
+    linkedin: 'Red flag: Head of Sustainability departed Q1 2026. ESG reporting team restructured. 2 senior compliance officers left in past 6 months.',
+    supply: 'Mapped 6 sub-suppliers across 4 countries. WARNING: iron ore suppliers in Brazil flagged for deforestation risk. Coal supplier dependency noted.',
+    financial: 'Revenue: EUR 34B (FY2025). Significant debt from green steel transition investment. S&P rating: BBB-. Green bond issuance of EUR 1.5B.',
+    compliance: 'CLAIM-EVIDENCE MISMATCH: CSRD sustainability report published but Scope 3 emissions significantly underreported. Double materiality assessment gaps in climate transition risk.',
   };
   return results[taskId] || 'Analysis complete -no issues detected';
 }
