@@ -163,7 +163,7 @@ export default function Settings() {
         </div>
       </SettingsCard>
 
-      {/* API Keys — Environment Variables */}
+      {/* API Keys -Environment Variables */}
       <SettingsCard
         icon={Key}
         iconColor="text-amber-400"

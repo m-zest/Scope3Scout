@@ -128,7 +128,7 @@ export default function SupplierDetail() {
       {isDemo && (
         <motion.div variants={fadeUp} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#818cf8]/[0.06] border border-[#818cf8]/[0.12] text-sm">
           <Info className="h-4 w-4 text-[#818cf8] shrink-0" />
-          <span className="text-[#818cf8]/80"><span className="font-semibold text-[#818cf8]">Demo Mode</span> — viewing sample supplier data</span>
+          <span className="text-[#818cf8]/80"><span className="font-semibold text-[#818cf8]">Demo Mode</span> -viewing sample supplier data</span>
         </motion.div>
       )}
 

@@ -140,7 +140,7 @@ export default function Dashboard() {
           {dbSuppliers && dbSuppliers.length > 0 ? (
             <><span className="font-semibold text-[#818cf8]">{dbSuppliers.length} real supplier{dbSuppliers.length !== 1 ? 's' : ''}</span> + 5 demo suppliers shown</>
           ) : (
-            <><span className="font-semibold text-[#818cf8]">Demo Data</span> — 5 sample suppliers. Upload your own to see them here</>
+            <><span className="font-semibold text-[#818cf8]">Demo Data</span> -5 sample suppliers. Upload your own to see them here</>
           )}
         </span>
       </motion.div>
@@ -165,7 +165,7 @@ export default function Dashboard() {
         ))}
       </motion.div>
 
-      {/* CCTV Agent Grid — Main feature */}
+      {/* CCTV Agent Grid -Main feature */}
       <motion.div variants={fadeUp}>
         <CCTVGrid />
       </motion.div>

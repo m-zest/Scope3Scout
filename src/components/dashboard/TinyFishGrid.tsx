@@ -60,12 +60,12 @@ const agentMeta: Record<string, { name: string; description: string; icon: React
   supply: { name: 'Supply Chain Map', description: 'Map sub-supplier network', icon: Search, color: 'text-rose-400', bgColor: 'bg-rose-500/10', borderColor: 'border-rose-500/20' },
   financial: { name: 'Financial Risk', description: 'Analyze financial stability', icon: FileText, color: 'text-orange-400', bgColor: 'bg-orange-500/10', borderColor: 'border-orange-500/20' },
   compliance: { name: 'CSRD Validator', description: 'Cross-check CSRD reports', icon: Shield, color: 'text-indigo-400', bgColor: 'bg-indigo-500/10', borderColor: 'border-indigo-500/20' },
-  // Tier 2 (simulated locally — these are LLM analysis on Tier 1 results)
+  // Tier 2 (simulated locally -these are LLM analysis on Tier 1 results)
   classifier: { name: 'Violation Classifier', description: 'Classify violation severity', icon: Brain, color: 'text-fuchsia-400', bgColor: 'bg-fuchsia-500/10', borderColor: 'border-fuchsia-500/20' },
   greenwash: { name: 'Greenwash Detector', description: 'Find claim discrepancies', icon: AlertTriangle, color: 'text-yellow-400', bgColor: 'bg-yellow-500/10', borderColor: 'border-yellow-500/20' },
   evidence: { name: 'Evidence Extractor', description: 'Extract & rank evidence', icon: Zap, color: 'text-teal-400', bgColor: 'bg-teal-500/10', borderColor: 'border-teal-500/20' },
   sentiment: { name: 'Sentiment Analyzer', description: 'Measure public sentiment', icon: Bot, color: 'text-sky-400', bgColor: 'bg-sky-500/10', borderColor: 'border-sky-500/20' },
-  // Tier 3 (simulated locally — risk simulation)
+  // Tier 3 (simulated locally -risk simulation)
   regulator: { name: 'Regulator Agent', description: 'Predict enforcement actions', icon: Scale, color: 'text-red-400', bgColor: 'bg-red-500/10', borderColor: 'border-red-500/20' },
   media: { name: 'Media Agent', description: 'Predict media coverage risk', icon: Newspaper, color: 'text-violet-400', bgColor: 'bg-violet-500/10', borderColor: 'border-violet-500/20' },
   investor: { name: 'Investor Agent', description: 'Predict ESG fund reactions', icon: FileText, color: 'text-lime-400', bgColor: 'bg-lime-500/10', borderColor: 'border-lime-500/20' },
@@ -80,9 +80,9 @@ const allAgentIds = [
 ];
 
 const tierLabels = [
-  { label: 'TIER 1 — TinyFish Web Agents (Live)', color: 'text-cyan-400', range: [0, 8], live: true },
-  { label: 'TIER 2 — LLM Analysis', color: 'text-fuchsia-400', range: [8, 12], live: false },
-  { label: 'TIER 3 — Risk Simulation', color: 'text-red-400', range: [12, 16], live: false },
+  { label: 'TIER 1 -TinyFish Web Agents (Live)', color: 'text-cyan-400', range: [0, 8], live: true },
+  { label: 'TIER 2 -LLM Analysis', color: 'text-fuchsia-400', range: [8, 12], live: false },
+  { label: 'TIER 3 -Risk Simulation', color: 'text-red-400', range: [12, 16], live: false },
 ];
 
 function statusIcon(status: AgentStatus) {
@@ -191,7 +191,7 @@ export function TinyFishGrid({ supplierName }: TinyFishGridProps) {
       }));
     }
 
-    // === TIER 2: LLM Analysis (simulated — runs on Tier 1 output) ===
+    // === TIER 2: LLM Analysis (simulated -runs on Tier 1 output) ===
     const tier2Ids = ['classifier', 'greenwash', 'evidence', 'sentiment'];
     for (const taskId of tier2Ids) {
       updateTask(taskId, { status: 'running', progress: 30 });
@@ -201,7 +201,7 @@ export function TinyFishGrid({ supplierName }: TinyFishGridProps) {
 
       const hasViolations = demo.violations.length > 0;
       const tier2Results: Record<string, string> = {
-        classifier: hasViolations ? `${demo.violations.length} violation(s) classified — ${demo.violations[0]?.severity} severity` : 'No violations to classify',
+        classifier: hasViolations ? `${demo.violations.length} violation(s) classified -${demo.violations[0]?.severity} severity` : 'No violations to classify',
         greenwash: demo.tier1_result.discrepancies.length > 0 ? `${demo.tier1_result.discrepancies.length} greenwashing discrepancy found` : 'No claim discrepancies detected',
         evidence: hasViolations ? `${demo.violations.length} evidence chain(s) verified with source links` : 'No evidence to extract',
         sentiment: hasViolations ? 'Negative sentiment detected in recent coverage' : 'Neutral/positive public sentiment',
@@ -230,8 +230,8 @@ export function TinyFishGrid({ supplierName }: TinyFishGridProps) {
         status: isRisky ? 'warning' : 'success',
         progress: 100,
         result: pred
-          ? `${Math.round(pred.probability * 100)}% probability — ${pred.timeline_days}d timeline`
-          : 'Low risk — no action needed',
+          ? `${Math.round(pred.probability * 100)}% probability -${pred.timeline_days}d timeline`
+          : 'Low risk -no action needed',
         duration: Math.round(500 + Math.random() * 300),
       });
     }
@@ -476,7 +476,7 @@ export function TinyFishGrid({ supplierName }: TinyFishGridProps) {
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                <span className="text-xs font-semibold text-white">Scan Complete — {activeSupplier}</span>
+                <span className="text-xs font-semibold text-white">Scan Complete -{activeSupplier}</span>
               </div>
               <span className="text-[10px] text-neutral-600">16 agents · {totalTime}s{hasTinyFishKey() ? ' · live' : ' · demo'}</span>
             </div>
