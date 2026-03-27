@@ -375,11 +375,20 @@ export default function Dashboard() {
               <tbody>
                 {suppliers
                   .sort((a, b) => b.risk_score - a.risk_score)
-                  .map((supplier) => (
+                  .map((supplier) => {
+                    const isUploaded = supplier.id.startsWith('uploaded-');
+                    const isDemoWithDetail = supplier.id.startsWith('demo-supplier-');
+                    return (
                     <tr
                       key={supplier.id}
-                      className="border-b border-white/[0.02] hover:bg-white/[0.02] transition-colors cursor-pointer group"
-                      onClick={() => navigate(`/supplier/${supplier.id}`)}
+                      className={cn(
+                        'border-b border-white/[0.02] transition-colors group',
+                        (isDemoWithDetail || !isUploaded) ? 'hover:bg-white/[0.02] cursor-pointer' : 'hover:bg-white/[0.01]'
+                      )}
+                      onClick={() => {
+                        if (isDemoWithDetail) navigate(`/supplier/${supplier.id}`);
+                        else if (!isUploaded) navigate(`/supplier/${supplier.id}`);
+                      }}
                     >
                       <td className="px-6 py-3.5">
                         <p className="font-medium text-neutral-200 text-[13px]">{supplier.name}</p>
@@ -432,10 +441,15 @@ export default function Dashboard() {
                         {supplier.financial_exposure_eur > 0 ? `EUR ${supplier.financial_exposure_eur.toLocaleString()}` : '—'}
                       </td>
                       <td className="px-4 py-3.5">
-                        <ChevronRight className="h-4 w-4 text-neutral-700 group-hover:text-neutral-400 transition-colors" />
+                        {isUploaded ? (
+                          <span className="text-[9px] text-neutral-700 font-medium">NEW</span>
+                        ) : (
+                          <ChevronRight className="h-4 w-4 text-neutral-700 group-hover:text-neutral-400 transition-colors" />
+                        )}
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
               </tbody>
             </table>
           </div>

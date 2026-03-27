@@ -125,7 +125,22 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
   const [focusedAgentId, setFocusedAgentId] = useState<string | null>(null);
 
   const contradictionRef = useRef<HTMLDivElement>(null);
-  const suppliers = getDemoSuppliers();
+  const demoSuppliers = getDemoSuppliers();
+  // Include uploaded suppliers from localStorage in dropdown
+  const uploadedSuppliers = (() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('scope3scout_uploaded_suppliers') || '[]');
+      return stored.map((s: Record<string, string>) => ({
+        ...demoSuppliers[0], // Use SteelCorp as template for scan data
+        id: s.id || `uploaded-${Math.random()}`,
+        supplier_name: s.name || 'Unknown',
+        country: s.country || 'Unknown',
+        industry: s.industry || 'Unknown',
+        website: s.website || demoSuppliers[0].website,
+      }));
+    } catch { return []; }
+  })();
+  const suppliers = [...demoSuppliers, ...uploadedSuppliers];
   const isLive = hasTinyFishKey();
 
   const addTimelineEntry = useCallback((entry: Omit<TimelineEntry, 'id' | 'timestamp'>) => {
@@ -379,9 +394,9 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
     // Build Tier 1 context for Gemini
     const geminiContext = {
       supplierName: demo.supplier_name,
-      claims: demo.tier1_result.discrepancies.map(d => d.claim),
-      violations: demo.violations.map(v => `${v.type}: ${v.description}`),
-      discrepancies: demo.tier1_result.discrepancies.map(d => ({ claim: d.claim, finding: d.finding })),
+      claims: demo.tier1_result.discrepancies.map((d: { claim: string }) => d.claim),
+      violations: demo.violations.map((v: { type: string; description: string }) => `${v.type}: ${v.description}`),
+      discrepancies: demo.tier1_result.discrepancies.map((d: { claim: string; finding: string }) => ({ claim: d.claim, finding: d.finding })),
     };
 
     for (const taskId of tier2Ids) {
@@ -479,7 +494,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
 
       await new Promise((r) => setTimeout(r, 200 + Math.random() * 300));
 
-      const pred = demo.simulation_output.predictions.find((p) => p.agent_type === taskId);
+      const pred = demo.simulation_output.predictions.find((p: { agent_type: string }) => p.agent_type === taskId);
       const isRisky = pred ? pred.probability > 0.4 : false;
       const taskResult = pred
         ? `${Math.round(pred.probability * 100)}% probability -${pred.timeline_days}d -${pred.prediction}`
