@@ -94,6 +94,66 @@ export function buildAgentTasks(supplier: SupplierInput): TinyFishAgentTask[] {
   return tasks;
 }
 
+// Parse TinyFish SSE events into human-readable text
+function parseTinyFishEvent(event: Record<string, unknown>): string {
+  const type = (event.type as string) || '';
+
+  switch (type) {
+    case 'STREAMING_URL':
+      return `Agent started — streaming live`;
+    case 'PROGRESS':
+    case 'STEP': {
+      const step = (event.step as string) || (event.message as string) || '';
+      const action = (event.action as string) || '';
+      if (step) return step;
+      if (action) return `Action: ${action}`;
+      return 'Processing...';
+    }
+    case 'ACTION': {
+      const actionType = (event.action_type as string) || (event.action as string) || '';
+      const url = (event.url as string) || (event.target_url as string) || '';
+      if (actionType === 'navigate' || actionType === 'goto') return `Navigating to ${url ? shortenUrl(url) : 'page'}`;
+      if (actionType === 'click') return `Clicking element on page`;
+      if (actionType === 'extract' || actionType === 'scrape') return `Extracting content from page`;
+      if (actionType === 'scroll') return `Scrolling page`;
+      if (actionType === 'type' || actionType === 'input') return `Entering search query`;
+      if (actionType) return `${actionType.charAt(0).toUpperCase() + actionType.slice(1)}`;
+      return 'Performing action...';
+    }
+    case 'NAVIGATION':
+      return `Navigating to ${shortenUrl((event.url as string) || '')}`;
+    case 'EXTRACTION':
+    case 'CONTENT':
+      return 'Extracting page content...';
+    case 'RESULT':
+    case 'COMPLETED':
+    case 'FINAL_RESULT': {
+      const result = (event.result as string) || (event.extracted_content as string) || (event.output as string) || '';
+      return result ? (result.length > 100 ? result.substring(0, 100) + '...' : result) : 'Analysis complete';
+    }
+    case 'ERROR':
+    case 'FAILED':
+      return (event.error as string) || (event.message as string) || 'Error occurred';
+    default: {
+      // Try to extract meaningful text from unknown events
+      const msg = (event.message as string) || (event.step as string) || (event.action as string) || '';
+      if (msg) return msg;
+      // For truly unknown events, show type
+      if (type) return `${type.toLowerCase().replace(/_/g, ' ')}`;
+      return 'Processing...';
+    }
+  }
+}
+
+function shortenUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    return u.hostname + (u.pathname.length > 30 ? u.pathname.substring(0, 30) + '...' : u.pathname);
+  } catch {
+    return url.length > 40 ? url.substring(0, 40) + '...' : url;
+  }
+}
+
 // Run a single TinyFish agent via SSE — returns parsed events in real-time via callback
 export async function runTinyFishAgent(
   task: TinyFishAgentTask,
@@ -159,29 +219,33 @@ export async function runTinyFishAgent(
           const data = trimmed.slice(5).trim();
           try {
             const parsed = JSON.parse(data);
-            if (parsed.type === 'step' || parsed.step) {
-              const stepText = parsed.step || parsed.message || parsed.data || data;
-              steps.push(stepText);
-              onEvent?.({ type: 'step', data: stepText });
-            } else if (parsed.type === 'result' || parsed.result) {
-              finalResult = parsed.result || parsed.output || parsed.data || JSON.stringify(parsed);
+            const stepText = parseTinyFishEvent(parsed);
+
+            if (parsed.type === 'RESULT' || parsed.type === 'COMPLETED' || parsed.type === 'FINAL_RESULT') {
+              finalResult = parsed.result || parsed.output || parsed.extracted_content || stepText;
               onEvent?.({ type: 'result', data: finalResult });
-            } else if (parsed.type === 'error' || parsed.error) {
-              const errMsg = parsed.error || parsed.message || data;
+            } else if (parsed.type === 'ERROR' || parsed.type === 'FAILED') {
+              const errMsg = parsed.error || parsed.message || stepText;
               onEvent?.({ type: 'error', data: errMsg });
               return { result: '', steps, error: errMsg };
             } else {
-              // Generic data event - treat as step
-              const msg = parsed.message || parsed.output || data;
-              steps.push(msg);
-              onEvent?.({ type: 'step', data: msg });
-              finalResult = msg; // Keep last message as result
+              // All other events (STREAMING_URL, PROGRESS, ACTION, STEP, etc.)
+              if (stepText) {
+                steps.push(stepText);
+                onEvent?.({ type: 'step', data: stepText });
+              }
+              // Keep updating finalResult with latest meaningful content
+              if (parsed.extracted_content || parsed.result || parsed.output) {
+                finalResult = parsed.extracted_content || parsed.result || parsed.output;
+              }
             }
           } catch {
             // Plain text SSE data
-            steps.push(data);
-            onEvent?.({ type: 'step', data });
-            finalResult = data;
+            if (data && data.length > 0) {
+              steps.push(data);
+              onEvent?.({ type: 'step', data });
+              finalResult = data;
+            }
           }
         }
       }
