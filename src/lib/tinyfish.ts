@@ -47,24 +47,18 @@ export function buildAgentTasks(supplier: SupplierInput): TinyFishAgentTask[] {
   const country = supplier.country || 'EU';
   const tasks: TinyFishAgentTask[] = [];
 
-  if (supplier.website) {
-    tasks.push({
-      id: 'website',
-      url: supplier.website,
-      goal: `You are an autonomous compliance audit agent. Act step-by-step like a human browsing. Extract all ESG claims, sustainability commitments, certifications (ISO 14001, etc), and environmental policies from this company website for "${name}". List each claim with a direct quote. Always describe your action before executing it. When evidence is found include: claim, evidence, source URL, confidence. If mismatch is found output: "CLAIM-EVIDENCE MISMATCH". Always capture a screenshot when a result or contradiction is found.`,
-    });
-  } else {
-    tasks.push({
-      id: 'website',
-      url: `https://www.google.com/search?q=${encodeURIComponent(name + ' company website ESG sustainability')}`,
-      goal: `You are an autonomous compliance audit agent. Find the official website of "${name}" and extract any ESG claims, certifications, or sustainability commitments they make. Click buttons, fill search fields, and navigate pages. Do not stop at the first page -explore until evidence is found. Always capture a screenshot when a result or contradiction is found.`,
-    });
-  }
+  // Always use Google search for Claim Extractor - ensures real browsable results
+  // even if the supplier's direct website is unavailable or fake
+  tasks.push({
+    id: 'website',
+    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' ESG sustainability claims certifications ISO 14001 ' + country)}`,
+    goal: `You are an autonomous ESG compliance audit agent. Search for "${name}" and find their ESG claims, sustainability commitments, ISO certifications, and environmental policies. Click on relevant results and extract specific claims with direct quotes. Navigate to at least 2 pages. When evidence is found include: claim text, source URL. If any claim contradicts public records, output: "CLAIM-EVIDENCE MISMATCH". Always describe what you are doing before each action. Always capture a screenshot when you find important information.`,
+  });
 
   tasks.push({
     id: 'regulatory',
-    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' environmental fine penalty violation ' + country)}`,
-    goal: `You are an autonomous compliance audit agent. Search for any environmental fines, penalties, regulatory violations, or sanctions related to "${name}" in ${country}. Find government enforcement actions, court records, or EPA-equivalent penalties. Return specific amounts and dates. When evidence is found include: claim, evidence, source URL, confidence. If mismatch is found output: "CLAIM-EVIDENCE MISMATCH". Always capture a screenshot when a result is found.`,
+    url: `https://www.google.com/search?q=${encodeURIComponent('"' + name + '" fine OR penalty OR violation OR sanction ' + country + ' environmental')}`,
+    goal: `You are an autonomous compliance audit agent. Search for environmental fines, penalties, or regulatory violations for "${name}" in ${country}. Click on government websites, news articles, and court records. Find specific fine amounts in EUR, dates, and issuing authority. Navigate to at least 2 results. If a fine or penalty is found, output "FOUND:" followed by details. Always describe your actions step by step. Capture screenshots of evidence.`,
   });
 
   tasks.push({
