@@ -12,7 +12,7 @@ import {
   Eye,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-// Demo alerts are always shown as default data
+import { useScanResults } from '@/lib/scanResultContext';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 12 },
@@ -34,13 +34,14 @@ interface AlertItem {
   created_at: string;
 }
 
+// Default demo alerts shown before any scans are run
 const DEMO_ALERTS: AlertItem[] = [
   {
     id: 'a1',
     supplier_id: 'demo-supplier-1',
-    supplier_name: 'SteelCorp GmbH',
+    supplier_name: 'ThyssenKrupp Steel',
     type: 'violation_detected',
-    message: 'Critical violation found: Illegal water discharge into Rhine river -€40,000 fine issued by German Federal Environment Agency',
+    message: 'Critical violation found: Exceeded EU ETS carbon allowances at Duisburg plant — EUR 45,000 fine issued',
     severity: 'critical',
     read: false,
     created_at: '2026-03-27T09:14:00Z',
@@ -48,9 +49,9 @@ const DEMO_ALERTS: AlertItem[] = [
   {
     id: 'a2',
     supplier_id: 'demo-supplier-1',
-    supplier_name: 'SteelCorp GmbH',
+    supplier_name: 'ThyssenKrupp Steel',
     type: 'greenwashing',
-    message: 'Greenwashing detected: Active coal plant contract contradicts published renewable energy commitment in 2024 sustainability report',
+    message: 'Greenwashing detected: Climate-neutral steel commitment contradicted by delayed hydrogen plant and active blast furnaces',
     severity: 'high',
     read: false,
     created_at: '2026-03-27T09:14:00Z',
@@ -58,9 +59,9 @@ const DEMO_ALERTS: AlertItem[] = [
   {
     id: 'a3',
     supplier_id: 'demo-supplier-2',
-    supplier_name: 'TextilePro Bangladesh',
+    supplier_name: 'H&M Supply Chain Bangladesh',
     type: 'labour_dispute',
-    message: 'Labour dispute: Workers strike over unpaid wages reported -400+ workers affected at Dhaka facility',
+    message: 'Labour dispute: Workers protest over wages at Dhaka and Gazipur supplier factories despite corporate living wage commitment',
     severity: 'high',
     read: false,
     created_at: '2026-03-26T14:32:00Z',
@@ -68,9 +69,9 @@ const DEMO_ALERTS: AlertItem[] = [
   {
     id: 'a4',
     supplier_id: 'demo-supplier-3',
-    supplier_name: 'PackagingPlus Romania',
+    supplier_name: 'Nestle Packaging EU',
     type: 'greenwashing',
-    message: 'Energy claim discrepancy: Public procurement records show active coal energy contract despite "100% renewable" claims',
+    message: 'Packaging claim discrepancy: Only 82% recyclable packaging achieved vs 100% target claimed for 2025',
     severity: 'high',
     read: true,
     created_at: '2026-03-25T11:08:00Z',
@@ -78,7 +79,7 @@ const DEMO_ALERTS: AlertItem[] = [
   {
     id: 'a5',
     supplier_id: 'demo-supplier-1',
-    supplier_name: 'SteelCorp GmbH',
+    supplier_name: 'ThyssenKrupp Steel',
     type: 'csrd_risk',
     message: 'CSRD non-compliance risk: Simulation engine predicts 91% probability of regulatory enforcement within 45 days',
     severity: 'critical',
@@ -88,7 +89,7 @@ const DEMO_ALERTS: AlertItem[] = [
   {
     id: 'a6',
     supplier_id: 'demo-supplier-4',
-    supplier_name: 'ChemBase France',
+    supplier_name: 'BASF SE',
     type: 'scan_complete',
     message: 'Scan completed: No violations detected. Supplier is CSRD compliant with low risk score (18/100)',
     severity: 'low',
@@ -98,7 +99,7 @@ const DEMO_ALERTS: AlertItem[] = [
   {
     id: 'a7',
     supplier_id: 'demo-supplier-5',
-    supplier_name: 'LogiTrans Hungary',
+    supplier_name: 'Maersk Logistics',
     type: 'scan_complete',
     message: 'Scan completed: No violations detected. Supplier is fully compliant with risk score 12/100',
     severity: 'low',
@@ -124,7 +125,18 @@ function timeAgo(dateStr: string) {
 
 export default function Alerts() {
   const navigate = useNavigate();
-  const [alerts, setAlerts] = useState<AlertItem[]>(DEMO_ALERTS);
+  const { liveAlerts, markAlertRead, markAllAlertsRead } = useScanResults();
+
+  // Merge live scan alerts with demo alerts (live alerts take priority at top)
+  const allAlerts = useMemo<AlertItem[]>(() => {
+    return [...liveAlerts, ...DEMO_ALERTS];
+  }, [liveAlerts]);
+
+  const [localReadIds, setLocalReadIds] = useState<Set<string>>(new Set());
+  const alerts = useMemo(() => {
+    return allAlerts.map((a) => localReadIds.has(a.id) ? { ...a, read: true } : a);
+  }, [allAlerts, localReadIds]);
+
   const [filter, setFilter] = useState<'all' | 'unread' | 'critical' | 'high'>('all');
 
   const filtered = useMemo(() => {
@@ -139,11 +151,13 @@ export default function Alerts() {
   const unreadCount = alerts.filter((a) => !a.read).length;
 
   const markRead = (id: string) => {
-    setAlerts((prev) => prev.map((a) => a.id === id ? { ...a, read: true } : a));
+    setLocalReadIds((prev) => new Set(prev).add(id));
+    markAlertRead(id);
   };
 
   const markAllRead = () => {
-    setAlerts((prev) => prev.map((a) => ({ ...a, read: true })));
+    setLocalReadIds(new Set(alerts.map((a) => a.id)));
+    markAllAlertsRead();
   };
 
   return (

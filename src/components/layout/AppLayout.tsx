@@ -1,6 +1,8 @@
+import { useState, useEffect, useCallback } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { AppSidebar } from './AppSidebar';
+import { SearchPalette } from './SearchPalette';
 
 interface AppLayoutProps {
   userEmail?: string;
@@ -8,6 +10,7 @@ interface AppLayoutProps {
 
 export function AppLayout({ userEmail }: AppLayoutProps) {
   const location = useLocation();
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const pageTitles: Record<string, string> = {
     '/dashboard': 'Dashboard',
@@ -19,6 +22,20 @@ export function AppLayout({ userEmail }: AppLayoutProps) {
 
   const pageTitle = pageTitles[location.pathname] || '';
   const isSupplierDetail = location.pathname.startsWith('/supplier/');
+
+  const handleCloseSearch = useCallback(() => setSearchOpen(false), []);
+
+  // Ctrl+K keyboard shortcut
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
     <div
@@ -44,14 +61,17 @@ export function AppLayout({ userEmail }: AppLayoutProps) {
             )}
           </div>
           <div className="flex items-center gap-4">
-            <div className="hidden md:flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-[12px] text-neutral-500 cursor-default">
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="hidden md:flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-[12px] text-neutral-500 hover:bg-white/[0.05] hover:border-white/[0.1] transition-all cursor-pointer"
+            >
               <Search className="h-3.5 w-3.5 text-neutral-600" />
               <span>Search Suppliers</span>
               <div className="flex items-center gap-1 ml-3">
                 <kbd className="font-mono text-[10px] text-neutral-600 bg-white/[0.04] px-1.5 py-0.5 rounded border border-white/[0.06]">Ctrl</kbd>
                 <kbd className="font-mono text-[10px] text-neutral-600 bg-white/[0.04] px-1.5 py-0.5 rounded border border-white/[0.06]">K</kbd>
               </div>
-            </div>
+            </button>
           </div>
         </header>
         {/* Main content */}
@@ -59,6 +79,9 @@ export function AppLayout({ userEmail }: AppLayoutProps) {
           <Outlet />
         </main>
       </div>
+
+      {/* Search Command Palette */}
+      <SearchPalette open={searchOpen} onClose={handleCloseSearch} />
     </div>
   );
 }

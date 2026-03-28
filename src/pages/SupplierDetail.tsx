@@ -18,6 +18,7 @@ import { useLatestSimulation } from '@/hooks/useSimulations';
 import { getDemoSuppliers } from '@/data/demoSuppliers';
 import { cn } from '@/lib/utils';
 import { CCTVGrid } from '@/components/dashboard/CCTVGrid';
+import { useScanResults } from '@/lib/scanResultContext';
 import type { Supplier, Violation, SimulationOutput } from '@/types';
 
 const riskLevelConfig = {
@@ -52,10 +53,14 @@ const stagger = {
 export default function SupplierDetail() {
   const { id } = useParams<{ id: string }>();
   const isDemo = id?.startsWith('demo-supplier-');
+  const { getScanResult } = useScanResults();
 
   const { data: dbSupplier, isLoading: supplierLoading } = useSupplier(isDemo ? '' : (id || ''));
   const { data: dbViolations } = useViolations(isDemo ? undefined : id);
   const { data: dbSimulation } = useLatestSimulation(isDemo ? '' : (id || ''));
+
+  // Check if this supplier has live scan results from the current session
+  const liveScan = id ? getScanResult(id) : undefined;
 
   const { supplier, violations, simulation } = useMemo(() => {
     if (isDemo) {
@@ -63,30 +68,65 @@ export default function SupplierDetail() {
       const demoIndex = parseInt(id?.replace('demo-supplier-', '') || '1') - 1;
       const demo = demoList[demoIndex] || demoList[0];
 
+      // If we have live scan results, use those (they may be updated from a real scan)
+      const scanData = liveScan?.result || demo;
+
       const sup: Supplier = {
-        id: demo.id,
+        id: scanData.id,
         org_id: 'demo',
-        name: demo.supplier_name,
-        website: demo.website,
-        country: demo.country,
-        industry: demo.industry,
-        status: demo.status,
-        risk_score: demo.risk_score,
-        risk_level: demo.risk_level,
-        last_scanned_at: '2026-03-15T00:00:00Z',
+        name: scanData.supplier_name,
+        website: scanData.website,
+        country: scanData.country,
+        industry: scanData.industry,
+        status: scanData.status,
+        risk_score: scanData.risk_score,
+        risk_level: scanData.risk_level,
+        last_scanned_at: liveScan ? new Date(liveScan.scannedAt).toISOString() : '2026-03-15T00:00:00Z',
         created_at: '2026-03-15T00:00:00Z',
       };
 
-      const viol: Violation[] = demo.violations.map((v) => ({
+      const viol: Violation[] = scanData.violations.map((v) => ({
         ...v,
-        supplier_id: demo.id,
+        supplier_id: scanData.id,
       }));
 
       const sim: SimulationOutput = {
-        ...demo.simulation_output,
+        ...scanData.simulation_output,
         id: 'demo-sim',
-        supplier_id: demo.id,
-        simulated_at: '2026-03-15T00:00:00Z',
+        supplier_id: scanData.id,
+        simulated_at: liveScan ? new Date(liveScan.scannedAt).toISOString() : '2026-03-15T00:00:00Z',
+      };
+
+      return { supplier: sup, violations: viol, simulation: sim };
+    }
+
+    // For non-demo suppliers, check if there are live scan results
+    if (liveScan) {
+      const scanData = liveScan.result;
+      const sup: Supplier = {
+        id: scanData.id,
+        org_id: 'live',
+        name: scanData.supplier_name,
+        website: scanData.website,
+        country: scanData.country,
+        industry: scanData.industry,
+        status: scanData.status,
+        risk_score: scanData.risk_score,
+        risk_level: scanData.risk_level,
+        last_scanned_at: new Date(liveScan.scannedAt).toISOString(),
+        created_at: new Date(liveScan.scannedAt).toISOString(),
+      };
+
+      const viol: Violation[] = scanData.violations.map((v) => ({
+        ...v,
+        supplier_id: scanData.id,
+      }));
+
+      const sim: SimulationOutput = {
+        ...scanData.simulation_output,
+        id: 'live-sim',
+        supplier_id: scanData.id,
+        simulated_at: new Date(liveScan.scannedAt).toISOString(),
       };
 
       return { supplier: sup, violations: viol, simulation: sim };
@@ -97,7 +137,7 @@ export default function SupplierDetail() {
       violations: (dbViolations as Violation[]) || [],
       simulation: dbSimulation as SimulationOutput | null,
     };
-  }, [isDemo, id, dbSupplier, dbViolations, dbSimulation]);
+  }, [isDemo, id, dbSupplier, dbViolations, dbSimulation, liveScan]);
 
   if (!isDemo && supplierLoading) {
     return (
