@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense, Component, type ReactNode, type ErrorInfo } from 'react';
+import { useEffect, useState, lazy, Suspense, Component, type ReactNode, type ErrorInfo, createContext, useContext, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from 'next-themes';
@@ -16,6 +16,16 @@ const SupplierDetail = lazy(() => import('@/pages/SupplierDetail'));
 const Reports = lazy(() => import('@/pages/Reports'));
 const Alerts = lazy(() => import('@/pages/Alerts'));
 const Settings = lazy(() => import('@/pages/Settings'));
+
+// ─── Demo Mode Context ───
+interface DemoContextValue {
+  isDemoMode: boolean;
+  enterDemoMode: () => void;
+  exitDemoMode: () => void;
+}
+
+const DemoContext = createContext<DemoContextValue>({ isDemoMode: false, enterDemoMode: () => {}, exitDemoMode: () => {} });
+export function useDemoMode() { return useContext(DemoContext); }
 
 // ─── Error Boundary ───
 interface ErrorBoundaryProps { children: ReactNode; }
@@ -71,9 +81,9 @@ function PageLoader() {
   );
 }
 
-// ─── Protected Route guard ───
-function ProtectedRoute({ session, children }: { session: Session | null; children: ReactNode }) {
-  if (!session) {
+// ─── Protected Route guard (allows demo mode bypass) ───
+function ProtectedRoute({ session, isDemoMode, children }: { session: Session | null; isDemoMode: boolean; children: ReactNode }) {
+  if (!session && !isDemoMode) {
     return <Navigate to="/auth" replace />;
   }
   return <>{children}</>;
@@ -91,6 +101,17 @@ const queryClient = new QueryClient({
 function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isDemoMode, setIsDemoMode] = useState(() => localStorage.getItem('scope3scout_demo_mode') === 'true');
+
+  const enterDemoMode = useCallback(() => {
+    localStorage.setItem('scope3scout_demo_mode', 'true');
+    setIsDemoMode(true);
+  }, []);
+
+  const exitDemoMode = useCallback(() => {
+    localStorage.removeItem('scope3scout_demo_mode');
+    setIsDemoMode(false);
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -118,60 +139,64 @@ function App() {
     );
   }
 
+  const isAuthed = !!session || isDemoMode;
+
   return (
     <ErrorBoundary>
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
         <QueryClientProvider client={queryClient}>
-          <ScanResultProvider>
-            <BrowserRouter>
-              <Suspense fallback={<PageLoader />}>
-                <Routes>
-                  {/* Public landing page */}
-                  <Route
-                    path="/"
-                    element={
-                      session ? <Navigate to="/dashboard" replace /> : <Home />
-                    }
-                  />
+          <DemoContext.Provider value={{ isDemoMode, enterDemoMode, exitDemoMode }}>
+            <ScanResultProvider>
+              <BrowserRouter>
+                <Suspense fallback={<PageLoader />}>
+                  <Routes>
+                    {/* Public landing page */}
+                    <Route
+                      path="/"
+                      element={
+                        isAuthed ? <Navigate to="/dashboard" replace /> : <Home />
+                      }
+                    />
 
-                  {/* Auth */}
-                  <Route
-                    path="/auth"
-                    element={
-                      session ? <Navigate to="/dashboard" replace /> : <Auth />
-                    }
-                  />
+                    {/* Auth */}
+                    <Route
+                      path="/auth"
+                      element={
+                        isAuthed ? <Navigate to="/dashboard" replace /> : <Auth />
+                      }
+                    />
 
-                  {/* Protected app routes with layout */}
-                  <Route
-                    element={
-                      <ProtectedRoute session={session}>
-                        <AppLayout userEmail={session?.user?.email} />
-                      </ProtectedRoute>
-                    }
-                  >
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/upload" element={<Upload />} />
-                    <Route path="/supplier/:id" element={<SupplierDetail />} />
-                    <Route path="/reports" element={<Reports />} />
-                    <Route path="/alerts" element={<Alerts />} />
-                    <Route path="/settings" element={<Settings />} />
-                  </Route>
+                    {/* Protected app routes with layout (auth OR demo mode) */}
+                    <Route
+                      element={
+                        <ProtectedRoute session={session} isDemoMode={isDemoMode}>
+                          <AppLayout userEmail={session?.user?.email || (isDemoMode ? 'demo@scope3scout.com' : undefined)} />
+                        </ProtectedRoute>
+                      }
+                    >
+                      <Route path="/dashboard" element={<Dashboard />} />
+                      <Route path="/upload" element={<Upload />} />
+                      <Route path="/supplier/:id" element={<SupplierDetail />} />
+                      <Route path="/reports" element={<Reports />} />
+                      <Route path="/alerts" element={<Alerts />} />
+                      <Route path="/settings" element={<Settings />} />
+                    </Route>
 
-                  {/* Default redirect */}
-                  <Route
-                    path="*"
-                    element={
-                      <Navigate
-                        to={session ? '/dashboard' : '/'}
-                        replace
-                      />
-                    }
-                  />
-                </Routes>
-              </Suspense>
-            </BrowserRouter>
-          </ScanResultProvider>
+                    {/* Default redirect */}
+                    <Route
+                      path="*"
+                      element={
+                        <Navigate
+                          to={isAuthed ? '/dashboard' : '/'}
+                          replace
+                        />
+                      }
+                    />
+                  </Routes>
+                </Suspense>
+              </BrowserRouter>
+            </ScanResultProvider>
+          </DemoContext.Provider>
         </QueryClientProvider>
       </ThemeProvider>
     </ErrorBoundary>

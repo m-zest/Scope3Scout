@@ -13,6 +13,7 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/Logo';
+import { useDemoMode } from '@/App';
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -30,10 +31,16 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
+  const { isDemoMode, exitDemoMode } = useDemoMode();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate('/auth');
+    if (isDemoMode) {
+      exitDemoMode();
+      navigate('/');
+    } else {
+      await supabase.auth.signOut();
+      navigate('/auth');
+    }
   };
 
   return (
@@ -92,6 +99,13 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
           {collapsed ? <ChevronRight className="h-4 w-4 shrink-0" /> : <ChevronLeft className="h-4 w-4 shrink-0" />}
           {!collapsed && <span>Collapse</span>}
         </button>
+
+        {/* Demo mode badge */}
+        {isDemoMode && !collapsed && (
+          <div className="px-3 py-1.5 mx-1 rounded-lg bg-purple-500/10 border border-purple-500/20">
+            <p className="text-[10px] font-bold text-purple-400 uppercase tracking-wider text-center">Demo Mode</p>
+          </div>
+        )}
 
         {/* User email */}
         {userEmail && !collapsed && (
