@@ -80,9 +80,38 @@ const stagger = {
   visible: { transition: { staggerChildren: 0.07 } },
 };
 
+function SkeletonCard() {
+  return (
+    <div className="bg-white/[0.02] border border-white/[0.05] backdrop-blur-md rounded-2xl p-5 overflow-hidden">
+      <div className="flex items-center justify-between mb-3">
+        <div className="w-4 h-4 rounded bg-white/[0.06] animate-pulse" />
+        <div className="w-3 h-3 rounded bg-white/[0.04] animate-pulse" />
+      </div>
+      <div className="w-16 h-7 rounded bg-white/[0.06] animate-pulse mb-1" />
+      <div className="w-24 h-3 rounded bg-white/[0.04] animate-pulse mt-2" />
+    </div>
+  );
+}
+
+function SkeletonRow() {
+  return (
+    <tr className="border-b border-white/[0.02]">
+      <td className="px-6 py-3.5"><div className="w-32 h-4 rounded bg-white/[0.06] animate-pulse" /></td>
+      <td className="px-6 py-3.5"><div className="w-16 h-4 rounded bg-white/[0.04] animate-pulse" /></td>
+      <td className="px-6 py-3.5 hidden lg:table-cell"><div className="w-20 h-4 rounded bg-white/[0.04] animate-pulse" /></td>
+      <td className="px-6 py-3.5 text-center"><div className="w-14 h-4 rounded bg-white/[0.04] animate-pulse mx-auto" /></td>
+      <td className="px-6 py-3.5 text-center"><div className="w-16 h-4 rounded bg-white/[0.04] animate-pulse mx-auto" /></td>
+      <td className="px-6 py-3.5 text-center hidden md:table-cell"><div className="w-6 h-4 rounded bg-white/[0.04] animate-pulse mx-auto" /></td>
+      <td className="px-6 py-3.5 text-center hidden md:table-cell"><div className="w-6 h-4 rounded bg-white/[0.04] animate-pulse mx-auto" /></td>
+      <td className="px-6 py-3.5 text-right hidden lg:table-cell"><div className="w-20 h-4 rounded bg-white/[0.04] animate-pulse ml-auto" /></td>
+      <td className="px-4 py-3.5" />
+    </tr>
+  );
+}
+
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { data: dbSuppliers } = useSuppliers();
+  const { data: dbSuppliers, isLoading: isLoadingSuppliers } = useSuppliers();
 
   // Re-read localStorage on every render (captures uploads from other pages)
   const [uploadedVersion, setUploadedVersion] = useState(0);
@@ -180,7 +209,11 @@ export default function Dashboard() {
 
       {/* Stat cards */}
       <motion.div variants={fadeUp} className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-        {stats.map((stat, i) => (
+        {isLoadingSuppliers ? (
+          <>
+            <SkeletonCard /><SkeletonCard /><SkeletonCard /><SkeletonCard /><SkeletonCard />
+          </>
+        ) : stats.map((stat, i) => (
           <div
             key={stat.label}
             className="relative bg-white/[0.02] border border-white/[0.05] backdrop-blur-md rounded-2xl p-5 hover:bg-white/[0.04] transition-all duration-300 overflow-hidden group"
@@ -363,7 +396,28 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {suppliers.length > 0 ? (
+        {isLoadingSuppliers ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-white/[0.03]">
+                  <th className="text-left px-6 py-3 text-[10px] font-medium text-neutral-600 uppercase tracking-wider">Supplier</th>
+                  <th className="text-left px-6 py-3 text-[10px] font-medium text-neutral-600 uppercase tracking-wider">Country</th>
+                  <th className="text-left px-6 py-3 text-[10px] font-medium text-neutral-600 uppercase tracking-wider hidden lg:table-cell">Industry</th>
+                  <th className="text-center px-6 py-3 text-[10px] font-medium text-neutral-600 uppercase tracking-wider">Risk</th>
+                  <th className="text-center px-6 py-3 text-[10px] font-medium text-neutral-600 uppercase tracking-wider">Status</th>
+                  <th className="text-center px-6 py-3 text-[10px] font-medium text-neutral-600 uppercase tracking-wider hidden md:table-cell">Violations</th>
+                  <th className="text-center px-6 py-3 text-[10px] font-medium text-neutral-600 uppercase tracking-wider hidden md:table-cell">CSRD</th>
+                  <th className="text-right px-6 py-3 text-[10px] font-medium text-neutral-600 uppercase tracking-wider hidden lg:table-cell">Exposure</th>
+                  <th className="px-4 py-3 w-8" />
+                </tr>
+              </thead>
+              <tbody>
+                <SkeletonRow /><SkeletonRow /><SkeletonRow /><SkeletonRow /><SkeletonRow />
+              </tbody>
+            </table>
+          </div>
+        ) : suppliers.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>

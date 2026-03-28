@@ -37,6 +37,7 @@ import { TimelineFeed, type TimelineEntry } from './TimelineFeed';
 import { ContradictionPanel, type Contradiction } from './ContradictionPanel';
 import { ActionPanel } from './ActionPanel';
 import { runGeminiAnalysis, hasGeminiKey } from '@/lib/gemini';
+import { useScanResults } from '@/lib/scanResultContext';
 
 export type AgentStatus = 'idle' | 'queued' | 'running' | 'success' | 'warning' | 'error';
 
@@ -126,6 +127,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
   const [liveMode, setLiveMode] = useState(false); // DEMO by default, toggle to REAL
 
   const contradictionRef = useRef<HTMLDivElement>(null);
+  const { saveScanResult } = useScanResults();
   const demoSuppliers = getDemoSuppliers();
   // Include uploaded suppliers from localStorage, deduplicated by name
   const suppliers = (() => {
@@ -517,6 +519,9 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
     setScanning(false);
     setScanStatus('complete');
 
+    // Persist scan results to context for cross-page access + auto-generate alerts
+    saveScanResult(demo.id, demo.supplier_name, demo);
+
     addTimelineEntry({
       agent: 'System',
       message: `Audit complete -${foundContradictions.length} contradictions found in ${finalElapsed.toFixed(1)}s`,
@@ -524,7 +529,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
     });
 
     onScanComplete?.(demo);
-  }, [suppliers, updateTask, addTimelineEntry, onScanComplete]);
+  }, [suppliers, updateTask, addTimelineEntry, onScanComplete, saveScanResult]);
 
   // Only 4 visible hero agents for clean, focused demo
   const heroAgents = tasks.filter((t) => heroAgentIds.includes(t.id));
