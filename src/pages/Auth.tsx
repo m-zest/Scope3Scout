@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Loader2, Fingerprint, Lock } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { Logo } from '@/components/Logo';
+import { useDemoMode } from '@/App';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -12,6 +13,7 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { enterDemoMode } = useDemoMode();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -190,7 +192,7 @@ export default function Auth() {
 
             <div className="mt-4 pt-4 border-t border-white/[0.06]">
               <button
-                onClick={() => navigate('/dashboard')}
+                onClick={() => { enterDemoMode(); navigate('/dashboard'); }}
                 className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-white/[0.08] bg-white/[0.03] text-neutral-400 text-sm font-medium hover:bg-white/[0.06] hover:text-neutral-200 hover:border-white/[0.12] transition-all"
               >
                 Try Demo - No Account Needed
