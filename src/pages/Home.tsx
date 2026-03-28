@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef, lazy, Suspense } from 'react';
-import { useDemoMode } from '@/App';
 const Spline = lazy(() => import('@splinetool/react-spline'));
 import {
   Shield,
@@ -169,7 +168,6 @@ const chartData = {
 
 export default function Home() {
   const navigate = useNavigate();
-  const { enterDemoMode } = useDemoMode();
   const heroRef = useRef<HTMLDivElement>(null);
   const macRef = useRef<HTMLDivElement>(null);
 
@@ -204,10 +202,10 @@ export default function Home() {
               Sign In
             </button>
             <button
-              onClick={() => { enterDemoMode(); navigate('/dashboard'); }}
+              onClick={() => navigate('/auth')}
               className="text-[13px] font-semibold bg-purple-600 hover:bg-purple-500 text-white px-5 py-2 rounded-full transition-all duration-300 shadow-[0_0_20px_rgba(147,51,234,0.4)] hover:shadow-[0_0_30px_rgba(147,51,234,0.6)]"
             >
-              Try Demo
+              Get Started
             </button>
           </div>
         </div>
@@ -253,7 +251,7 @@ export default function Home() {
               Start Free Trial &rarr;
             </button>
             <button
-              onClick={() => { enterDemoMode(); navigate('/dashboard'); }}
+              onClick={() => navigate('/auth')}
               className="px-8 py-4 rounded-full bg-white/[0.05] border border-white/10 text-white font-medium backdrop-blur-md hover:bg-white/[0.1] transition-colors duration-300 text-[15px]"
             >
               View Live Demo
@@ -804,10 +802,10 @@ export default function Home() {
           </motion.div>
           <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
-              onClick={() => { enterDemoMode(); navigate('/dashboard'); }}
+              onClick={() => navigate('/auth')}
               className="flex items-center gap-2 bg-purple-600 hover:bg-purple-500 text-white font-semibold px-10 py-4 rounded-full text-base transition-all duration-300 shadow-[0_0_30px_rgba(147,51,234,0.5)] hover:shadow-[0_0_50px_rgba(147,51,234,0.6)]"
             >
-              Try Live Demo
+              Get Started Free
               <ArrowRight className="h-5 w-5" />
             </button>
             <button
