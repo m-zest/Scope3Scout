@@ -771,6 +771,177 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ═══ PHASE 2: GLOBAL EXPANSION ROADMAP ═══ */}
+      <section className="relative py-32 px-6 overflow-hidden">
+        {/* Background glow */}
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-600/10 via-cyan-800/5 to-transparent blur-[120px] opacity-60 pointer-events-none" />
+
+        <motion.div
+          className="relative z-10 max-w-6xl mx-auto"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-80px' }}
+          variants={stagger}
+        >
+          {/* Section Header */}
+          <motion.div variants={fadeUp} className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 backdrop-blur-md mb-6">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[11px] font-semibold tracking-[0.15em] text-emerald-400 uppercase">Phase 2 Roadmap</span>
+            </div>
+            <h2 className="font-heading text-4xl md:text-[3.5rem] font-light tracking-tight leading-tight mb-5">
+              Beyond EU &mdash;{' '}
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-500">
+                Global Regulatory Intelligence
+              </span>
+            </h2>
+            <p className="text-neutral-500 text-lg font-light max-w-2xl mx-auto leading-relaxed">
+              CSRD is just the beginning. Every major economy is enforcing supply chain accountability.
+            </p>
+          </motion.div>
+
+          {/* Expansion Cards */}
+          <motion.div variants={stagger} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-14">
+            {/* India EPR */}
+            <motion.div variants={fadeUpSlow}>
+              <div className="relative h-full rounded-2xl border border-emerald-500/20 bg-white/[0.02] backdrop-blur-xl p-7 hover:bg-white/[0.04] transition-all duration-300 group overflow-hidden">
+                {/* Gradient accent line */}
+                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-500/60 to-transparent" />
+
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-2xl">&#127470;&#127475;</span>
+                    <h3 className="font-heading text-lg font-semibold text-white tracking-tight">India EPR Compliance</h3>
+                  </div>
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full whitespace-nowrap">Phase 2 &mdash; Q3 2026</span>
+                </div>
+
+                <p className="text-sm text-neutral-400 leading-relaxed mb-5 font-light">
+                  India&apos;s Extended Producer Responsibility (EPR) laws now require 100% plastic waste recovery from every brand. CPCB portal has no API &mdash; perfect for TinyFish agents.
+                </p>
+
+                <div className="space-y-2 mb-5">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-emerald-400/70">New Agents</p>
+                  {['EPR Registration Verifier', 'Waste Recovery Auditor', 'Carbon Credit Validator'].map((agent) => (
+                    <div key={agent} className="flex items-center gap-2 text-[12px] text-neutral-500">
+                      <div className="w-1 h-1 rounded-full bg-emerald-500/60 shrink-0" />
+                      {agent}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t border-white/[0.04]">
+                  <span className="text-[11px] text-neutral-600">Market size</span>
+                  <span className="text-sm font-heading font-bold text-emerald-400">50,000+ companies</span>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* US SEC */}
+            <motion.div variants={fadeUpSlow}>
+              <div className="relative h-full rounded-2xl border border-blue-500/20 bg-white/[0.02] backdrop-blur-xl p-7 hover:bg-white/[0.04] transition-all duration-300 group overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-blue-500/60 to-transparent" />
+
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-2xl">&#127482;&#127480;</span>
+                    <h3 className="font-heading text-lg font-semibold text-white tracking-tight">US SEC Climate Disclosure</h3>
+                  </div>
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2.5 py-1 rounded-full whitespace-nowrap">Phase 2 &mdash; Q4 2026</span>
+                </div>
+
+                <p className="text-sm text-neutral-400 leading-relaxed mb-5 font-light">
+                  SEC Climate Rules require Scope 3 emissions reporting starting 2026&ndash;2027. SEC EDGAR filings, EPA databases, state portals &mdash; all browser-based, no APIs.
+                </p>
+
+                <div className="space-y-2 mb-5">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-blue-400/70">New Agents</p>
+                  {['SEC Filing Scanner', 'EPA Violation Checker', 'State Permit Verifier'].map((agent) => (
+                    <div key={agent} className="flex items-center gap-2 text-[12px] text-neutral-500">
+                      <div className="w-1 h-1 rounded-full bg-blue-500/60 shrink-0" />
+                      {agent}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t border-white/[0.04]">
+                  <span className="text-[11px] text-neutral-600">Market size</span>
+                  <span className="text-sm font-heading font-bold text-blue-400">10,000+ companies</span>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Australia ASRS */}
+            <motion.div variants={fadeUpSlow}>
+              <div className="relative h-full rounded-2xl border border-amber-500/20 bg-white/[0.02] backdrop-blur-xl p-7 hover:bg-white/[0.04] transition-all duration-300 group overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-500/60 to-transparent" />
+
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-2xl">&#127462;&#127482;</span>
+                    <h3 className="font-heading text-lg font-semibold text-white tracking-tight">Australia ASRS</h3>
+                  </div>
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full whitespace-nowrap">Phase 3 &mdash; 2027</span>
+                </div>
+
+                <p className="text-sm text-neutral-400 leading-relaxed mb-5 font-light">
+                  Australian Sustainability Reporting Standards active 2025&ndash;2027. ASIC, Clean Energy Regulator portals &mdash; browser-only access, no public APIs.
+                </p>
+
+                <div className="space-y-2 mb-5">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-amber-400/70">New Agents</p>
+                  {['ASRS Disclosure Verifier', 'National Greenhouse Reporter'].map((agent) => (
+                    <div key={agent} className="flex items-center gap-2 text-[12px] text-neutral-500">
+                      <div className="w-1 h-1 rounded-full bg-amber-500/60 shrink-0" />
+                      {agent}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t border-white/[0.04]">
+                  <span className="text-[11px] text-neutral-600">Market size</span>
+                  <span className="text-sm font-heading font-bold text-amber-400">6,000+ entities</span>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+
+          {/* Platform message */}
+          <motion.p
+            variants={fadeUp}
+            className="text-center text-neutral-500 text-[15px] font-light leading-relaxed max-w-3xl mx-auto mb-10"
+          >
+            Same platform. Same TinyFish agents. New geographies.{' '}
+            <span className="text-neutral-300">Every regulation that requires verification of supplier claims is a market we can enter.</span>
+          </motion.p>
+
+          {/* Why TinyFish Scales This */}
+          <motion.div variants={scaleIn}>
+            <div className="relative rounded-2xl border border-cyan-500/15 bg-gradient-to-br from-cyan-500/[0.04] via-white/[0.01] to-purple-500/[0.04] backdrop-blur-xl p-8 md:p-10 max-w-4xl mx-auto overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
+
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                  <Globe className="h-5 w-5 text-cyan-400" />
+                </div>
+                <div>
+                  <h3 className="font-heading text-base font-semibold text-white tracking-tight mb-3">
+                    Why TinyFish Scales This
+                  </h3>
+                  <p className="text-sm text-neutral-400 leading-relaxed font-light">
+                    Traditional compliance tools break at borders &mdash; every country has different portals, languages, and workflows.{' '}
+                    <span className="text-neutral-300">TinyFish agents adapt to any website in any language.</span>{' '}
+                    Adding a new regulation means deploying new agent configs, not rebuilding infrastructure.{' '}
+                    <span className="text-cyan-400/80">EU CSRD today. India EPR tomorrow. SEC next quarter.</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      </section>
+
       {/* ═══ CTA -DEEP GLOW ═══ */}
       <section id="compliance" className="relative py-44 px-6">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[700px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-600/25 via-indigo-800/10 to-transparent blur-3xl opacity-70 pointer-events-none" />
