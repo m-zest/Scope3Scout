@@ -3,7 +3,7 @@
 <p align="center"><strong>Autonomous ESG supply chain intelligence for the CSRD era.</strong></p>
 
 <p align="center">
-  <em>We don't trust supplier reports — we verify them using autonomous browser agents.</em>
+  <em>We don't trust supplier reports  -  we verify them using autonomous browser agents.</em>
 </p>
 
 <p align="center">
@@ -27,7 +27,7 @@
 <tr>
 <td align="center" width="50%">
 
-### Phase 1 — Cleared
+### Phase 1  -  Cleared
 **March 2026 · Hackathon**
 
 Selected from the TinyFish Pre-Accelerator hackathon applicant pool on the strength of the TinyFish-native architecture and the regulatory urgency of the CSRD use case.
@@ -37,7 +37,7 @@ Evaluators specifically cited the depth of the SSE integration and the product's
 </td>
 <td align="center" width="50%">
 
-### Phase 2 — Active
+### Phase 2  -  Active
 **April 2026 · Build Sprint**
 
 14-day sprint toward **Demo Day pitch to Robin Vasan at Mango Capital** for a share of the **$2M seed pool**.
@@ -143,7 +143,7 @@ ESG compliance data lives behind dynamic web portals with no public APIs. Tradit
 | Regional Labour Violation Databases | No | Scattered across 27 country portals |
 | Local News Archives | No | Dynamic content extraction |
 
-TinyFish browser agents interact with these portals the way a human compliance analyst would — at **1,000x the speed**.
+TinyFish browser agents interact with these portals the way a human compliance analyst would  -  at **1,000x the speed**.
 
 > Scope3Scout is not a TinyFish user. Scope3Scout is a **TinyFish-native product.**
 
@@ -153,9 +153,9 @@ TinyFish browser agents interact with these portals the way a human compliance a
 
 | | Size | Scope |
 |---|---|---|
-| **TAM** | €12B+ | Global ESG compliance software and consulting — 150,000+ companies across CSRD, SEC Climate, TCFD, ASRS |
-| **SAM** | €3.5B | EU CSRD mandatory compliance — 50,000+ companies required to verify supplier conduct by 2027 |
-| **SOM** | €120M | Mid-market EU companies (250–2,000 employees) pursuing automation — 12,000 companies at €10K ACV |
+| **TAM** | €12B+ | Global ESG compliance software and consulting  -  150,000+ companies across CSRD, SEC Climate, TCFD, ASRS |
+| **SAM** | €3.5B | EU CSRD mandatory compliance  -  50,000+ companies required to verify supplier conduct by 2027 |
+| **SOM** | €120M | Mid-market EU companies (250–2,000 employees) pursuing automation  -  12,000 companies at €10K ACV |
 
 ### Regulatory Landscape
 
@@ -255,10 +255,10 @@ Runs at `http://localhost:8080`.
 VITE_SUPABASE_URL=
 VITE_SUPABASE_PUBLISHABLE_KEY=
 
-# TinyFish (optional — can be entered via Settings page)
+# TinyFish (optional  -  can be entered via Settings page)
 VITE_TINYFISH_API_KEY=
 
-# LLM (optional — for Tier 2 analysis)
+# LLM (optional  -  for Tier 2 analysis)
 VITE_FIREWORKS_API_KEY=
 VITE_GEMINI_API_KEY=
 VITE_OPENAI_API_KEY=
@@ -290,11 +290,11 @@ All API keys can also be entered through the Settings page at runtime. The app w
 
 ## Team
 
-**Mohammad Zeeshan** — Founder, CEO
+**Mohammad Zeeshan**  -  Founder, CEO
 AI Research Developer at HUN-REN SZTAKI (Hungary's national research network), independently leading four EU Horizon Europe projects. Builder of Parity AI, a production-grade EU AI Act compliance framework. Incoming AI Governance Technical SME at Sony (April 2026). Starting PhD in AI Systems Security at Óbuda University (September 2026). Stanford Ethics, Technology and Public Policy scholarship recipient (2026).
 GitHub: [@m-zest](https://github.com/m-zest)
 
-**Afzal** — Co-founder, Operations & Go-to-Market
+**Afzal**  -  Co-founder, Operations & Go-to-Market
 Leads applications, partnerships, and customer research across compliance verticals. Co-architect of product strategy and regulatory positioning. Drives enterprise outreach and cross-European pilot coordination.
 
 ---
@@ -325,5 +325,5 @@ TinyFish API used with permission for hackathon and commercial development.
 </p>
 
 <p align="center">
-  <strong>Scope3Scout — The compliance layer of the browser-agent era.</strong>
+  <strong>Scope3Scout  -  The compliance layer of the browser-agent era.</strong>
 </p>
