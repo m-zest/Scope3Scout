@@ -16,7 +16,7 @@
   <img src="https://img.shields.io/badge/TinyFish_Accelerator-Phase_2_Active-FF5D42" alt="Phase 2 Active" />
   <img src="https://img.shields.io/badge/Regulation-EU_CSRD_2026--2027-E8B04B" alt="CSRD" />
   <img src="https://img.shields.io/badge/Stack-React_19_·_Supabase_·_TinyFish_·_Fireworks-142036" alt="Stack" />
-  <img src="https://img.shields.io/badge/License-All_Rights_Reserved-6B7691" alt="License" />
+  <img src="https://img.shields.io/badge/License-AGPL%20v3-blue.svg" alt="License: AGPL v3" />
 </p>
 
 ---
