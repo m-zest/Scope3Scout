@@ -17,6 +17,9 @@ import { getDemoSuppliers, type DemoScanResult } from '@/data/demoSuppliers';
 import { useSuppliers } from '@/hooks/useSuppliers';
 import { cn } from '@/lib/utils';
 import { CCTVGrid } from '@/components/dashboard/CCTVGrid';
+import { REAL_SUPPLIERS } from '@/data/realSuppliers';
+import { hasTinyFishKey } from '@/lib/tinyfish';
+import { Radio, Beaker, Zap as ZapIcon } from 'lucide-react';
 
 /* ─── Risk + Status Badge Styles ─── */
 const riskBadge: Record<string, string> = {
@@ -106,6 +109,83 @@ function SkeletonRow() {
       <td className="px-6 py-3.5 text-right hidden lg:table-cell"><div className="w-20 h-4 rounded bg-white/[0.04] animate-pulse ml-auto" /></td>
       <td className="px-4 py-3.5" />
     </tr>
+  );
+}
+
+/**
+ * Owns the demo/live mode toggle and the imperative trigger that fires when
+ * "Run Live Audit on Nestlé" is clicked. Kept in its own component so flipping
+ * mode does not re-run the dashboard stats memo.
+ */
+function DashboardModeBar() {
+  const [mode, setMode] = useState<'demo' | 'live'>('demo');
+  const [triggerScan, setTriggerScan] = useState<{ supplierName: string; nonce: number } | null>(null);
+  const tinyFishConfigured = hasTinyFishKey();
+  const nestle = REAL_SUPPLIERS.find((s) => s.id === 'live-nestle');
+
+  const runNestleLive = () => {
+    if (!nestle) return;
+    setMode('live');
+    setTriggerScan({ supplierName: nestle.name, nonce: Date.now() });
+  };
+
+  return (
+    <>
+      <div className="flex items-center gap-3 flex-wrap rounded-2xl border border-white/[0.06] bg-black/40 backdrop-blur-xl px-4 py-3">
+        <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-neutral-500">Audit Mode</span>
+        <div className="inline-flex items-center rounded-xl border border-white/[0.08] bg-white/[0.02] p-1">
+          <button
+            type="button"
+            onClick={() => setMode('demo')}
+            className={cn(
+              'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all',
+              mode === 'demo'
+                ? 'bg-emerald-500/15 text-emerald-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]'
+                : 'text-neutral-500 hover:text-neutral-300'
+            )}
+          >
+            <Beaker className="h-3.5 w-3.5" />
+            Demo
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('live')}
+            className={cn(
+              'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all',
+              mode === 'live'
+                ? 'bg-red-500/15 text-red-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]'
+                : 'text-neutral-500 hover:text-neutral-300'
+            )}
+          >
+            <Radio className={cn('h-3.5 w-3.5', mode === 'live' && 'animate-pulse')} />
+            Live Audit
+          </button>
+        </div>
+        <span className="text-[11px] text-neutral-500">
+          {mode === 'demo'
+            ? 'Simulated agents on 5 sample suppliers — instant, deterministic, for storytelling.'
+            : 'Real TinyFish browser agents + Gemini structured analysis on public sources.'}
+        </span>
+        <div className="ml-auto">
+          <button
+            type="button"
+            onClick={runNestleLive}
+            disabled={!tinyFishConfigured || !nestle}
+            title={!tinyFishConfigured ? 'Add a TinyFish API key in Settings to run a Live Audit' : 'Runs a real audit on Nestlé Packaging'}
+            className={cn(
+              'flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-semibold transition-all',
+              tinyFishConfigured && nestle
+                ? 'bg-gradient-to-r from-red-500 to-fuchsia-500 text-white hover:shadow-[0_0_30px_rgba(239,68,68,0.3)]'
+                : 'bg-white/[0.04] border border-white/[0.08] text-neutral-500 cursor-not-allowed'
+            )}
+          >
+            <ZapIcon className="h-3.5 w-3.5" />
+            Run Live Audit on Nestlé
+          </button>
+        </div>
+      </div>
+      <CCTVGrid mode={mode} triggerScan={triggerScan} />
+    </>
   );
 }
 
@@ -369,8 +449,8 @@ export default function Dashboard() {
       </motion.div>
 
       {/* CCTV Agent Grid -Main feature */}
-      <motion.div variants={fadeUp}>
-        <CCTVGrid />
+      <motion.div variants={fadeUp} className="space-y-3">
+        <DashboardModeBar />
       </motion.div>
 
       {/* Supplier Risk Table */}

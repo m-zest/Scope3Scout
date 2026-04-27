@@ -22,8 +22,10 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getDemoSuppliers, type DemoScanResult } from '@/data/demoSuppliers';
+import { REAL_SUPPLIERS, getRealSupplierByName, type RealSupplier } from '@/data/realSuppliers';
 import {
   buildAgentTasks,
+  buildLiveSupplierScanPrompts,
   runTinyFishAgent,
   hasTinyFishKey,
   getDemoStepsForTask,
@@ -36,8 +38,9 @@ import { MissionControl } from './MissionControl';
 import { TimelineFeed, type TimelineEntry } from './TimelineFeed';
 import { ContradictionPanel, type Contradiction } from './ContradictionPanel';
 import { ActionPanel } from './ActionPanel';
-import { runGeminiAnalysis, hasGeminiKey } from '@/lib/gemini';
+import { runGeminiAnalysis, hasGeminiKey, analyzeForContradictionStructured } from '@/lib/gemini';
 import { useScanResults } from '@/lib/scanResultContext';
+import { getCachedLiveScan, setCachedLiveScan } from '@/lib/scanCache';
 
 export type AgentStatus = 'idle' | 'queued' | 'running' | 'success' | 'warning' | 'error';
 
@@ -107,13 +110,25 @@ function initTasks(): AgentTask[] {
 interface CCTVGridProps {
   supplierName?: string;
   onScanComplete?: (result: DemoScanResult & { id: string }) => void;
+  /**
+   * 'demo' (default) → existing simulated path with cleanPairs + 25s contradiction injection.
+   * 'live' → real TinyFish + structured Gemini contradiction analysis. Demo-only paths are gated off.
+   */
+  mode?: 'demo' | 'live';
+  /**
+   * Imperative trigger from a parent: when `nonce` changes, runScan is auto-fired
+   * for the given supplierName under the current mode. Used by Dashboard's
+   * "Run Live Audit on Nestlé" button.
+   */
+  triggerScan?: { supplierName: string; nonce: number } | null;
 }
 
-export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
+export function CCTVGrid({ supplierName, onScanComplete, mode = 'demo', triggerScan }: CCTVGridProps) {
   const [tasks, setTasks] = useState<AgentTask[]>(initTasks());
   const [scanning, setScanning] = useState(false);
   const [scanComplete, setScanComplete] = useState(false);
-  const [activeSupplier, setActiveSupplier] = useState(supplierName || 'ThyssenKrupp Steel');
+  const initialSupplier = supplierName || (mode === 'live' ? REAL_SUPPLIERS[0].name : 'ThyssenKrupp Steel');
+  const [activeSupplier, setActiveSupplier] = useState(initialSupplier);
   const [scanResult, setScanResult] = useState<(DemoScanResult & { id: string }) | null>(null);
   const [totalTime, setTotalTime] = useState(0);
   const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
@@ -124,7 +139,19 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
   const [showAllTier1, setShowAllTier1] = useState(false);
   const [dimBackground, setDimBackground] = useState(false);
   const [focusedAgentId, setFocusedAgentId] = useState<string | null>(null);
-  const [liveMode, setLiveMode] = useState(false); // DEMO by default, toggle to REAL
+  const liveMode = mode === 'live';
+
+  // When mode flips between demo/live, reset the active supplier to a valid one for the new mode
+  useEffect(() => {
+    if (liveMode) {
+      const stillValid = REAL_SUPPLIERS.some(s => s.name === activeSupplier);
+      if (!stillValid) setActiveSupplier(REAL_SUPPLIERS[0].name);
+    } else {
+      const stillValid = activeSupplier && demoSuppliers.some(s => s.supplier_name === activeSupplier);
+      if (!stillValid) setActiveSupplier('ThyssenKrupp Steel');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [liveMode]);
 
   const contradictionRef = useRef<HTMLDivElement>(null);
   const { saveScanResult } = useScanResults();
@@ -164,6 +191,17 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
     setTasks((prev) => prev.map((t) => t.id === taskId ? { ...t, ...updates } : t));
   }, []);
 
+  // Ref so the trigger-scan effect can call the latest runScan without including it in deps
+  const runScanRef = useRef<((s: string) => Promise<void>) | null>(null);
+
+  // External trigger: when parent flips the nonce, kick off a scan for the named supplier.
+  // Used by Dashboard's "Run Live Audit on Nestlé" button.
+  useEffect(() => {
+    if (!triggerScan) return;
+    runScanRef.current?.(triggerScan.supplierName);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [triggerScan?.nonce]);
+
   // Auto-scroll to contradiction when detected -dramatic pause for impact
   useEffect(() => {
     if (contradictions.length > 0 && contradictionRef.current) {
@@ -179,6 +217,30 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
   }, [contradictions.length]);
 
   const runScan = useCallback(async (targetSupplier: string) => {
+    const isLiveAudit = mode === 'live';
+
+    // === LIVE-MODE CACHE HIT: instant restore, no scan run ===
+    if (isLiveAudit) {
+      const cached = getCachedLiveScan(targetSupplier);
+      if (cached) {
+        setActiveSupplier(targetSupplier);
+        setFocusedAgentId(null);
+        setTasks(cached.tasks);
+        setContradictions(cached.contradictions);
+        setTimeline(cached.timeline);
+        setScanResult(cached.scanResult);
+        setTotalTime(cached.totalTime);
+        setElapsed(cached.totalTime);
+        setAgentsComplete(allAgentIds.length);
+        setScanComplete(true);
+        setScanning(false);
+        setScanStatus('complete');
+        saveScanResult(cached.scanResult.id, cached.scanResult.supplier_name, cached.scanResult);
+        onScanComplete?.(cached.scanResult);
+        return;
+      }
+    }
+
     setScanning(true);
     setScanComplete(false);
     setScanResult(null);
@@ -198,19 +260,65 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
 
     setTasks(initTasks().map((t) => ({ ...t, status: 'queued' as AgentStatus })));
 
-    addTimelineEntry({ agent: 'System', message: `Initiating compliance audit for ${targetSupplier}`, type: 'info' });
+    addTimelineEntry({ agent: 'System', message: `Initiating ${isLiveAudit ? 'LIVE AUDIT' : 'compliance audit'} for ${targetSupplier}`, type: 'info' });
 
-    const demo = suppliers.find((s) => s.supplier_name === targetSupplier) || suppliers[0];
-    const supplierInput = {
-      name: demo.supplier_name,
-      website: demo.website,
-      country: demo.country,
-      industry: demo.industry,
-    };
+    // === SUPPLIER + TIER 1 TASK RESOLUTION (mode-aware) ===
+    let realSupplier: RealSupplier | undefined;
+    let demo: DemoScanResult & { id: string };
+    let tier1Tasks: TinyFishAgentTask[];
 
-    const tier1Tasks = buildAgentTasks(supplierInput);
+    if (isLiveAudit) {
+      realSupplier = getRealSupplierByName(targetSupplier);
+      if (!realSupplier) {
+        addTimelineEntry({ agent: 'System', message: `Live Audit not configured for "${targetSupplier}". Pick a supplier from the Live list.`, type: 'warning' });
+        setScanning(false);
+        setScanStatus('error');
+        return;
+      }
+      if (!hasTinyFishKey()) {
+        addTimelineEntry({ agent: 'System', message: 'Live Audit requires a TinyFish API key. Add one in Settings.', type: 'warning' });
+        setScanning(false);
+        setScanStatus('error');
+        return;
+      }
+      tier1Tasks = buildLiveSupplierScanPrompts(realSupplier);
+      // Synthesized DemoScanResult-shaped object so downstream UI works without a fork.
+      // Risk levels and counts get filled in at end of scan based on real findings.
+      demo = {
+        id: realSupplier.id,
+        supplier_name: realSupplier.name,
+        country: realSupplier.country,
+        industry: realSupplier.industry,
+        website: realSupplier.primaryUrl,
+        risk_score: 0,
+        risk_level: 'low',
+        status: 'scanning',
+        tier1_result: { flag_severity: 'none', discrepancies: [] },
+        violations: [],
+        simulation_output: {
+          risk_score: 0,
+          risk_level: 'low',
+          predictions: [],
+          recommended_action: 'Live Audit in progress',
+          financial_exposure_eur: 0,
+          csrd_compliant: true,
+        },
+      };
+    } else {
+      demo = suppliers.find((s) => s.supplier_name === targetSupplier) || suppliers[0];
+      const supplierInput = {
+        name: demo.supplier_name,
+        website: demo.website,
+        country: demo.country,
+        industry: demo.industry,
+      };
+      tier1Tasks = buildAgentTasks(supplierInput);
+    }
+
     let completedCount = 0;
     const foundContradictions: Contradiction[] = [];
+    // Live-only: capture each Tier 1 agent's raw text + sourceUrl for the structured Gemini analysis pass.
+    const liveAgentResults: Record<string, { text: string; sourceUrl: string | undefined }> = {};
 
     // === TIER 1 AGENTS ===
 
@@ -231,7 +339,9 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
         resultText.toLowerCase().includes('expired') ||
         resultText.toLowerCase().includes('found:');
 
-      if (resultText.includes('MISMATCH') || resultText.includes('FOUND:')) {
+      // DEMO-ONLY: cleanPairs lookup + per-agent contradiction push.
+      // In LIVE mode, contradictions come exclusively from analyzeForContradictionStructured after Tier 1.
+      if (!isLiveAudit && (resultText.includes('MISMATCH') || resultText.includes('FOUND:'))) {
         const pair = cleanPairs[taskId] || { claim: resultText.split('. ')[0], evidence: resultText.split('. ')[1] || resultText };
         const c: Contradiction = {
           id: `c-${taskId}-${Date.now()}`,
@@ -312,6 +422,16 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
       if (resultText.startsWith('{')) {
         try { const p = JSON.parse(resultText); resultText = p.action || p.result || p.message || p.output || p.purpose || 'Scan complete'; } catch { /* keep */ }
       }
+
+      // Capture for live-mode structured analysis. Pull a SOURCE: URL out of the result if present.
+      if (isLiveAudit) {
+        const sourceMatch = resultText.match(/SOURCE:\s*(\S+)/i);
+        liveAgentResults[taskId] = {
+          text: resultText,
+          sourceUrl: sourceMatch?.[1] || undefined,
+        };
+      }
+
       const hasIssues = processTier1Result(taskId, agentTask, resultText, meta);
       updateTask(taskId, {
         status: result.error ? 'error' : hasIssues ? 'warning' : 'success',
@@ -323,9 +443,9 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
       setAgentsComplete(completedCount);
     };
 
-    if (liveMode && isLive) {
-      // === REAL MODE: All agents use TinyFish with 60s timeout ===
-      addTimelineEntry({ agent: 'System', message: 'LIVE MODE - all agents using real TinyFish API', type: 'info' });
+    if (isLiveAudit) {
+      // === LIVE AUDIT: real TinyFish for every Tier 1 task. No injection, no cleanPairs. ===
+      addTimelineEntry({ agent: 'System', message: 'LIVE AUDIT — running real TinyFish browser agents', type: 'info' });
       const batchSize = 2; // TinyFish allows 2 concurrent
       for (let i = 0; i < tier1Tasks.length; i += batchSize) {
         const batch = tier1Tasks.slice(i, i + batchSize);
@@ -348,39 +468,83 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
       }
     }
 
-    // === HYBRID GUARANTEE: Inject contradiction if real agents didn't find one ===
-    // Wait until 25 seconds from scan start before checking
-    const elapsedSoFar = (Date.now() - startTime) / 1000;
-    const remainingDelay = Math.max(0, 25 - elapsedSoFar) * 1000;
-    await new Promise(r => setTimeout(r, remainingDelay));
+    // === LIVE-ONLY: Structured contradiction analysis via Gemini ===
+    // Compare the supplier's own claims (from the website agent) against scraped evidence
+    // (news + regulatory + certs agents). Confidence comes verbatim from the model.
+    if (isLiveAudit && realSupplier) {
+      addTimelineEntry({ agent: 'System', message: 'Tier 1 complete — running structured contradiction analysis (Gemini)', type: 'info' });
+      const claimText = liveAgentResults['website']?.text?.trim() || `Public ESG claims by ${realSupplier.name} (claim extraction returned no content)`;
+      const evidenceParts = ['news', 'regulatory', 'certs']
+        .map(id => liveAgentResults[id]?.text?.trim())
+        .filter((t): t is string => Boolean(t && t.length > 0));
+      const evidenceText = evidenceParts.length > 0
+        ? evidenceParts.join('\n\n---\n\n')
+        : '(no independent evidence retrieved by Tier 1 agents)';
+      const sourceUrl =
+        liveAgentResults['news']?.sourceUrl ||
+        liveAgentResults['regulatory']?.sourceUrl ||
+        liveAgentResults['certs']?.sourceUrl ||
+        realSupplier.primaryUrl;
 
-    if (foundContradictions.length === 0 && demo.tier1_result.discrepancies.length > 0) {
-      const d = demo.tier1_result.discrepancies[0];
-      const guaranteedContradiction: Contradiction = {
-        id: `c-guarantee-${Date.now()}`,
-        agent: 'Certification Verifier',
-        claim: d.claim,
-        evidence: d.finding,
-        confidence: d.confidence,
-        sourceUrl: d.source_url,
-        severity: 'critical',
-        financialExposure: demo.simulation_output.financial_exposure_eur,
-        timelineImpactDays: demo.simulation_output.predictions?.[0]?.timeline_days || 45,
-      };
-      foundContradictions.push(guaranteedContradiction);
-      setContradictions((prev) => [...prev, guaranteedContradiction]);
+      try {
+        const structured = await analyzeForContradictionStructured(claimText, evidenceText, sourceUrl);
+        if (structured.contradictionFound) {
+          const c: Contradiction = {
+            id: `c-live-${Date.now()}`,
+            agent: 'Greenwash Detector',
+            claim: structured.claim,
+            evidence: structured.evidence,
+            confidence: structured.confidence,
+            sourceUrl: structured.sourceUrl,
+            severity: 'critical',
+          };
+          foundContradictions.push(c);
+          setContradictions((prev) => [...prev, c]);
+          addTimelineEntry({ agent: 'Greenwash Detector', message: `LIVE CONTRADICTION: ${structured.evidence.substring(0, 100)}`, type: 'contradiction' });
+        } else {
+          addTimelineEntry({ agent: 'Greenwash Detector', message: `No contradiction surfaced — ${structured.reasoning.substring(0, 120)}`, type: 'success' });
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Unknown error';
+        addTimelineEntry({ agent: 'System', message: `Structured analysis failed: ${msg}. No contradictions injected.`, type: 'warning' });
+      }
+    }
 
-      // Update the cert verifier agent to show it found the issue
-      updateTask('certs', {
-        status: 'warning',
-        result: `MISMATCH: ${d.claim} - ${d.finding}`,
-      });
+    // === DEMO-ONLY HYBRID GUARANTEE: inject contradiction if simulated agents didn't push one ===
+    // This block is intentionally unreachable in LIVE AUDIT mode.
+    if (!isLiveAudit) {
+      const elapsedSoFar = (Date.now() - startTime) / 1000;
+      const remainingDelay = Math.max(0, 25 - elapsedSoFar) * 1000;
+      await new Promise(r => setTimeout(r, remainingDelay));
 
-      addTimelineEntry({
-        agent: 'Certification Verifier',
-        message: `CONTRADICTION DETECTED: "${d.claim}" contradicted by evidence`,
-        type: 'contradiction',
-      });
+      if (foundContradictions.length === 0 && demo.tier1_result.discrepancies.length > 0) {
+        const d = demo.tier1_result.discrepancies[0];
+        const guaranteedContradiction: Contradiction = {
+          id: `c-guarantee-${Date.now()}`,
+          agent: 'Certification Verifier',
+          claim: d.claim,
+          evidence: d.finding,
+          confidence: d.confidence,
+          sourceUrl: d.source_url,
+          severity: 'critical',
+          financialExposure: demo.simulation_output.financial_exposure_eur,
+          timelineImpactDays: demo.simulation_output.predictions?.[0]?.timeline_days || 45,
+        };
+        foundContradictions.push(guaranteedContradiction);
+        setContradictions((prev) => [...prev, guaranteedContradiction]);
+
+        // Update the cert verifier agent to show it found the issue
+        updateTask('certs', {
+          status: 'warning',
+          result: `MISMATCH: ${d.claim} - ${d.finding}`,
+        });
+
+        addTimelineEntry({
+          agent: 'Certification Verifier',
+          message: `CONTRADICTION DETECTED: "${d.claim}" contradicted by evidence`,
+          type: 'contradiction',
+        });
+      }
     }
 
     // === TIER 2: LLM Analysis (Gemini-powered when key available) ===
@@ -388,13 +552,21 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
     addTimelineEntry({ agent: 'System', message: `Starting Tier 2 -cross-referencing claims against evidence${useGemini ? ' (Gemini AI)' : ''}`, type: 'info' });
     const tier2Ids: Array<'classifier' | 'greenwash' | 'evidence' | 'sentiment'> = ['classifier', 'greenwash', 'evidence', 'sentiment'];
 
-    // Build Tier 1 context for Gemini
-    const geminiContext = {
-      supplierName: demo.supplier_name,
-      claims: demo.tier1_result.discrepancies.map((d: { claim: string }) => d.claim),
-      violations: demo.violations.map((v: { type: string; description: string }) => `${v.type}: ${v.description}`),
-      discrepancies: demo.tier1_result.discrepancies.map((d: { claim: string; finding: string }) => ({ claim: d.claim, finding: d.finding })),
-    };
+    // Build Tier 1 context for Gemini.
+    // In LIVE mode, derive context from the real findings of this scan, not from demo data.
+    const geminiContext = isLiveAudit
+      ? {
+          supplierName: demo.supplier_name,
+          claims: foundContradictions.map((c) => c.claim),
+          violations: [],
+          discrepancies: foundContradictions.map((c) => ({ claim: c.claim, finding: c.evidence })),
+        }
+      : {
+          supplierName: demo.supplier_name,
+          claims: demo.tier1_result.discrepancies.map((d: { claim: string }) => d.claim),
+          violations: demo.violations.map((v: { type: string; description: string }) => `${v.type}: ${v.description}`),
+          discrepancies: demo.tier1_result.discrepancies.map((d: { claim: string; finding: string }) => ({ claim: d.claim, finding: d.finding })),
+        };
 
     for (const taskId of tier2Ids) {
       const meta = agentMeta[taskId];
@@ -444,8 +616,9 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
         isWarn = hasViolations && (taskId === 'classifier' || taskId === 'greenwash');
       }
 
-      // Greenwash contradiction from Tier 2
-      if (taskId === 'greenwash' && demo.tier1_result.discrepancies.length > 0) {
+      // DEMO-ONLY: Greenwash auto-push from canned demo discrepancies.
+      // In LIVE mode the Greenwash Detector card just reports on findings already surfaced by the structured analysis pass above.
+      if (!isLiveAudit && taskId === 'greenwash' && demo.tier1_result.discrepancies.length > 0) {
         const d = demo.tier1_result.discrepancies[0];
         const c: Contradiction = {
           id: `c-greenwash-${Date.now()}`,
@@ -479,57 +652,134 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
     }
 
     // === TIER 3: Risk Simulation ===
-    addTimelineEntry({ agent: 'System', message: 'Starting Tier 3 -predicting stakeholder responses', type: 'info' });
     const tier3Ids = ['regulator', 'media', 'investor', 'ngo'];
-    for (const taskId of tier3Ids) {
-      const meta = agentMeta[taskId];
-      updateTask(taskId, { status: 'running', progress: 40, steps: ['Running Monte Carlo simulation...'] });
-      addTimelineEntry({ agent: meta.name, message: 'Simulating response...', type: 'step' });
+    if (isLiveAudit) {
+      // LIVE MODE: predictive module is intentionally disabled. No canned probabilities.
+      addTimelineEntry({ agent: 'System', message: 'Tier 3 predictive module not enabled in Live Audit (Beta)', type: 'info' });
+      for (const taskId of tier3Ids) {
+        const meta = agentMeta[taskId];
+        updateTask(taskId, {
+          status: 'success',
+          progress: 100,
+          result: 'Predictive module not enabled in Live Audit (Beta)',
+          duration: 0,
+          steps: ['Predictive module disabled in Live Audit'],
+        });
+        completedCount++;
+        setAgentsComplete(completedCount);
+        addTimelineEntry({ agent: meta.name, message: 'Skipped — predictive module disabled in Live Audit', type: 'info' });
+      }
+    } else {
+      addTimelineEntry({ agent: 'System', message: 'Starting Tier 3 -predicting stakeholder responses', type: 'info' });
+      for (const taskId of tier3Ids) {
+        const meta = agentMeta[taskId];
+        updateTask(taskId, { status: 'running', progress: 40, steps: ['Running Monte Carlo simulation...'] });
+        addTimelineEntry({ agent: meta.name, message: 'Simulating response...', type: 'step' });
 
-      await new Promise((r) => setTimeout(r, 1200 + Math.random() * 800));
-      updateTask(taskId, { progress: 80, steps: ['Running Monte Carlo simulation...', 'Computing probability distributions...'] });
+        await new Promise((r) => setTimeout(r, 1200 + Math.random() * 800));
+        updateTask(taskId, { progress: 80, steps: ['Running Monte Carlo simulation...', 'Computing probability distributions...'] });
 
-      await new Promise((r) => setTimeout(r, 1000 + Math.random() * 600));
+        await new Promise((r) => setTimeout(r, 1000 + Math.random() * 600));
 
-      const pred = demo.simulation_output.predictions.find((p: { agent_type: string }) => p.agent_type === taskId);
-      const isRisky = pred ? pred.probability > 0.4 : false;
-      const taskResult = pred
-        ? `${Math.round(pred.probability * 100)}% probability -${pred.timeline_days}d -${pred.prediction}`
-        : 'Low risk -no action needed';
+        const pred = demo.simulation_output.predictions.find((p: { agent_type: string }) => p.agent_type === taskId);
+        const isRisky = pred ? pred.probability > 0.4 : false;
+        const taskResult = pred
+          ? `${Math.round(pred.probability * 100)}% probability -${pred.timeline_days}d -${pred.prediction}`
+          : 'Low risk -no action needed';
 
-      updateTask(taskId, {
-        status: isRisky ? 'warning' : 'success',
-        progress: 100,
-        result: taskResult,
-        duration: Math.round(500 + Math.random() * 300),
-        steps: ['Running Monte Carlo simulation...', 'Computing probability distributions...', 'Finalizing prediction...'],
-      });
+        updateTask(taskId, {
+          status: isRisky ? 'warning' : 'success',
+          progress: 100,
+          result: taskResult,
+          duration: Math.round(500 + Math.random() * 300),
+          steps: ['Running Monte Carlo simulation...', 'Computing probability distributions...', 'Finalizing prediction...'],
+        });
 
-      completedCount++;
-      setAgentsComplete(completedCount);
-      addTimelineEntry({ agent: meta.name, message: taskResult.substring(0, 80), type: isRisky ? 'warning' : 'success' });
+        completedCount++;
+        setAgentsComplete(completedCount);
+        addTimelineEntry({ agent: meta.name, message: taskResult.substring(0, 80), type: isRisky ? 'warning' : 'success' });
+      }
     }
 
     clearInterval(elapsedInterval);
     const finalElapsed = (Date.now() - startTime) / 1000;
+    const finalTotalTime = parseFloat(finalElapsed.toFixed(1));
     setElapsed(finalElapsed);
-    setTotalTime(parseFloat(finalElapsed.toFixed(1)));
-    setScanResult(demo);
+    setTotalTime(finalTotalTime);
+
+    // === FINAL RESULT SYNTHESIS ===
+    let finalResult: DemoScanResult & { id: string };
+    if (isLiveAudit) {
+      // Build a result that reflects what the live audit actually found.
+      // No financial exposure, no canned predictions, no fake violations.
+      const hasC = foundContradictions.length > 0;
+      finalResult = {
+        ...demo,
+        risk_score: hasC ? 75 : 5,
+        risk_level: hasC ? 'critical' : 'low',
+        status: hasC ? 'flagged' : 'cleared',
+        tier1_result: {
+          flag_severity: hasC ? 'critical' : 'none',
+          discrepancies: foundContradictions.map((c) => ({
+            claim: c.claim,
+            finding: c.evidence,
+            source_url: c.sourceUrl || '',
+            confidence: c.confidence,
+          })),
+        },
+        violations: [],
+        simulation_output: {
+          risk_score: hasC ? 75 : 5,
+          risk_level: hasC ? 'critical' : 'low',
+          predictions: [],
+          recommended_action: hasC
+            ? 'Request supplier clarification on documented discrepancy within 14 business days.'
+            : 'No contradictions surfaced. Schedule routine re-audit in 6 months.',
+          financial_exposure_eur: 0,
+          csrd_compliant: !hasC,
+        },
+      };
+    } else {
+      finalResult = demo;
+    }
+
+    setScanResult(finalResult);
     setScanComplete(true);
     setScanning(false);
     setScanStatus('complete');
 
     // Persist scan results to context for cross-page access + auto-generate alerts
-    saveScanResult(demo.id, demo.supplier_name, demo);
+    saveScanResult(finalResult.id, finalResult.supplier_name, finalResult);
+
+    // Live-mode: cache the completed scan so a refresh / re-click within 30 minutes is instant.
+    if (isLiveAudit) {
+      // Read latest tasks/timeline synchronously via setState callback
+      let snapshotTasks: AgentTask[] = [];
+      let snapshotTimeline: TimelineEntry[] = [];
+      setTasks((prev) => { snapshotTasks = prev; return prev; });
+      setTimeline((prev) => { snapshotTimeline = prev; return prev; });
+      setCachedLiveScan(targetSupplier, {
+        tasks: snapshotTasks,
+        contradictions: foundContradictions,
+        timeline: snapshotTimeline,
+        scanResult: finalResult,
+        totalTime: finalTotalTime,
+      });
+    }
 
     addTimelineEntry({
       agent: 'System',
-      message: `Audit complete -${foundContradictions.length} contradictions found in ${finalElapsed.toFixed(1)}s`,
+      message: `${isLiveAudit ? 'Live Audit' : 'Audit'} complete -${foundContradictions.length} contradiction${foundContradictions.length === 1 ? '' : 's'} found in ${finalElapsed.toFixed(1)}s`,
       type: foundContradictions.length > 0 ? 'warning' : 'success',
     });
 
-    onScanComplete?.(demo);
-  }, [suppliers, updateTask, addTimelineEntry, onScanComplete, saveScanResult]);
+    onScanComplete?.(finalResult);
+  }, [mode, suppliers, updateTask, addTimelineEntry, onScanComplete, saveScanResult]);
+
+  // Keep the ref pointing at the latest runScan for the external trigger effect
+  useEffect(() => {
+    runScanRef.current = runScan;
+  }, [runScan]);
 
   // Only 4 visible hero agents for clean, focused demo
   const heroAgents = tasks.filter((t) => heroAgentIds.includes(t.id));
@@ -573,30 +823,24 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
             className="flex-1 max-w-xs px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08] text-sm text-neutral-300 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 transition-all"
           >
             <option value="">Select supplier to audit...</option>
-            {suppliers.map((s) => (
-              <option key={s.id} value={s.supplier_name}>{s.supplier_name} -{s.country}</option>
-            ))}
+            {liveMode
+              ? REAL_SUPPLIERS.map((s) => (
+                  <option key={s.id} value={s.name}>{s.name} -{s.country}</option>
+                ))
+              : suppliers.map((s) => (
+                  <option key={s.id} value={s.supplier_name}>{s.supplier_name} -{s.country}</option>
+                ))}
           </select>
-          {/* DEMO / REAL toggle */}
-          {isLive && (
-            <button
-              onClick={() => setLiveMode(!liveMode)}
-              disabled={scanning}
-              className={cn(
-                'flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all border',
-                liveMode
-                  ? 'bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20'
-                  : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20',
-                scanning && 'opacity-40 cursor-not-allowed'
-              )}
-            >
-              <span className={cn('w-2 h-2 rounded-full', liveMode ? 'bg-red-500 animate-pulse' : 'bg-emerald-500')} />
-              {liveMode ? 'LIVE API' : 'DEMO'}
-            </button>
+          {liveMode && (
+            <span className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-[10px] font-bold uppercase tracking-wider text-red-400">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+              Live Audit
+            </span>
           )}
           <button
             onClick={() => activeSupplier && runScan(activeSupplier)}
-            disabled={scanning || !activeSupplier}
+            disabled={scanning || !activeSupplier || (liveMode && !isLive)}
+            title={liveMode && !isLive ? 'Add a TinyFish API key in Settings to run a Live Audit' : undefined}
             className={cn(
               'flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all',
               scanning
@@ -612,11 +856,22 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
             ) : (
               <>
                 <Play className="h-4 w-4" />
-                Run Audit
+                {liveMode ? 'Run Live Audit' : 'Run Audit'}
               </>
             )}
           </button>
-          {!isLive && (
+          {liveMode && !isLive && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/[0.05] border border-amber-500/10 text-[11px] text-amber-400/80">
+              <Key className="h-3 w-3 shrink-0" />
+              <span>
+                Live Audit requires a TinyFish API key. Add one in <strong>Settings</strong>.{' '}
+                <a href="https://agent.tinyfish.ai/sign-up" target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:underline inline-flex items-center gap-0.5">
+                  Get key <ExternalLink className="h-2.5 w-2.5" />
+                </a>
+              </span>
+            </div>
+          )}
+          {!liveMode && !isLive && (
             <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/[0.05] border border-amber-500/10 text-[11px] text-amber-400/80">
               <Key className="h-3 w-3 shrink-0" />
               <span>
@@ -773,6 +1028,26 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
           </motion.div>
         )}
       </div>
+
+      {/* LIVE MODE: explicit "no contradictions" panel — intentional and correct outcome */}
+      {liveMode && scanComplete && contradictions.length === 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: -10, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="rounded-2xl border-2 border-emerald-500/40 bg-gradient-to-r from-emerald-500/[0.12] via-emerald-500/[0.06] to-black/60 backdrop-blur-2xl px-6 py-4 shadow-[0_0_60px_rgba(16,185,129,0.15)]"
+        >
+          <div className="flex items-center gap-3">
+            <Shield className="h-5 w-5 text-emerald-400 shrink-0" />
+            <p className="font-heading text-lg md:text-xl font-bold tracking-tight text-emerald-400">
+              No contradictions surfaced — supplier currently low-risk on publicly verifiable data
+            </p>
+          </div>
+          <p className="text-sm text-emerald-400/60 mt-1 ml-8">
+            Live Audit found no claim-evidence mismatch in the scraped public sources. Re-audit recommended in 6 months.
+          </p>
+        </motion.div>
+      )}
 
       {/* Headline Insight -instant risk summary */}
       {contradictions.length > 0 && (

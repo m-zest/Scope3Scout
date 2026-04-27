@@ -2,6 +2,7 @@
 // Real API: https://agent.tinyfish.ai/v1/automation/run-sse (SSE streaming)
 
 import { getDemoScanResult, getDemoSuppliers, type DemoScanResult } from '@/data/demoSuppliers';
+import type { RealSupplier } from '@/data/realSuppliers';
 import { getTinyFishKey } from '@/lib/keys';
 
 export const DEMO_MODE = import.meta.env.VITE_DEMO_MODE !== 'false';
@@ -94,6 +95,49 @@ export function buildAgentTasks(supplier: SupplierInput): TinyFishAgentTask[] {
     id: 'compliance',
     url: `https://www.google.com/search?q=${encodeURIComponent(name + ' CSRD sustainability report ESG disclosure')}`,
     goal: `Search for "${name}" CSRD sustainability report. Click the first result. Check for Scope 1/2/3 emissions and ESRS compliance. Take a screenshot. Flag any gaps.`,
+  });
+
+  return tasks;
+}
+
+// Build the Tier 1 agent tasks for a LIVE AUDIT against a real supplier.
+// Unlike buildAgentTasks (demo path), each prompt explicitly asks the agent
+// to extract a {claim, evidence, source} pair so downstream Gemini analysis
+// has structured input. No hardcoded contradiction hints.
+export function buildLiveSupplierScanPrompts(supplier: RealSupplier): TinyFishAgentTask[] {
+  const { name, primaryUrl, expectedClaimKeywords, newsSearchQueries, regulatorySearchQueries } = supplier;
+  const keywordHint = expectedClaimKeywords.slice(0, 4).join(', ');
+
+  const tasks: TinyFishAgentTask[] = [];
+
+  // 1. Sustainability page claim extraction (hits the supplier's own page)
+  tasks.push({
+    id: 'website',
+    url: primaryUrl,
+    goal: `Open ${primaryUrl}. Extract verbatim ESG and sustainability claims this company publishes about itself. Focus on commitments related to: ${keywordHint}. For each claim, capture the exact wording, the specific page section it appears in, and the URL. Take a screenshot. Return a list of claims as plain text, one per line, prefixed with "CLAIM:".`,
+  });
+
+  // 2. News evidence search
+  const newsQuery = newsSearchQueries[0] || `${name} ESG news`;
+  tasks.push({
+    id: 'news',
+    url: `https://www.google.com/search?q=${encodeURIComponent(newsQuery)}&tbm=nws`,
+    goal: `Search for: "${newsQuery}". Open the most relevant recent news article from a credible outlet (Reuters, FT, Guardian, Bloomberg, Handelsblatt, etc.). Extract the headline, publication date, outlet name, and the specific factual claim made about ${name}'s actual performance, delays, or shortfalls. Take a screenshot. Return as plain text starting with "EVIDENCE:" followed by the source URL on the next line as "SOURCE:".`,
+  });
+
+  // 3. Regulatory / progress-report evidence
+  const regQuery = regulatorySearchQueries[0] || `${name} regulatory filing`;
+  tasks.push({
+    id: 'regulatory',
+    url: `https://www.google.com/search?q=${encodeURIComponent(regQuery)}`,
+    goal: `Search for: "${regQuery}". Open the first authoritative result (regulator site, official registry, or the company's own progress report). Extract any documented compliance gap, missed target, fine, or formal admission of underperformance for ${name}. Take a screenshot. Return as plain text starting with "EVIDENCE:" and include the source URL on a line starting with "SOURCE:".`,
+  });
+
+  // 4. Certification verification (independent of demo cleanPairs)
+  tasks.push({
+    id: 'certs',
+    url: `https://www.google.com/search?q=${encodeURIComponent(name + ' ISO 14001 OR B Corp OR Science Based Targets certification status')}`,
+    goal: `Search for "${name}" third-party certifications (ISO 14001, B Corp, Science Based Targets, Fair Wear, etc.). Open the first authoritative result. Determine which certifications are currently active vs. expired vs. under review. Take a screenshot. Return findings as plain text starting with "EVIDENCE:" and include the source URL on a line starting with "SOURCE:".`,
   });
 
   return tasks;

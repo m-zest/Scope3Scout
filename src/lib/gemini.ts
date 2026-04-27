@@ -116,6 +116,112 @@ Tone: firm but professional. No greeting or sign-off needed. Max 100 words.`;
   }
 }
 
+// Strict structured contradiction analysis for LIVE AUDIT mode.
+// Compares a supplier's own ESG claim against scraped evidence and returns
+// a strict JSON shape. NO fallbacks, NO defaults — throws on missing key,
+// network/HTTP error, missing Gemini text, or invalid JSON. Confidence is
+// passed through verbatim from the model.
+export interface StructuredContradiction {
+  contradictionFound: boolean;
+  claim: string;
+  evidence: string;
+  sourceUrl: string;
+  confidence: number;
+  reasoning: string;
+}
+
+export async function analyzeForContradictionStructured(
+  claim: string,
+  evidence: string,
+  sourceUrl: string,
+): Promise<StructuredContradiction> {
+  const apiKey = getGeminiKey();
+  if (!apiKey) {
+    throw new Error('Gemini API key is required for structured contradiction analysis');
+  }
+
+  const prompt = `You are an EU CSRD compliance auditor. Compare a supplier's own published ESG claim against scraped public evidence (news, regulatory filings, progress reports). Decide whether the evidence directly contradicts the claim. A contradiction requires a concrete factual mismatch (missed target, expired certification, documented violation, admitted shortfall) — not just sentiment or speculation.
+
+CLAIM (from supplier's own materials):
+"""
+${claim}
+"""
+
+EVIDENCE (from independent or self-reported public sources):
+"""
+${evidence}
+"""
+
+EVIDENCE SOURCE URL: ${sourceUrl}
+
+Respond with ONLY a JSON object matching this exact schema, no prose, no markdown:
+{
+  "contradictionFound": boolean,
+  "claim": string,         // the claim verbatim or the most concise faithful summary
+  "evidence": string,      // the specific contradicting fact in one sentence
+  "sourceUrl": string,     // the evidence source URL provided above, unchanged
+  "confidence": number,    // 0.0 to 1.0, your honest calibration
+  "reasoning": string      // one or two sentences explaining the verdict
+}
+
+If there is no genuine contradiction, set contradictionFound to false and explain why in reasoning.`;
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.1,
+          maxOutputTokens: 600,
+          responseMimeType: 'application/json',
+        },
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Gemini API error ${response.status}: ${errText}`);
+  }
+
+  const data = await response.json();
+  const text: string = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  if (!text) {
+    throw new Error('Gemini returned an empty response');
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    throw new Error(`Gemini returned non-JSON output: ${text.slice(0, 200)}`);
+  }
+
+  const obj = parsed as Record<string, unknown>;
+  if (
+    typeof obj.contradictionFound !== 'boolean' ||
+    typeof obj.claim !== 'string' ||
+    typeof obj.evidence !== 'string' ||
+    typeof obj.sourceUrl !== 'string' ||
+    typeof obj.confidence !== 'number' ||
+    typeof obj.reasoning !== 'string'
+  ) {
+    throw new Error(`Gemini response did not match required schema: ${text.slice(0, 200)}`);
+  }
+
+  return {
+    contradictionFound: obj.contradictionFound,
+    claim: obj.claim,
+    evidence: obj.evidence,
+    sourceUrl: obj.sourceUrl,
+    confidence: obj.confidence,
+    reasoning: obj.reasoning,
+  };
+}
+
 export async function runGeminiAnalysis(
   taskType: 'classifier' | 'greenwash' | 'evidence' | 'sentiment',
   tier1Data: {
