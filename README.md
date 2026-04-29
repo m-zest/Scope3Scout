@@ -291,7 +291,7 @@ All API keys can also be entered through the Settings page at runtime. The app w
 ## Team
 
 **Mohammad Zeeshan**  -  Founder, CEO
-AI Research Developer at HUN-REN SZTAKI (Hungary's national research network), independently leading four EU Horizon Europe projects. Builder of Parity AI, a production-grade EU AI Act compliance framework. Incoming AI Governance Technical SME at Sony (April 2026). Starting PhD in AI Systems Security at Óbuda University (September 2026). Stanford Ethics, Technology and Public Policy scholarship recipient (2026).
+AI Research Developer at HUN-REN SZTAKI (Hungary's national research network), independently led four EU Horizon Europe projects. Builder of Parity AI, a production-grade EU AI Act compliance framework. Stanford Ethics, Technology and Public Policy scholarship recipient (2026).
 GitHub: [@m-zest](https://github.com/m-zest)
 
 **Afzal**  -  Co-founder, Operations & Go-to-Market
