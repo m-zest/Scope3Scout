@@ -60,38 +60,9 @@ For pitch use, the dashboard ships with a **Run Demo Scenario** button (Bavarian
 
 ## Three-Tier Intelligence Pipeline
 
-```
-┌────────────────────────────────────────────────────────────────────┐
-│  TIER 1 · Smart AI Agents              8 agents · Browser Automation │
-├────────────────────────────────────────────────────────────────────┤
-│  Claim Extractor .......... Scrapes supplier websites for compliance claims
-│  Certification Verifier ... Validates ISO certificates in registries
-│  Compliance Auditor ....... Searches government databases for fines
-│  News Scanner ............. Monitors news archives for controversies
-│  Workforce Monitor ........ Detects layoffs and key departures
-│  Supply Chain Mapper ...... Maps sub-supplier networks and risks
-│  Financial Analyst ........ Assesses financial stability signals
-│  CSRD Validator ........... Cross-checks sustainability disclosures
-└────────────────────────────────────────────────────────────────────┘
-                                  ↓
-┌────────────────────────────────────────────────────────────────────┐
-│  TIER 2 · LLM Cross-Reference            4 agents · Fireworks 70B  │
-├────────────────────────────────────────────────────────────────────┤
-│  Violation Classifier ..... Categorizes and ranks violations
-│  Greenwash Detector ....... Finds claim-vs-evidence mismatches
-│  Evidence Extractor ....... Ranks and links evidence chains
-│  Sentiment Analyzer ....... Measures public perception risk
-└────────────────────────────────────────────────────────────────────┘
-                                  ↓
-┌────────────────────────────────────────────────────────────────────┐
-│  TIER 3 · Risk Prediction                4 agents · Simulation     │
-├────────────────────────────────────────────────────────────────────┤
-│  Regulator Predictor ...... Predicts enforcement probability
-│  Media Risk Predictor ..... Predicts press coverage likelihood
-│  Investor Risk Predictor .. Predicts ESG fund divestment
-│  NGO Response Predictor ... Predicts advocacy group actions
-└────────────────────────────────────────────────────────────────────┘
-```
+<p align="center">
+  <img src="architecture-3-tier-editorial.png" alt="Scope3Scout · 16 specialised agents, one verification layer" width="100%"/>
+</p>
 
 ### Contradiction Detection
 
