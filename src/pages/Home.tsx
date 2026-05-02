@@ -479,19 +479,19 @@ export default function Home() {
             viewport={{ once: true, margin: '-100px' }}
             variants={staggerFast}
           >
-            {/* Card 1: TinyFish */}
+            {/* Card 1: Smart AI Agents */}
             <motion.div variants={fadeUpSlow}>
               <GlassCard className="p-8 h-full group">
                 <div className="w-12 h-12 rounded-xl bg-cyan-400/[0.08] border border-cyan-400/[0.15] flex items-center justify-center mb-6 group-hover:bg-cyan-400/[0.12] transition-colors duration-500">
                   <Search className="h-5 w-5 text-cyan-400" />
                 </div>
-                <h3 className="font-heading text-xl font-semibold mb-3 tracking-tight">TinyFish Web Agents</h3>
+                <h3 className="font-heading text-xl font-semibold mb-3 tracking-tight">Smart AI Agents</h3>
                 <p className="text-neutral-500 text-sm leading-relaxed mb-6 font-light">
                   Navigates complex government portals like a human analyst. 5 parallel agents scrape EPA databases, news archives, and certification registries simultaneously.
                 </p>
                 <div className="bg-black/80 border border-white/[0.04] rounded-xl p-4 font-mono text-[11px]">
                   <div className="flex items-center gap-2 text-neutral-700 mb-3">
-                    <span className="text-cyan-400">$</span> tinyfish scan --supplier &quot;SteelCorp GmbH&quot;
+                    <span className="text-cyan-400">$</span> scope3scout audit --supplier &quot;SteelCorp GmbH&quot;
                   </div>
                   <div className="space-y-1.5 text-neutral-600">
                     <p><span className="text-cyan-400">agent[1]</span> Scanning website claims...</p>
@@ -817,7 +817,7 @@ export default function Home() {
                 </div>
 
                 <p className="text-sm text-neutral-400 leading-relaxed mb-5 font-light">
-                  India&apos;s Extended Producer Responsibility (EPR) laws now require 100% plastic waste recovery from every brand. CPCB portal has no API &mdash; perfect for TinyFish agents.
+                  India&apos;s Extended Producer Responsibility (EPR) laws now require 100% plastic waste recovery from every brand. CPCB portal has no API &mdash; perfect for Smart AI Agents.
                 </p>
 
                 <div className="space-y-2 mb-5">
@@ -911,11 +911,11 @@ export default function Home() {
             variants={fadeUp}
             className="text-center text-neutral-500 text-[15px] font-light leading-relaxed max-w-3xl mx-auto mb-10"
           >
-            Same platform. Same TinyFish agents. New geographies.{' '}
+            Same platform. Same Smart AI Agents. New geographies.{' '}
             <span className="text-neutral-300">Every regulation that requires verification of supplier claims is a market we can enter.</span>
           </motion.p>
 
-          {/* Why TinyFish Scales This */}
+          {/* Why Smart AI Agents Scale This */}
           <motion.div variants={scaleIn}>
             <div className="relative rounded-2xl border border-cyan-500/15 bg-gradient-to-br from-cyan-500/[0.04] via-white/[0.01] to-purple-500/[0.04] backdrop-blur-xl p-8 md:p-10 max-w-4xl mx-auto overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent" />
@@ -927,11 +927,11 @@ export default function Home() {
                 </div>
                 <div>
                   <h3 className="font-heading text-base font-semibold text-white tracking-tight mb-3">
-                    Why TinyFish Scales This
+                    Why Smart AI Agents Scale This
                   </h3>
                   <p className="text-sm text-neutral-400 leading-relaxed font-light">
                     Traditional compliance tools break at borders &mdash; every country has different portals, languages, and workflows.{' '}
-                    <span className="text-neutral-300">TinyFish agents adapt to any website in any language.</span>{' '}
+                    <span className="text-neutral-300">Smart AI Agents adapt to any website in any language.</span>{' '}
                     Adding a new regulation means deploying new agent configs, not rebuilding infrastructure.{' '}
                     <span className="text-cyan-400/80">EU CSRD today. India EPR tomorrow. SEC next quarter.</span>
                   </p>

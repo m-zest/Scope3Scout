@@ -172,7 +172,7 @@ export default function Settings() {
         description="Managed via environment variables"
       >
         <div className="grid gap-3">
-          <KeyStatus label="TinyFish Web Agent" hasKey={getTinyFishKey().length > 0} />
+          <KeyStatus label="Smart AI Agent (Browser Automation)" hasKey={getTinyFishKey().length > 0} />
           <KeyStatus label="Google Gemini AI" hasKey={getGeminiKey().length > 0} />
           <KeyStatus label="OpenAI" hasKey={getOpenAIKey().length > 0} />
         </div>

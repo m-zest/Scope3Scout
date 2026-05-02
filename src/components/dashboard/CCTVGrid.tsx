@@ -333,8 +333,8 @@ export function CCTVGrid({ supplierName, onScanComplete, triggerScenario, onScen
     };
 
     if (liveMode && isLive) {
-      // === REAL MODE: All agents use TinyFish with 60s timeout ===
-      addTimelineEntry({ agent: 'System', message: 'LIVE MODE - all agents using real TinyFish API', type: 'info' });
+      // === REAL MODE: All agents use the live browser-automation API with 60s timeout ===
+      addTimelineEntry({ agent: 'System', message: 'LIVE MODE — Smart AI Agents running real-time browser automation', type: 'info' });
       const batchSize = 2; // TinyFish allows 2 concurrent
       for (let i = 0; i < tier1Tasks.length; i += batchSize) {
         const batch = tier1Tasks.slice(i, i + batchSize);
@@ -807,7 +807,7 @@ export function CCTVGrid({ supplierName, onScanComplete, triggerScenario, onScen
             <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/[0.05] border border-amber-500/10 text-[11px] text-amber-400/80">
               <Key className="h-3 w-3 shrink-0" />
               <span>
-                Add API key in <strong>Settings</strong> for live scraping.{' '}
+                Add an API key in <strong>Settings</strong> to run Smart AI Agents on live data.{' '}
                 <a href="https://agent.tinyfish.ai/sign-up" target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:underline inline-flex items-center gap-0.5">
                   Get key <ExternalLink className="h-2.5 w-2.5" />
                 </a>
