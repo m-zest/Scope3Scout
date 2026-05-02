@@ -20,7 +20,8 @@ import { CCTVGrid } from '@/components/dashboard/CCTVGrid';
 import { CountryBadge } from '@/components/CountryBadge';
 import { ExecutiveSummary, type ExecutiveSummaryMetrics } from '@/components/dashboard/ExecutiveSummary';
 import { DEFAULT_SCENARIO_ID, DEMO_SCENARIOS, type ScriptedScenario } from '@/data/demoScenario';
-import { Play, RotateCcw } from 'lucide-react';
+import { Play, RotateCcw, Network } from 'lucide-react';
+import { EuropeanSMENetwork } from '@/components/dashboard/EuropeanSMENetwork';
 
 /* ─── Risk + Status Badge Styles ─── */
 const riskBadge: Record<string, string> = {
@@ -199,18 +200,22 @@ export default function Dashboard() {
   // null = use computed metrics; populated = scripted demo numbers win.
   const [scenarioMetrics, setScenarioMetrics] = useState<ExecutiveSummaryMetrics | null>(null);
   const [activeScenarioName, setActiveScenarioName] = useState<string | null>(null);
+  const [activeScenarioId, setActiveScenarioId] = useState<string | null>(null);
   const [triggerScenario, setTriggerScenario] = useState<{ scenarioId: string; nonce: number } | null>(null);
+  const [smeNetworkOpen, setSmeNetworkOpen] = useState(false);
 
   const handleRunScenario = (scenarioId: string) => {
     const sc = DEMO_SCENARIOS[scenarioId];
     if (!sc) return;
     setActiveScenarioName(`${sc.smeName} → ${sc.supplierName}`);
+    setActiveScenarioId(scenarioId);
     setTriggerScenario({ scenarioId, nonce: Date.now() });
   };
 
   const handleResetScenario = () => {
     setScenarioMetrics(null);
     setActiveScenarioName(null);
+    setActiveScenarioId(null);
     setTriggerScenario(null);
   };
 
@@ -424,6 +429,20 @@ export default function Dashboard() {
           <Play className="h-3.5 w-3.5" />
           Run Demo Scenario
         </button>
+        <button
+          type="button"
+          onClick={() => setSmeNetworkOpen((v) => !v)}
+          className={cn(
+            'inline-flex items-center gap-2 rounded-md border px-3 py-2 text-[11px] font-semibold transition-colors',
+            smeNetworkOpen
+              ? 'border-[#10B981]/60 bg-[#10B981]/10 text-[#10B981]'
+              : 'border-white/[0.08] bg-white/[0.02] text-neutral-300 hover:bg-white/[0.06]',
+          )}
+        >
+          <Network className="h-3 w-3" />
+          European SME Network
+          {smeNetworkOpen ? ' · open' : ''}
+        </button>
         {activeScenarioName && (
           <button
             type="button"
@@ -440,6 +459,16 @@ export default function Dashboard() {
             : 'Bavarian Motors GmbH 🇩🇪 auditing Carpathian Components SRL 🇷🇴 — surfaces a €2.4M Scope 3 mismatch.'}
         </span>
       </motion.div>
+
+      {/* European SME Network — off by default, toggled by the button above */}
+      {smeNetworkOpen && (
+        <motion.div variants={fadeUp}>
+          <EuropeanSMENetwork
+            onSelectScenario={handleRunScenario}
+            activeScenarioId={activeScenarioId}
+          />
+        </motion.div>
+      )}
 
       {/* CCTV Agent Grid -Main feature */}
       <motion.div variants={fadeUp}>
