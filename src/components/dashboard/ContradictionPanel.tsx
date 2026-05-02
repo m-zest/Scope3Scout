@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { AlertTriangle, ExternalLink, ShieldAlert, Clock, DollarSign } from 'lucide-react';
+import { AlertTriangle, ExternalLink, ShieldAlert, Clock, DollarSign, Info } from 'lucide-react';
 
 export interface Contradiction {
   id: string;
@@ -33,30 +33,34 @@ export function ContradictionPanel({ contradictions }: ContradictionPanelProps) 
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div className="rounded-2xl border-2 border-red-500/30 bg-gradient-to-b from-red-500/[0.08] via-red-500/[0.04] to-black/60 backdrop-blur-2xl overflow-hidden shadow-[0_0_80px_rgba(239,68,68,0.12)]">
+      <div className="rounded-md border-[1.5px] border-[#DC2626] bg-gradient-to-b from-red-500/[0.08] via-red-500/[0.04] to-black/60 backdrop-blur-2xl overflow-hidden shadow-[0_0_80px_rgba(220,38,38,0.10)]">
 
         {/* Big alert header */}
         <div className="px-6 py-5 border-b border-red-500/10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <motion.div
-                animate={{ scale: [1, 1.2, 1], opacity: [1, 0.8, 1] }}
-                transition={{ repeat: Infinity, duration: 1.5 }}
-                className="w-12 h-12 rounded-xl bg-red-500/15 border border-red-500/30 flex items-center justify-center shadow-[0_0_30px_rgba(239,68,68,0.2)]"
+              <div
+                className="w-12 h-12 rounded-md bg-[#DC2626]/15 border border-[#DC2626]/40 flex items-center justify-center"
               >
-                <ShieldAlert className="h-6 w-6 text-red-400" />
-              </motion.div>
+                <ShieldAlert className="h-6 w-6 text-[#DC2626]" />
+              </div>
               <div>
-                <h2 className="font-heading text-xl font-bold text-red-400 tracking-tight">
-                  CRITICAL RISK DETECTED
-                </h2>
-                <p className="text-xs text-red-400/60 mt-0.5">
-                  {contradictions.length} claim-evidence mismatch{contradictions.length > 1 ? 'es' : ''} found by autonomous agents
+                <div className="flex items-center gap-2.5">
+                  <h2 className="font-heading text-xl font-bold text-white tracking-tight">
+                    Compliance Risk Detected
+                  </h2>
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#DC2626] text-white">
+                    Critical
+                  </span>
+                </div>
+                <p className="flex items-center gap-1.5 text-[11px] text-amber-300/80 mt-1">
+                  <Info className="h-3 w-3 shrink-0" />
+                  Potential CSRD violation &rarr; fines up to 10% of annual revenue under Article 29a
                 </p>
               </div>
             </div>
             <div className="text-right">
-              <span className="text-3xl font-heading font-bold text-red-400">{contradictions.length}</span>
+              <span className="text-3xl font-heading font-bold text-[#DC2626] tabular-nums">{contradictions.length}</span>
               <p className="text-[9px] text-red-400/40 uppercase tracking-wider">findings</p>
             </div>
           </div>
@@ -131,17 +135,17 @@ export function ContradictionPanel({ contradictions }: ContradictionPanelProps) 
                 {/* Claim vs Evidence — side by side */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="space-y-2">
-                    <p className="text-[9px] font-bold uppercase tracking-wider text-neutral-600">Supplier Claim</p>
-                    <div className="p-4 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-neutral-600">Supplier&apos;s Stated Position</p>
+                    <div className="p-4 rounded-md bg-white/[0.03] border border-white/[0.06]">
                       <p className="text-[13px] text-neutral-300 leading-relaxed italic">
                         &ldquo;{c.claim}&rdquo;
                       </p>
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-[9px] font-bold uppercase tracking-wider text-red-400/60">Evidence Found</p>
-                    <div className="p-4 rounded-lg bg-red-500/[0.06] border border-red-500/15">
-                      <p className="text-[13px] text-red-300 leading-relaxed font-medium">
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-[#DC2626]">Independent Evidence</p>
+                    <div className="p-4 rounded-md bg-[#DC2626]/[0.08] border border-[#DC2626]/30">
+                      <p className="text-[13px] text-red-200 leading-relaxed font-medium">
                         {c.evidence}
                       </p>
                     </div>
