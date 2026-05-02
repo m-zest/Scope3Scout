@@ -18,6 +18,7 @@ import { useSuppliers } from '@/hooks/useSuppliers';
 import { cn } from '@/lib/utils';
 import { CCTVGrid } from '@/components/dashboard/CCTVGrid';
 import { CountryBadge } from '@/components/CountryBadge';
+import { ExecutiveSummary, type ExecutiveSummaryMetrics } from '@/components/dashboard/ExecutiveSummary';
 
 /* ─── Risk + Status Badge Styles ─── */
 const riskBadge: Record<string, string> = {
@@ -183,6 +184,19 @@ export default function Dashboard() {
   const csrdCompliant = suppliers.filter((s) => s.csrd_compliant).length;
   const totalExposure = suppliers.reduce((sum, s) => sum + s.financial_exposure_eur, 0);
 
+  // Computed Executive Summary metrics from current supplier data.
+  // Demo Scenario / SME selection can override these via the scenarioMetrics state below.
+  const computedExecMetrics: ExecutiveSummaryMetrics = {
+    financialExposureEur: totalExposure,
+    suppliersAtRisk: highRisk,
+    csrdViolations: totalViolations,
+    timeToImpactDays: highRisk > 0 ? 60 : 0,
+  };
+
+  // Scripted scenario override — set by the Demo Scenario button or SME card click.
+  // Wired in Commit 5 (Demo Scenario). Default null = use computed metrics.
+  const [scenarioMetrics] = useState<ExecutiveSummaryMetrics | null>(null);
+
   const stats = [
     { label: 'Total Suppliers', value: totalSuppliers.toString(), icon: Shield, trend: 'flat' as const, iconCls: 'text-[#818cf8]', sparkColor: '#818cf8' },
     { label: 'High / Critical', value: highRisk.toString(), icon: ShieldAlert, trend: highRisk > 0 ? 'up' as const : 'flat' as const, iconCls: 'text-red-400', sparkColor: '#f87171' },
@@ -193,6 +207,15 @@ export default function Dashboard() {
 
   return (
     <motion.div className="space-y-6 max-w-[1400px]" initial="hidden" animate="visible" variants={stagger}>
+      {/* Executive Summary — Bloomberg-style risk posture */}
+      <motion.div variants={fadeUp}>
+        <ExecutiveSummary
+          computed={computedExecMetrics}
+          override={scenarioMetrics}
+          scenarioActive={scenarioMetrics !== null}
+        />
+      </motion.div>
+
       {/* Info banner */}
       <motion.div
         variants={fadeUp}
