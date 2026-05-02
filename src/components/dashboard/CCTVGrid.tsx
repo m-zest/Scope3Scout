@@ -63,7 +63,7 @@ export interface AgentTask {
 
 // Human-readable names that feel like a real team
 const agentMeta: Record<string, { name: string; description: string; icon: React.ElementType; color: string; bgColor: string; borderColor: string; isHero?: boolean }> = {
-  website:    { name: 'Claim Extractor',        description: 'Extract ESG claims from website', icon: Globe,         color: 'text-cyan-400',    bgColor: 'bg-cyan-500/10',    borderColor: 'border-cyan-500/20',   isHero: true },
+  website:    { name: 'Claim Extractor',        description: 'Extract compliance claims from website', icon: Globe,         color: 'text-cyan-400',    bgColor: 'bg-cyan-500/10',    borderColor: 'border-cyan-500/20',   isHero: true },
   certs:      { name: 'Certification Verifier',  description: 'Verify ISO certifications',      icon: Award,         color: 'text-emerald-400', bgColor: 'bg-emerald-500/10',  borderColor: 'border-emerald-500/20', isHero: true },
   regulatory: { name: 'Compliance Auditor',      description: 'Search fines and penalties',     icon: Scale,         color: 'text-amber-400',   bgColor: 'bg-amber-500/10',    borderColor: 'border-amber-500/20',  isHero: true },
   news:       { name: 'News Scanner',            description: 'Scan news for controversies',    icon: Newspaper,     color: 'text-blue-400',    bgColor: 'bg-blue-500/10',     borderColor: 'border-blue-500/20',   isHero: true },
@@ -77,7 +77,7 @@ const agentMeta: Record<string, { name: string; description: string; icon: React
   sentiment:  { name: 'Sentiment Analyzer',       description: 'Measure public sentiment',       icon: Bot,           color: 'text-sky-400',     bgColor: 'bg-sky-500/10',      borderColor: 'border-sky-500/20' },
   regulator:  { name: 'Regulator Predictor',      description: 'Predict enforcement actions',    icon: Scale,         color: 'text-red-400',     bgColor: 'bg-red-500/10',      borderColor: 'border-red-500/20' },
   media:      { name: 'Media Risk Predictor',     description: 'Predict media coverage',         icon: Newspaper,     color: 'text-violet-400',  bgColor: 'bg-violet-500/10',   borderColor: 'border-violet-500/20' },
-  investor:   { name: 'Investor Risk Predictor',  description: 'Predict ESG fund response',      icon: FileText,      color: 'text-lime-400',    bgColor: 'bg-lime-500/10',     borderColor: 'border-lime-500/20' },
+  investor:   { name: 'Investor Risk Predictor',  description: 'Predict investor risk response',      icon: FileText,      color: 'text-lime-400',    bgColor: 'bg-lime-500/10',     borderColor: 'border-lime-500/20' },
   ngo:        { name: 'NGO Response Predictor',   description: 'Predict NGO actions',            icon: Users,         color: 'text-pink-400',    bgColor: 'bg-pink-500/10',     borderColor: 'border-pink-500/20' },
 };
 
