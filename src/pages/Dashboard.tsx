@@ -17,6 +17,11 @@ import { getDemoSuppliers, type DemoScanResult } from '@/data/demoSuppliers';
 import { useSuppliers } from '@/hooks/useSuppliers';
 import { cn } from '@/lib/utils';
 import { CCTVGrid } from '@/components/dashboard/CCTVGrid';
+import { CountryBadge } from '@/components/CountryBadge';
+import { ExecutiveSummary, type ExecutiveSummaryMetrics } from '@/components/dashboard/ExecutiveSummary';
+import { DEFAULT_SCENARIO_ID, DEMO_SCENARIOS, type ScriptedScenario } from '@/data/demoScenario';
+import { Play, RotateCcw, Network } from 'lucide-react';
+import { EuropeanSMENetwork } from '@/components/dashboard/EuropeanSMENetwork';
 
 /* ─── Risk + Status Badge Styles ─── */
 const riskBadge: Record<string, string> = {
@@ -182,16 +187,61 @@ export default function Dashboard() {
   const csrdCompliant = suppliers.filter((s) => s.csrd_compliant).length;
   const totalExposure = suppliers.reduce((sum, s) => sum + s.financial_exposure_eur, 0);
 
+  // Computed Executive Summary metrics from current supplier data.
+  // Demo Scenario / SME selection can override these via the scenarioMetrics state below.
+  const computedExecMetrics: ExecutiveSummaryMetrics = {
+    financialExposureEur: totalExposure,
+    suppliersAtRisk: highRisk,
+    csrdViolations: totalViolations,
+    timeToImpactDays: highRisk > 0 ? 60 : 0,
+  };
+
+  // Scripted scenario state — set by the Demo Scenario button or SME card click.
+  // null = use computed metrics; populated = scripted demo numbers win.
+  const [scenarioMetrics, setScenarioMetrics] = useState<ExecutiveSummaryMetrics | null>(null);
+  const [activeScenarioName, setActiveScenarioName] = useState<string | null>(null);
+  const [activeScenarioId, setActiveScenarioId] = useState<string | null>(null);
+  const [triggerScenario, setTriggerScenario] = useState<{ scenarioId: string; nonce: number } | null>(null);
+  const [smeNetworkOpen, setSmeNetworkOpen] = useState(false);
+
+  const handleRunScenario = (scenarioId: string) => {
+    const sc = DEMO_SCENARIOS[scenarioId];
+    if (!sc) return;
+    setActiveScenarioName(`${sc.smeName} → ${sc.supplierName}`);
+    setActiveScenarioId(scenarioId);
+    setTriggerScenario({ scenarioId, nonce: Date.now() });
+  };
+
+  const handleResetScenario = () => {
+    setScenarioMetrics(null);
+    setActiveScenarioName(null);
+    setActiveScenarioId(null);
+    setTriggerScenario(null);
+  };
+
+  const handleScenarioComplete = (scenario: ScriptedScenario) => {
+    setScenarioMetrics(scenario.executive);
+  };
+
   const stats = [
     { label: 'Total Suppliers', value: totalSuppliers.toString(), icon: Shield, trend: 'flat' as const, iconCls: 'text-[#818cf8]', sparkColor: '#818cf8' },
     { label: 'High / Critical', value: highRisk.toString(), icon: ShieldAlert, trend: highRisk > 0 ? 'up' as const : 'flat' as const, iconCls: 'text-red-400', sparkColor: '#f87171' },
     { label: 'Violations', value: totalViolations.toString(), icon: AlertTriangle, trend: totalViolations > 0 ? 'up' as const : 'flat' as const, iconCls: 'text-orange-400', sparkColor: '#fb923c' },
     { label: 'CSRD Compliant', value: `${csrdCompliant}/${totalSuppliers}`, icon: ShieldCheck, trend: csrdCompliant === totalSuppliers ? 'down' as const : 'up' as const, iconCls: 'text-emerald-400', sparkColor: '#34d399' },
-    { label: 'Exposure', value: totalExposure > 0 ? `EUR ${(totalExposure / 1_000_000).toFixed(1)}M` : 'EUR 0', icon: Activity, trend: totalExposure > 0 ? 'up' as const : 'flat' as const, iconCls: 'text-[#c084fc]', sparkColor: '#c084fc' },
+    { label: 'Financial Exposure', value: totalExposure > 0 ? `EUR ${(totalExposure / 1_000_000).toFixed(1)}M` : 'EUR 0', icon: Activity, trend: totalExposure > 0 ? 'up' as const : 'flat' as const, iconCls: 'text-[#c084fc]', sparkColor: '#c084fc' },
   ];
 
   return (
     <motion.div className="space-y-6 max-w-[1400px]" initial="hidden" animate="visible" variants={stagger}>
+      {/* Executive Summary — Bloomberg-style risk posture */}
+      <motion.div variants={fadeUp}>
+        <ExecutiveSummary
+          computed={computedExecMetrics}
+          override={scenarioMetrics}
+          scenarioActive={scenarioMetrics !== null}
+        />
+      </motion.div>
+
       {/* Info banner */}
       <motion.div
         variants={fadeUp}
@@ -368,9 +418,64 @@ export default function Dashboard() {
         </div>
       </motion.div>
 
+      {/* Demo Scenario controls — one-click pitch-ready audit */}
+      <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-3 rounded-md border border-white/[0.08] bg-black px-4 py-3">
+        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-neutral-500">Pitch Demo</span>
+        <button
+          type="button"
+          onClick={() => handleRunScenario(DEFAULT_SCENARIO_ID)}
+          className="inline-flex items-center gap-2 rounded-md bg-[#DC2626] px-4 py-2 text-[12px] font-semibold text-white transition-colors hover:bg-[#b91c1c]"
+        >
+          <Play className="h-3.5 w-3.5" />
+          Run Demo Scenario
+        </button>
+        <button
+          type="button"
+          onClick={() => setSmeNetworkOpen((v) => !v)}
+          className={cn(
+            'inline-flex items-center gap-2 rounded-md border px-3 py-2 text-[11px] font-semibold transition-colors',
+            smeNetworkOpen
+              ? 'border-[#10B981]/60 bg-[#10B981]/10 text-[#10B981]'
+              : 'border-white/[0.08] bg-white/[0.02] text-neutral-300 hover:bg-white/[0.06]',
+          )}
+        >
+          <Network className="h-3 w-3" />
+          European SME Network
+          {smeNetworkOpen ? ' · open' : ''}
+        </button>
+        {activeScenarioName && (
+          <button
+            type="button"
+            onClick={handleResetScenario}
+            className="inline-flex items-center gap-2 rounded-md border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-[11px] font-semibold text-neutral-400 hover:bg-white/[0.06]"
+          >
+            <RotateCcw className="h-3 w-3" />
+            Reset
+          </button>
+        )}
+        <span className="text-[11px] text-neutral-500">
+          {activeScenarioName
+            ? <>Active scenario: <span className="text-white font-semibold">{activeScenarioName}</span></>
+            : 'Bavarian Motors GmbH 🇩🇪 auditing Carpathian Components SRL 🇷🇴 — surfaces a €2.4M Scope 3 mismatch.'}
+        </span>
+      </motion.div>
+
+      {/* European SME Network — off by default, toggled by the button above */}
+      {smeNetworkOpen && (
+        <motion.div variants={fadeUp}>
+          <EuropeanSMENetwork
+            onSelectScenario={handleRunScenario}
+            activeScenarioId={activeScenarioId}
+          />
+        </motion.div>
+      )}
+
       {/* CCTV Agent Grid -Main feature */}
       <motion.div variants={fadeUp}>
-        <CCTVGrid />
+        <CCTVGrid
+          triggerScenario={triggerScenario}
+          onScenarioComplete={handleScenarioComplete}
+        />
       </motion.div>
 
       {/* Supplier Risk Table */}
@@ -454,7 +559,12 @@ export default function Dashboard() {
                       <td className="px-6 py-3.5">
                         <p className="font-medium text-neutral-200 text-[13px]">{supplier.name}</p>
                       </td>
-                      <td className="px-6 py-3.5 text-neutral-500 text-[13px]">{supplier.country}</td>
+                      <td className="px-6 py-3.5 text-neutral-500 text-[13px]">
+                        <span className="inline-flex items-center gap-1.5">
+                          <CountryBadge country={supplier.country} />
+                          <span>{supplier.country}</span>
+                        </span>
+                      </td>
                       <td className="px-6 py-3.5 text-neutral-600 text-[13px] hidden lg:table-cell">{supplier.industry}</td>
                       <td className="px-6 py-3.5 text-center">
                         <div className="inline-flex items-center gap-2">

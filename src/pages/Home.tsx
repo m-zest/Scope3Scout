@@ -239,7 +239,7 @@ export default function Home() {
 
           {/* Subheadline */}
           <p className="mb-12 max-w-2xl text-center text-lg font-light leading-relaxed text-[#a3a3a3] md:text-xl">
-            AI-powered supply chain risk intelligence. Automatically audit your entire network, detect ESG violations, and prevent CSRD fines before regulators step in.
+            AI-powered supply chain financial risk intelligence. Automatically audit your entire network, detect CSRD violations including Scope 3 carbon, and prevent fines before regulators step in.
           </p>
 
           {/* CTA Buttons */}
@@ -479,19 +479,19 @@ export default function Home() {
             viewport={{ once: true, margin: '-100px' }}
             variants={staggerFast}
           >
-            {/* Card 1: TinyFish */}
+            {/* Card 1: Smart AI Agents */}
             <motion.div variants={fadeUpSlow}>
               <GlassCard className="p-8 h-full group">
                 <div className="w-12 h-12 rounded-xl bg-cyan-400/[0.08] border border-cyan-400/[0.15] flex items-center justify-center mb-6 group-hover:bg-cyan-400/[0.12] transition-colors duration-500">
                   <Search className="h-5 w-5 text-cyan-400" />
                 </div>
-                <h3 className="font-heading text-xl font-semibold mb-3 tracking-tight">TinyFish Web Agents</h3>
+                <h3 className="font-heading text-xl font-semibold mb-3 tracking-tight">Smart AI Agents</h3>
                 <p className="text-neutral-500 text-sm leading-relaxed mb-6 font-light">
                   Navigates complex government portals like a human analyst. 5 parallel agents scrape EPA databases, news archives, and certification registries simultaneously.
                 </p>
                 <div className="bg-black/80 border border-white/[0.04] rounded-xl p-4 font-mono text-[11px]">
                   <div className="flex items-center gap-2 text-neutral-700 mb-3">
-                    <span className="text-cyan-400">$</span> tinyfish scan --supplier &quot;SteelCorp GmbH&quot;
+                    <span className="text-cyan-400">$</span> scope3scout audit --supplier &quot;SteelCorp GmbH&quot;
                   </div>
                   <div className="space-y-1.5 text-neutral-600">
                     <p><span className="text-cyan-400">agent[1]</span> Scanning website claims...</p>
@@ -511,7 +511,7 @@ export default function Home() {
                 </div>
                 <h3 className="font-heading text-xl font-semibold mb-3 tracking-tight">Cross-Reference LLM</h3>
                 <p className="text-neutral-500 text-sm leading-relaxed font-light">
-                  Instantly compares supplier claims against actual public records. Identifies discrepancies between sustainability reports, procurement databases, and fine registries across all 27 EU member states.
+                  Instantly compares supplier claims against actual public records. Identifies discrepancies between supplier compliance reports, procurement databases, and fine registries across all 27 EU member states.
                 </p>
                 <div className="mt-6 grid grid-cols-2 gap-2">
                   {['Environmental', 'Labour', 'Governance', 'Financial'].map((cat) => (
@@ -817,7 +817,7 @@ export default function Home() {
                 </div>
 
                 <p className="text-sm text-neutral-400 leading-relaxed mb-5 font-light">
-                  India&apos;s Extended Producer Responsibility (EPR) laws now require 100% plastic waste recovery from every brand. CPCB portal has no API &mdash; perfect for TinyFish agents.
+                  India&apos;s Extended Producer Responsibility (EPR) laws now require 100% plastic waste recovery from every brand. CPCB portal has no API &mdash; perfect for Smart AI Agents.
                 </p>
 
                 <div className="space-y-2 mb-5">
@@ -871,26 +871,26 @@ export default function Home() {
               </div>
             </motion.div>
 
-            {/* Australia ASRS */}
+            {/* EU CSRD Wave 2 */}
             <motion.div variants={fadeUpSlow}>
               <div className="relative h-full rounded-2xl border border-amber-500/20 bg-white/[0.02] backdrop-blur-xl p-7 hover:bg-white/[0.04] transition-all duration-300 group overflow-hidden">
                 <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-500/60 to-transparent" />
 
                 <div className="flex items-center justify-between mb-5">
                   <div className="flex items-center gap-2.5">
-                    <span className="text-2xl">&#127462;&#127482;</span>
-                    <h3 className="font-heading text-lg font-semibold text-white tracking-tight">Australia ASRS</h3>
+                    <span className="text-2xl">&#127466;&#127482;</span>
+                    <h3 className="font-heading text-lg font-semibold text-white tracking-tight">EU CSRD Wave 2</h3>
                   </div>
                   <span className="text-[9px] font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full whitespace-nowrap">Phase 3 &mdash; 2027</span>
                 </div>
 
                 <p className="text-sm text-neutral-400 leading-relaxed mb-5 font-light">
-                  Australian Sustainability Reporting Standards active 2025&ndash;2027. ASIC, Clean Energy Regulator portals &mdash; browser-only access, no public APIs.
+                  CSRD Wave 2 brings 50,000+ EU mid-market companies into scope by FY2027. Article 29a value-chain disclosure, ESRS double materiality, Scope 3 attestation &mdash; full coverage required.
                 </p>
 
                 <div className="space-y-2 mb-5">
                   <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-amber-400/70">New Agents</p>
-                  {['ASRS Disclosure Verifier', 'National Greenhouse Reporter'].map((agent) => (
+                  {['ESRS Disclosure Verifier', 'Scope 3 Value-Chain Auditor'].map((agent) => (
                     <div key={agent} className="flex items-center gap-2 text-[12px] text-neutral-500">
                       <div className="w-1 h-1 rounded-full bg-amber-500/60 shrink-0" />
                       {agent}
@@ -900,7 +900,7 @@ export default function Home() {
 
                 <div className="flex items-center justify-between pt-4 border-t border-white/[0.04]">
                   <span className="text-[11px] text-neutral-600">Market size</span>
-                  <span className="text-sm font-heading font-bold text-amber-400">6,000+ entities</span>
+                  <span className="text-sm font-heading font-bold text-amber-400">50,000+ entities</span>
                 </div>
               </div>
             </motion.div>
@@ -911,11 +911,11 @@ export default function Home() {
             variants={fadeUp}
             className="text-center text-neutral-500 text-[15px] font-light leading-relaxed max-w-3xl mx-auto mb-10"
           >
-            Same platform. Same TinyFish agents. New geographies.{' '}
+            Same platform. Same Smart AI Agents. New geographies.{' '}
             <span className="text-neutral-300">Every regulation that requires verification of supplier claims is a market we can enter.</span>
           </motion.p>
 
-          {/* Why TinyFish Scales This */}
+          {/* Why Smart AI Agents Scale This */}
           <motion.div variants={scaleIn}>
             <div className="relative rounded-2xl border border-cyan-500/15 bg-gradient-to-br from-cyan-500/[0.04] via-white/[0.01] to-purple-500/[0.04] backdrop-blur-xl p-8 md:p-10 max-w-4xl mx-auto overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent" />
@@ -927,11 +927,11 @@ export default function Home() {
                 </div>
                 <div>
                   <h3 className="font-heading text-base font-semibold text-white tracking-tight mb-3">
-                    Why TinyFish Scales This
+                    Why Smart AI Agents Scale This
                   </h3>
                   <p className="text-sm text-neutral-400 leading-relaxed font-light">
                     Traditional compliance tools break at borders &mdash; every country has different portals, languages, and workflows.{' '}
-                    <span className="text-neutral-300">TinyFish agents adapt to any website in any language.</span>{' '}
+                    <span className="text-neutral-300">Smart AI Agents adapt to any website in any language.</span>{' '}
                     Adding a new regulation means deploying new agent configs, not rebuilding infrastructure.{' '}
                     <span className="text-cyan-400/80">EU CSRD today. India EPR tomorrow. SEC next quarter.</span>
                   </p>
@@ -997,7 +997,7 @@ export default function Home() {
             <Logo size={28} />
             <span className="font-heading font-semibold text-neutral-400 text-sm tracking-tight">Scope3Scout</span>
           </div>
-          <p className="text-[11px] text-neutral-700">ESG Supply Chain Intelligence. Built for EU compliance.</p>
+          <p className="text-[11px] text-neutral-700">Supply Chain Compliance Risk Intelligence. Built for EU.</p>
           <div className="flex gap-8 text-[11px] text-neutral-700">
             <span className="hover:text-neutral-400 cursor-pointer transition-colors">Privacy</span>
             <span className="hover:text-neutral-400 cursor-pointer transition-colors">Terms</span>

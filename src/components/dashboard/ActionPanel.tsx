@@ -48,7 +48,7 @@ Under EU CSRD/CSDDD regulations, continued engagement with a non-compliant suppl
 }
 
 function getFallbackAction(supplierName: string, contradictions: Contradiction[], riskLevel: string): string {
-  return `Our automated compliance audit of ${supplierName} has identified ${contradictions.length} critical discrepancy(ies) requiring immediate clarification. Specifically, claims regarding "${contradictions[0]?.claim || 'ESG compliance'}" are contradicted by documented evidence. We request updated certification documentation and a formal response within 14 business days. Please note that under our ${riskLevel.toUpperCase()}-risk protocol, failure to provide satisfactory clarification may trigger a formal contract review under Section 8.3 of our Supplier Code of Conduct.`;
+  return `Our automated compliance audit of ${supplierName} has identified ${contradictions.length} critical discrepancy(ies) requiring immediate clarification. Specifically, claims regarding "${contradictions[0]?.claim || 'CSRD compliance'}" are contradicted by documented evidence. We request updated certification documentation and a formal response within 14 business days. Please note that under our ${riskLevel.toUpperCase()}-risk protocol, failure to provide satisfactory clarification may trigger a formal contract review under Section 8.3 of our Supplier Code of Conduct.`;
 }
 
 export function ActionPanel({
