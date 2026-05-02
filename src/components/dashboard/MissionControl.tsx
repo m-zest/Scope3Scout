@@ -2,9 +2,11 @@ import { motion } from 'framer-motion';
 import { Scan, Shield, Clock, Loader2, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { hasTinyFishKey } from '@/lib/tinyfish';
+import { CountryBadge } from '@/components/CountryBadge';
 
 interface MissionControlProps {
   supplierName: string;
+  supplierCountry?: string;
   status: 'idle' | 'scanning' | 'complete' | 'error';
   progress: number;
   agentsComplete: number;
@@ -15,6 +17,7 @@ interface MissionControlProps {
 
 export function MissionControl({
   supplierName,
+  supplierCountry,
   status,
   progress,
   agentsComplete,
@@ -79,6 +82,7 @@ export function MissionControl({
                 <h2 className="font-heading text-lg font-bold text-white tracking-tight">
                   {supplierName || 'Select a Supplier'}
                 </h2>
+                <CountryBadge country={supplierCountry} variant="pill" />
                 {hasTinyFishKey() && (
                   <span className="relative flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-md bg-red-500/10 text-red-400 border border-red-500/20">
                     <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />

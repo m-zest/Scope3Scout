@@ -555,6 +555,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
       {/* Mission Control Header */}
       <MissionControl
         supplierName={activeSupplier}
+        supplierCountry={suppliers.find(s => s.supplier_name === activeSupplier)?.country}
         status={scanStatus}
         progress={allAgentIds.length > 0 ? (agentsComplete / allAgentIds.length) * 100 : 0}
         agentsComplete={heroAgents.filter(t => t.status === 'success' || t.status === 'warning').length}

@@ -17,6 +17,7 @@ import { getDemoSuppliers, type DemoScanResult } from '@/data/demoSuppliers';
 import { useSuppliers } from '@/hooks/useSuppliers';
 import { cn } from '@/lib/utils';
 import { CCTVGrid } from '@/components/dashboard/CCTVGrid';
+import { CountryBadge } from '@/components/CountryBadge';
 
 /* ─── Risk + Status Badge Styles ─── */
 const riskBadge: Record<string, string> = {
@@ -454,7 +455,12 @@ export default function Dashboard() {
                       <td className="px-6 py-3.5">
                         <p className="font-medium text-neutral-200 text-[13px]">{supplier.name}</p>
                       </td>
-                      <td className="px-6 py-3.5 text-neutral-500 text-[13px]">{supplier.country}</td>
+                      <td className="px-6 py-3.5 text-neutral-500 text-[13px]">
+                        <span className="inline-flex items-center gap-1.5">
+                          <CountryBadge country={supplier.country} />
+                          <span>{supplier.country}</span>
+                        </span>
+                      </td>
                       <td className="px-6 py-3.5 text-neutral-600 text-[13px] hidden lg:table-cell">{supplier.industry}</td>
                       <td className="px-6 py-3.5 text-center">
                         <div className="inline-flex items-center gap-2">
