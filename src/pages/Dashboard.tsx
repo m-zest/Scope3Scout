@@ -19,6 +19,8 @@ import { cn } from '@/lib/utils';
 import { CCTVGrid } from '@/components/dashboard/CCTVGrid';
 import { CountryBadge } from '@/components/CountryBadge';
 import { ExecutiveSummary, type ExecutiveSummaryMetrics } from '@/components/dashboard/ExecutiveSummary';
+import { DEFAULT_SCENARIO_ID, DEMO_SCENARIOS, type ScriptedScenario } from '@/data/demoScenario';
+import { Play, RotateCcw } from 'lucide-react';
 
 /* ─── Risk + Status Badge Styles ─── */
 const riskBadge: Record<string, string> = {
@@ -193,9 +195,28 @@ export default function Dashboard() {
     timeToImpactDays: highRisk > 0 ? 60 : 0,
   };
 
-  // Scripted scenario override — set by the Demo Scenario button or SME card click.
-  // Wired in Commit 5 (Demo Scenario). Default null = use computed metrics.
-  const [scenarioMetrics] = useState<ExecutiveSummaryMetrics | null>(null);
+  // Scripted scenario state — set by the Demo Scenario button or SME card click.
+  // null = use computed metrics; populated = scripted demo numbers win.
+  const [scenarioMetrics, setScenarioMetrics] = useState<ExecutiveSummaryMetrics | null>(null);
+  const [activeScenarioName, setActiveScenarioName] = useState<string | null>(null);
+  const [triggerScenario, setTriggerScenario] = useState<{ scenarioId: string; nonce: number } | null>(null);
+
+  const handleRunScenario = (scenarioId: string) => {
+    const sc = DEMO_SCENARIOS[scenarioId];
+    if (!sc) return;
+    setActiveScenarioName(`${sc.smeName} → ${sc.supplierName}`);
+    setTriggerScenario({ scenarioId, nonce: Date.now() });
+  };
+
+  const handleResetScenario = () => {
+    setScenarioMetrics(null);
+    setActiveScenarioName(null);
+    setTriggerScenario(null);
+  };
+
+  const handleScenarioComplete = (scenario: ScriptedScenario) => {
+    setScenarioMetrics(scenario.executive);
+  };
 
   const stats = [
     { label: 'Total Suppliers', value: totalSuppliers.toString(), icon: Shield, trend: 'flat' as const, iconCls: 'text-[#818cf8]', sparkColor: '#818cf8' },
@@ -392,9 +413,40 @@ export default function Dashboard() {
         </div>
       </motion.div>
 
+      {/* Demo Scenario controls — one-click pitch-ready audit */}
+      <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-3 rounded-md border border-white/[0.08] bg-black px-4 py-3">
+        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-neutral-500">Pitch Demo</span>
+        <button
+          type="button"
+          onClick={() => handleRunScenario(DEFAULT_SCENARIO_ID)}
+          className="inline-flex items-center gap-2 rounded-md bg-[#DC2626] px-4 py-2 text-[12px] font-semibold text-white transition-colors hover:bg-[#b91c1c]"
+        >
+          <Play className="h-3.5 w-3.5" />
+          Run Demo Scenario
+        </button>
+        {activeScenarioName && (
+          <button
+            type="button"
+            onClick={handleResetScenario}
+            className="inline-flex items-center gap-2 rounded-md border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-[11px] font-semibold text-neutral-400 hover:bg-white/[0.06]"
+          >
+            <RotateCcw className="h-3 w-3" />
+            Reset
+          </button>
+        )}
+        <span className="text-[11px] text-neutral-500">
+          {activeScenarioName
+            ? <>Active scenario: <span className="text-white font-semibold">{activeScenarioName}</span></>
+            : 'Bavarian Motors GmbH 🇩🇪 auditing Carpathian Components SRL 🇷🇴 — surfaces a €2.4M Scope 3 mismatch.'}
+        </span>
+      </motion.div>
+
       {/* CCTV Agent Grid -Main feature */}
       <motion.div variants={fadeUp}>
-        <CCTVGrid />
+        <CCTVGrid
+          triggerScenario={triggerScenario}
+          onScenarioComplete={handleScenarioComplete}
+        />
       </motion.div>
 
       {/* Supplier Risk Table */}

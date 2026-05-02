@@ -38,6 +38,7 @@ import { ContradictionPanel, type Contradiction } from './ContradictionPanel';
 import { ActionPanel } from './ActionPanel';
 import { runGeminiAnalysis, hasGeminiKey } from '@/lib/gemini';
 import { useScanResults } from '@/lib/scanResultContext';
+import { getScenario, type ScriptedScenario } from '@/data/demoScenario';
 
 export type AgentStatus = 'idle' | 'queued' | 'running' | 'success' | 'warning' | 'error';
 
@@ -107,9 +108,17 @@ function initTasks(): AgentTask[] {
 interface CCTVGridProps {
   supplierName?: string;
   onScanComplete?: (result: DemoScanResult & { id: string }) => void;
+  /**
+   * Imperative trigger from the Dashboard. When `nonce` changes, runScenario
+   * is fired for the named scenario id. Used by the Run Demo Scenario button
+   * and by SME card clicks. Bypasses TinyFish/Gemini entirely — purely scripted.
+   */
+  triggerScenario?: { scenarioId: string; nonce: number } | null;
+  /** Callback fired with the scenario's executive metrics when the script finishes. */
+  onScenarioComplete?: (scenario: ScriptedScenario) => void;
 }
 
-export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
+export function CCTVGrid({ supplierName, onScanComplete, triggerScenario, onScenarioComplete }: CCTVGridProps) {
   const [tasks, setTasks] = useState<AgentTask[]>(initTasks());
   const [scanning, setScanning] = useState(false);
   const [scanComplete, setScanComplete] = useState(false);
@@ -531,6 +540,183 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
     onScanComplete?.(demo);
   }, [suppliers, updateTask, addTimelineEntry, onScanComplete, saveScanResult]);
 
+  // Override for the supplier country shown in MissionControl. Set during
+  // scenario runs so non-database scenario suppliers still render their flag.
+  const [scenarioCountry, setScenarioCountry] = useState<string | null>(null);
+
+  // Run a scripted scenario. Bypasses TinyFish/Gemini entirely.
+  const runScenario = useCallback(async (scenarioId: string) => {
+    const scenario = getScenario(scenarioId);
+    if (!scenario) return;
+
+    setScanning(true);
+    setScanComplete(false);
+    setScanResult(null);
+    setActiveSupplier(scenario.supplierName);
+    setScenarioCountry(scenario.supplierCountry);
+    setFocusedAgentId(null);
+    setTimeline([]);
+    setContradictions([]);
+    setAgentsComplete(0);
+    setScanStatus('scanning');
+    setElapsed(0);
+    setDimBackground(false);
+    setTasks(initTasks().map((t) => ({ ...t, status: 'queued' as AgentStatus })));
+
+    const startTime = Date.now();
+    const elapsedInterval = setInterval(() => {
+      setElapsed((Date.now() - startTime) / 1000);
+    }, 100);
+
+    addTimelineEntry({
+      agent: 'System',
+      message: `Initiating audit · ${scenario.smeName} → ${scenario.supplierName}`,
+      type: 'info',
+    });
+
+    // 1-second pre-warm so the presenter has time to draw the room's attention.
+    await new Promise((r) => setTimeout(r, scenario.prewarmMs));
+
+    let completed = 0;
+
+    // Tier 1 — scripted agent runs
+    for (const step of scenario.tier1) {
+      const meta = agentMeta[step.agentId];
+      const startedAt = Date.now();
+      updateTask(step.agentId, { status: 'running', progress: 10, steps: [], screenshots: [] });
+      addTimelineEntry({ agent: meta.name, message: 'Starting evidence collection', type: 'action' });
+
+      for (let i = 0; i < step.steps.length; i++) {
+        await new Promise((r) => setTimeout(r, 700 + Math.random() * 350));
+        const progress = Math.min(10 + ((i + 1) / step.steps.length) * 80, 90);
+        setTasks((prev) =>
+          prev.map((t) => (t.id === step.agentId ? { ...t, progress, steps: [...(t.steps || []), step.steps[i]] } : t)),
+        );
+        addTimelineEntry({ agent: meta.name, message: step.steps[i], type: 'step' });
+      }
+
+      const taskElapsed = Date.now() - startedAt;
+      updateTask(step.agentId, {
+        status: step.hasIssues ? 'warning' : 'success',
+        progress: 100,
+        result: step.finalResult,
+        duration: taskElapsed,
+      });
+      completed++;
+      setAgentsComplete(completed);
+      addTimelineEntry({
+        agent: meta.name,
+        message: step.hasIssues ? `Issues found: ${step.finalResult.substring(0, 80)}...` : 'Scan clean — no issues',
+        type: step.hasIssues ? 'warning' : 'success',
+      });
+    }
+
+    // Surface the scripted contradiction (if any)
+    if (scenario.contradiction) {
+      const c = scenario.contradiction;
+      setContradictions([
+        {
+          id: `c-${scenario.id}-${Date.now()}`,
+          agent: c.agent,
+          claim: c.claim,
+          evidence: c.evidence,
+          confidence: c.confidence,
+          sourceUrl: c.sourceUrl,
+          severity: c.severity,
+          financialExposure: c.financialExposureEur,
+          timelineImpactDays: c.timelineImpactDays,
+        },
+      ]);
+      addTimelineEntry({
+        agent: c.agent,
+        message: `COMPLIANCE RISK DETECTED: ${c.evidence.substring(0, 100)}...`,
+        type: 'contradiction',
+      });
+    }
+
+    // Mark Tier 2 + Tier 3 as success quickly so the UI completes cleanly
+    const remainingIds = ['classifier', 'greenwash', 'evidence', 'sentiment', 'regulator', 'media', 'investor', 'ngo'];
+    for (const taskId of remainingIds) {
+      updateTask(taskId, {
+        status: 'success',
+        progress: 100,
+        result: scenario.contradiction
+          ? 'Contradiction confirmed by cross-reference analysis'
+          : 'No discrepancy detected',
+        duration: 200,
+      });
+      completed++;
+      setAgentsComplete(completed);
+      await new Promise((r) => setTimeout(r, 150));
+    }
+
+    clearInterval(elapsedInterval);
+    const finalElapsed = (Date.now() - startTime) / 1000;
+    setElapsed(finalElapsed);
+    setTotalTime(parseFloat(finalElapsed.toFixed(1)));
+
+    // Build a DemoScanResult-shaped object so downstream UI (ActionPanel, PDF) works without forks.
+    const scenarioResult: DemoScanResult & { id: string } = {
+      id: scenario.id,
+      supplier_name: scenario.supplierName,
+      country: scenario.supplierCountry,
+      industry: 'Audited Supplier',
+      website: scenario.contradiction?.sourceUrl ?? '',
+      risk_score: scenario.riskLevel === 'critical' ? 80 : scenario.riskLevel === 'high' ? 55 : scenario.riskLevel === 'medium' ? 35 : 10,
+      risk_level: scenario.riskLevel,
+      status: scenario.contradiction ? 'flagged' : 'cleared',
+      tier1_result: {
+        flag_severity: scenario.riskLevel === 'low' ? 'none' : scenario.riskLevel,
+        discrepancies: scenario.contradiction
+          ? [
+              {
+                claim: scenario.contradiction.claim,
+                finding: scenario.contradiction.evidence,
+                source_url: scenario.contradiction.sourceUrl,
+                confidence: scenario.contradiction.confidence,
+              },
+            ]
+          : [],
+      },
+      violations: [],
+      simulation_output: {
+        risk_score: scenario.riskLevel === 'critical' ? 80 : scenario.riskLevel === 'high' ? 55 : 10,
+        risk_level: scenario.riskLevel,
+        predictions: [],
+        recommended_action: scenario.recommendedAction,
+        financial_exposure_eur: scenario.executive.financialExposureEur,
+        csrd_compliant: !scenario.contradiction,
+      },
+    };
+    setScanResult(scenarioResult);
+    setScanComplete(true);
+    setScanning(false);
+    setScanStatus('complete');
+
+    addTimelineEntry({
+      agent: 'System',
+      message: scenario.contradiction
+        ? `Audit complete — 1 compliance risk identified · ${finalElapsed.toFixed(1)}s`
+        : `Audit complete — supplier compliant · ${finalElapsed.toFixed(1)}s`,
+      type: scenario.contradiction ? 'warning' : 'success',
+    });
+
+    onScenarioComplete?.(scenario);
+  }, [updateTask, addTimelineEntry, onScenarioComplete]);
+
+  // Ref so the trigger effect can call the latest runScenario without including it in deps
+  const runScenarioRef = useRef<((id: string) => Promise<void>) | null>(null);
+  useEffect(() => {
+    runScenarioRef.current = runScenario;
+  }, [runScenario]);
+
+  // External trigger: when parent flips the nonce, kick off the scripted scenario
+  useEffect(() => {
+    if (!triggerScenario) return;
+    runScenarioRef.current?.(triggerScenario.scenarioId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [triggerScenario?.nonce]);
+
   // Only 4 visible hero agents for clean, focused demo
   const heroAgents = tasks.filter((t) => heroAgentIds.includes(t.id));
   const backgroundAgents = tasks.filter((t) => !heroAgentIds.includes(t.id));
@@ -555,7 +741,7 @@ export function CCTVGrid({ supplierName, onScanComplete }: CCTVGridProps) {
       {/* Mission Control Header */}
       <MissionControl
         supplierName={activeSupplier}
-        supplierCountry={suppliers.find(s => s.supplier_name === activeSupplier)?.country}
+        supplierCountry={scenarioCountry ?? suppliers.find(s => s.supplier_name === activeSupplier)?.country}
         status={scanStatus}
         progress={allAgentIds.length > 0 ? (agentsComplete / allAgentIds.length) * 100 : 0}
         agentsComplete={heroAgents.filter(t => t.status === 'success' || t.status === 'warning').length}
