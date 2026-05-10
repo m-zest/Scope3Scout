@@ -1,9 +1,9 @@
 # Scope3Scout
 
-<p align="center"><strong>Supply chain compliance risk intelligence for European manufacturers - including Scope 3 carbon under CSRD.</strong></p>
+<p align="center"><strong>Autonomous ESG supply chain intelligence for the CSRD era.</strong></p>
 
 <p align="center">
-  <em>We don't trust supplier reports - we verify them using Smart AI Agents that read the same public records a human compliance analyst would.</em>
+  <em>We don't trust supplier reports  -  we verify them using autonomous browser agents.</em>
 </p>
 
 <p align="center">
@@ -12,11 +12,43 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/USC_2026-Milan_Finalist-1EA896" alt="University Startup Challenge 2026" />
+  <img src="https://img.shields.io/badge/TinyFish_Accelerator-Phase_1_Cleared-1EA896" alt="Phase 1 Cleared" />
+  <img src="https://img.shields.io/badge/TinyFish_Accelerator-Phase_2_Active-FF5D42" alt="Phase 2 Done" />
   <img src="https://img.shields.io/badge/Regulation-EU_CSRD_2026--2027-E8B04B" alt="CSRD" />
-  <img src="https://img.shields.io/badge/Stack-React_19_·_Supabase_·_AI_Agents_·_Fireworks-142036" alt="Stack" />
+  <img src="https://img.shields.io/badge/Stack-React_19_·_Supabase_·_TinyFish_·_Fireworks-142036" alt="Stack" />
   <img src="https://img.shields.io/badge/License-AGPL%20v3-blue.svg" alt="License: AGPL v3" />
 </p>
+
+---
+
+## TinyFish Accelerator Journey
+
+<table>
+<tr>
+<td align="center" width="50%">
+
+### Phase 1  -  Cleared
+**March 2026 · Hackathon**
+
+Selected from the TinyFish Pre-Accelerator hackathon applicant pool on the strength of the TinyFish-native architecture and the regulatory urgency of the CSRD use case.
+
+Evaluators specifically cited the depth of the SSE integration and the product's positioning against a €12B+ compliance spend market.
+
+</td>
+<td align="center" width="50%">
+
+### Phase 2  -  Completed
+**April 2026 · Build Sprint**
+
+14-day sprint toward **Demo Day pitch to Robin Vasan at Mango Capital** for a share of the **$2M seed pool**.
+
+Focus: multi-supplier batch scanning, real contradiction detection via Fireworks (Llama 70B), CSRD-compliant PDF reports, and increased TinyFish concurrency.
+
+</td>
+</tr>
+</table>
+
+**[View the Demo Day pitch deck →](https://m-zest.github.io/scope3scout_ipitch/)**
 
 ---
 
@@ -36,21 +68,19 @@ Under the EU Corporate Sustainability Reporting Directive (CSRD), **50,000+ Euro
 
 Three problems make this nearly impossible today:
 
-1. **Compliance data has no APIs.** It lives behind dynamic, JavaScript-rendered government portals across 27 EU member states.
+1. **ESG compliance data has no APIs.** It lives behind dynamic, JavaScript-rendered government portals across 27 EU member states.
 2. **Current solutions are either manual or blind.** Consulting firms charge €100–500K per one-time audit. ESG SaaS platforms trust self-reported data without independent verification.
 3. **The regulatory window is closing.** Enforcement begins 2027. Companies need continuous verification, not annual reports.
 
-Scope3Scout automates what currently takes compliance teams **3–6 months and €100,000+ in analyst fees**, using Smart AI Agents to independently verify supplier claims against real-world evidence.
+Scope3Scout automates what currently takes compliance teams **3–6 months and €100,000+ in analyst fees**, using autonomous browser agents to independently verify supplier claims against real-world evidence.
 
 ---
 
 ## Product
 
-Select a supplier. Click *Run Audit*. Watch 16 Smart AI Agents scan real websites, extract claims, verify certifications against government registries, and surface compliance risk in real-time.
+Select a supplier. Click *Run Audit*. Watch 16 autonomous AI agents scan real websites, extract claims, verify certifications against government registries, and surface contradictions in real-time.
 
-When a mismatch is detected between what a supplier claims and what public evidence shows, the system generates a **Compliance Risk Detected** alert with confidence score, financial exposure estimate, time-to-impact prediction, and source URL.
-
-For pitch use, the dashboard ships with a **Run Demo Scenario** button (Bavarian Motors GmbH 🇩🇪 auditing Carpathian Components SRL 🇷🇴) and a **European SME Network** view showing 4 representative SMEs across 4 countries with one-click scenario loading.
+When a mismatch is detected between what a supplier claims and what public evidence shows, the system generates a **contradiction alert** with confidence score, financial exposure estimate, time-to-impact prediction, and source URL.
 
 <p align="center">
   <a href="https://scope3-scout.vercel.app/"><b>Try the live product →</b></a>
@@ -63,6 +93,7 @@ For pitch use, the dashboard ships with a **Run Demo Scenario** button (Bavarian
 <p align="center">
   <img src="architecture-3-tier-editorial.png" alt="Scope3Scout · 16 specialised agents, one verification layer" width="100%"/>
 </p>
+
 
 ### Contradiction Detection
 
@@ -81,11 +112,11 @@ When Tier 1 extracts a supplier claim and another agent finds conflicting eviden
 
 ---
 
-## Why Smart AI Agents Are Core
+## Why TinyFish Is Core
 
-European compliance data lives behind dynamic web portals with no public APIs. Traditional scrapers cannot access them. **Remove the Smart AI Agent layer and the product cannot exist.**
+ESG compliance data lives behind dynamic web portals with no public APIs. Traditional scrapers cannot access them. **Remove TinyFish and the product cannot exist.**
 
-| Data Source | API? | How Smart AI Agents Access It |
+| Data Source | API? | How TinyFish Accesses It |
 |---|:---:|---|
 | German Federal Environment Agency (UBA) | No | Multi-step form navigation |
 | Hungarian OKIR Environmental Registry | No | Dynamic portal traversal |
@@ -94,9 +125,9 @@ European compliance data lives behind dynamic web portals with no public APIs. T
 | Regional Labour Violation Databases | No | Scattered across 27 country portals |
 | Local News Archives | No | Dynamic content extraction |
 
-The Smart AI Agents interact with these portals the way a human compliance analyst would — at **1,000x the speed**.
+TinyFish browser agents interact with these portals the way a human compliance analyst would  -  at **1,000x the speed**.
 
-> Scope3Scout is not a generic ESG dashboard wrapper. Scope3Scout is a **Smart-AI-Agent-native product** purpose-built for European compliance evidence.
+> Scope3Scout is not a TinyFish user. Scope3Scout is a **TinyFish-native product.**
 
 ---
 
@@ -104,9 +135,9 @@ The Smart AI Agents interact with these portals the way a human compliance analy
 
 | | Size | Scope |
 |---|---|---|
-| **TAM** | €12B+ | Global ESG compliance software and consulting — 150,000+ companies across CSRD, SEC Climate, TCFD, ASRS |
-| **SAM** | €3.5B | EU CSRD mandatory compliance — 50,000+ companies required to verify supplier conduct by 2027 |
-| **SOM** | €120M | Mid-market EU companies (250–2,000 employees) pursuing automation — 12,000 companies at €10K ACV |
+| **TAM** | €12B+ | Global ESG compliance software and consulting  -  150,000+ companies across CSRD, SEC Climate, TCFD, ASRS |
+| **SAM** | €3.5B | EU CSRD mandatory compliance  -  50,000+ companies required to verify supplier conduct by 2027 |
+| **SOM** | €120M | Mid-market EU companies (250–2,000 employees) pursuing automation  -  12,000 companies at €10K ACV |
 
 ### Regulatory Landscape
 
@@ -141,13 +172,13 @@ Consulting firms (Deloitte, EY, KPMG) currently capture this market at **€100�
 | Styling | Tailwind CSS 3, Framer Motion | Dark glassmorphic UI with animations |
 | Auth | Supabase Auth | Email/password authentication |
 | Database | Supabase (PostgreSQL) | Supplier data, violations, scan results |
-| AI Scraping | Smart AI Agent API (browser automation) | Real-time browser automation via SSE |
+| AI Scraping | **TinyFish Web Agent API** | Real-time browser automation via SSE |
 | LLM Inference | Fireworks AI (Llama 70B), Google Gemini, OpenAI | Tier 2 claim cross-referencing |
 | PDF Reports | jsPDF + AutoTable | CSRD-compliant report generation |
 | CSV Import | PapaParse | Bulk supplier upload |
 | 3D Visual | Spline | Landing page visualization |
 | Data Layer | TanStack React Query | Server state management |
-| Hosting | Vercel | Production deployment |
+| Hosting | Vercel | Production deployment (104 deployments shipped) |
 
 ---
 
@@ -184,7 +215,7 @@ A real-time scrolling event log showing every agent action with timestamp, agent
 Post-scan actions: auto-contact supplier, generate CSRD report (real PDF), download evidence (JSON), re-run scan. Includes audit summary with risk score, risk tier, contradiction count, violation count, and CSRD compliance status.
 
 **API Key Management**
-API keys are stored in `localStorage` via the Settings page. No environment variables required for demo. Priority: `localStorage` → env var → empty (falls back to demo mode).
+API keys (TinyFish, Gemini, OpenAI, Fireworks) are stored in `localStorage` via the Settings page. No environment variables required for demo. Priority: `localStorage` → env var → empty (falls back to demo mode).
 
 ---
 
@@ -206,10 +237,10 @@ Runs at `http://localhost:8080`.
 VITE_SUPABASE_URL=
 VITE_SUPABASE_PUBLISHABLE_KEY=
 
-# Smart AI Agent / Browser automation API (optional — can be entered via Settings page)
+# TinyFish (optional  -  can be entered via Settings page)
 VITE_TINYFISH_API_KEY=
 
-# LLM (optional — for Tier 2 analysis)
+# LLM (optional  -  for Tier 2 analysis)
 VITE_FIREWORKS_API_KEY=
 VITE_GEMINI_API_KEY=
 VITE_OPENAI_API_KEY=
@@ -221,41 +252,40 @@ All API keys can also be entered through the Settings page at runtime. The app w
 
 ## Roadmap
 
-**Now**
-- Live product with 16 Smart AI Agents in production
-- Scripted Demo Scenario (Bavarian Motors GmbH → Carpathian Components SRL)
-- European SME Network view across 4 countries
-- CSRD-compliant PDF report generation
+**Phase 2 Sprint Goals (by April 20, 2026)**
 
-**H2 2026**
-- First 10 paying mid-market customers in DACH
-- SAP connector and ERP integration
-- Multi-supplier batch scanning at scale (50+ suppliers per run)
-- SOC 2 readiness
+- Multi-supplier batch scanning from CSV upload (target: 50+ suppliers in one run)
+- Real contradiction detection via Fireworks AI Llama 70B (replacing mocked contradictions)
+- Working CSRD-compliant PDF report generator with evidence chain and risk scoring
+- Requested increased TinyFish concurrency (from 2 to 8+ parallel agents)
 
-**2027**
-- Italy and Iberia expansion
-- Direct EU regulatory submission integration
+**Post-Demo-Day (seed stage)**
+
+- Paid pilots with 3–5 EU mid-market companies at €2–5K/month
+- Expand regulatory coverage: SEC Climate Rules (US), TCFD + SECR (UK), ASRS (Australia)
+- Scale TinyFish agent concurrency to 20+ parallel audits
 - Hire compliance domain expert with CSRD audit experience
+- SOC 2 readiness and enterprise Supabase tier
 - Target: **€200K ARR by month 6, €1.2M ARR by month 12**
-
-**2028+**
-- Full European coverage
-- Standard for CSRD-grade supply chain audits
-- Expand regulatory coverage: SEC Climate Rules, TCFD + SECR, ASRS
 
 ---
 
 ## Team
 
-**Mohammad Zeeshan** — AI Researcher
+**Mohammad Zeeshan**  -  Founder, CEO
+AI Research Developer.
+GitHub: [@m-zest](https://github.com/m-zest)
+
+**Afzal**  -  Co-founder, Operations & Go-to-Market
+Leads applications, partnerships, and customer research across compliance verticals.
 
 ---
 
 ## Links
 
 - **Live Product:** [scope3-scout.vercel.app](https://scope3-scout.vercel.app/)
-- **Contact:** hdglit@inf.elte.hu
+- **Pitch Deck:** [m-zest.github.io/scope3scout_pitch](https://m-zest.github.io/scope3scout_ipitch/)
+- **Contact:** zeeshanm8313@gmail.com
 
 ---
 
@@ -266,11 +296,15 @@ Copyright © 2026 Mohammad Zeeshan. All Rights Reserved.
 
 Source available for evaluation purposes only.
 Commercial use requires written permission.
+TinyFish API used with permission for hackathon and commercial development.
 ```
 
 ---
 
+<p align="center">
+  <em>Built for the <a href="https://www.tinyfish.ai/">TinyFish $2M Pre-Accelerator</a> · March–April 2026</em>
+</p>
 
 <p align="center">
-  <strong>Scope3Scout — The compliance layer of the browser-agent era.</strong>
+  <strong>Scope3Scout  -  The compliance layer of the browser-agent era.</strong>
 </p>
