@@ -167,14 +167,6 @@ All keys can also be entered through the Settings page at runtime; the app works
 
 Scope3Scout was initially prototyped during the TinyFish Pre-Accelerator Phase 2 Finalist (2026) and uses the TinyFish Web Agent API under permission.
 
----
-
-## Authors
-
-- **Mohammad Zeeshan** - [@m-zest](https://github.com/m-zest)
-- **Afzal Hussain** - operations, partnerships, and customer research
-
-Contact: zeeshanm8313@gmail.com
 
 ---
 
